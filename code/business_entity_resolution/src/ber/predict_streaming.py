@@ -393,7 +393,7 @@ def _run_locked(args, output: Path, *, ce_scorer=None) -> dict:
             if ce_scorer is None:
                 ce_scorer = _load_ce_scorer(pipeline)
         with match_temporary.open("w", newline="") as matches_stream, candidate_temporary.open("w", newline="") as candidates_stream:
-            matches, candidates = csv.writer(matches_stream, delimiter="\t"), csv.writer(candidates_stream, delimiter="\t")
+            matches, candidates = csv.writer(matches_stream, delimiter="\t", lineterminator="\n"), csv.writer(candidates_stream, delimiter="\t", lineterminator="\n")
             matches.writerow(["source1_entity_id", "matched_entity_ids"])
             candidates.writerow(["source1_entity_id", "candidate_entity_ids"])
             exhausted = False

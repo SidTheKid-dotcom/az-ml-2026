@@ -6,12 +6,13 @@ a rank or guarantees the hidden-test result.
 
 ## Start here
 
-1. [Current results and running work](learnings/CURRENT_STATE.md).
-2. [Experiment loop](AGENTS.md): how to make the next useful experiment.
-3. [GPU, data and scoring runbook](docs/RUNBOOK.md).
-4. [What each experiment established](learnings/EXPERIMENT_DECISIONS.md).
-5. [Full score ledger](learnings/scoreboard.md), with machine-readable CSV/JSON.
-6. [Proposed v2 experiments](docs/PLAN_v2.md) and the [SageMaker migration
+1. [Operating context](CONTEXT.md). Scores, what worked, what failed, what runs next.
+2. [Current results and running work](learnings/CURRENT_STATE.md).
+3. [Experiment loop](AGENTS.md): how to make the next useful experiment.
+4. [GPU, data and scoring runbook](docs/RUNBOOK.md).
+5. [What each experiment established](learnings/EXPERIMENT_DECISIONS.md).
+6. [Full score ledger](learnings/scoreboard.md), with machine-readable CSV/JSON.
+7. [Proposed v2 experiments](docs/PLAN_v2.md) and the [SageMaker migration
    workflow](docs/RUNBOOK.md#v2-compute-migration-sagemaker-ai) for work after v1.
 
 The official [statement](problem-statement/statement.md),

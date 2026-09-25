@@ -1,8 +1,9 @@
 # Experiment loop — read before working
 
-Read `README.md`, `learnings/CURRENT_STATE.md`, `docs/RUNBOOK.md`, and
-`learnings/EXPERIMENT_DECISIONS.md`. Do not rediscover setup or rerun completed
-experiments unless a concrete failure or new hypothesis requires it.
+Read `CONTEXT.md` first, then `README.md`, `learnings/CURRENT_STATE.md`,
+`docs/RUNBOOK.md`, and `learnings/EXPERIMENT_DECISIONS.md`. Do not rediscover
+setup or rerun completed experiments unless a concrete failure or new
+hypothesis requires it.
 
 ## Working objective
 

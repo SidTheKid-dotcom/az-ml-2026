@@ -1,0 +1,38 @@
+{
+  "jobs": [
+    {
+      "name": "bge1800_conflict_only_20260926",
+      "kind": "gpu",
+      "threads": 2,
+      "vram_mib": 20000,
+      "cwd": "/tmp/az-ml-new",
+      "timeout_seconds": 7200,
+      "command": [
+        "/opt/amlc-venv/bin/python", "-u", "-m", "ber.cross_encoder_experiment",
+        "--data", "/tmp/az-ml-new/artifacts/full_dense_medium",
+        "--base-dir", "/tmp/az-ml-new/artifacts/medium_dense_frozen_for_ce",
+        "--base-format", "tabular",
+        "--require-hard-pool",
+        "--output", "/workspace/az-ml-new/experiments/bge1800_conflict_only_20260926",
+        "--model", "BAAI/bge-reranker-v2-m3",
+        "--model-id", "BAAI/bge-reranker-v2-m3",
+        "--allowlist", "/tmp/az-ml-new/problem-statement/models.yaml",
+        "--device", "cuda",
+        "--threads", "2",
+        "--gpu-memory-fraction", "0.4",
+        "--steps", "1800",
+        "--batch-size", "32",
+        "--inference-batch-size", "64",
+        "--tune-only-inference",
+        "--max-length", "256",
+        "--learning-rate", "0.00002",
+        "--weight-decay", "0.01",
+        "--negative-ratio", "3",
+        "--conflict-fraction", "1.0",
+        "--positive-fraction", "0.5",
+        "--rerank-cutoff", "0.01",
+        "--seed", "20260925"
+      ]
+    }
+  ]
+}

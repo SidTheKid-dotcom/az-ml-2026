@@ -154,7 +154,7 @@ def run(args, *, scorer=None):
     pool_ids, reference_ids = pool.entity_id.to_numpy(), reference.entity_id.to_numpy()
     offset = gated = 0
     with matching.open("w", newline="", encoding="utf-8") as stream, candidate_path.open(newline="", encoding="utf-8") as cstream:
-        writer, candidates = csv.writer(stream, delimiter="\t"), csv.reader(cstream, delimiter="\t")
+        writer, candidates = csv.writer(stream, delimiter="\t", lineterminator="\n"), csv.reader(cstream, delimiter="\t")
         writer.writerow(["source1_entity_id", "matched_entity_ids"])
         if next(candidates, None) != ["source1_entity_id", "candidate_entity_ids"]:
             raise ValueError("Unexpected candidate TSV header")

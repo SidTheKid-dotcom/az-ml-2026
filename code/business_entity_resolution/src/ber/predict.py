@@ -74,7 +74,7 @@ def run(args):
     probabilities[:] = np.nan
     match_path, candidate_path = output/'matching_results.tsv', output/'candidate_pairs.tsv'
     with match_path.open('w',newline='') as mstream, candidate_path.open('w',newline='') as cstream:
-        matches, candidates = csv.writer(mstream,delimiter='\t'), csv.writer(cstream,delimiter='\t')
+        matches, candidates = csv.writer(mstream, delimiter='\t', lineterminator='\n'), csv.writer(cstream, delimiter='\t', lineterminator='\n')
         matches.writerow(['source1_entity_id','matched_entity_ids'])
         candidates.writerow(['source1_entity_id','candidate_entity_ids'])
         for start in range(0,len(reference),args.reference_batch_size):

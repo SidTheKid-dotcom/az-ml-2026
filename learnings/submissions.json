@@ -19,14 +19,56 @@
       "date_reported": "2026-09-25",
       "platform_status": "SCORED (user-reported)",
       "platform_submission_performed": true,
-      "local_matching_file": null,
-      "local_matching_sha256": null,
+      "local_matching_file": "/home/sidvish/Downloads/matching_results.tsv",
+      "local_matching_sha256": "5df9ddbf42137d4e403f0072fe85169aaabc0167a0b431f675f926754371e1ed",
       "uploaded_file_sha256_confirmed_by_platform": null,
       "platform_submission_id": null,
       "failure_reason": null,
-      "public_score": 0.95639,
+      "public_score": 0.956,
       "daily_quota_consumed": null,
-      "note": "User reports 0.95639 on the first scored submission this evening. The exact uploaded file (original v1 TSV versus LF-only diagnostic), its hash, platform submission ID and screenshot have not been confirmed. Do not attribute this score to a particular file hash yet."
+      "note": "User on 2026-09-26 attributes public F0.5 0.956 to Downloads/matching_results.tsv. Those bytes match the original v1 matching TSV (same sha256 as the earlier FAILED row). An earlier report of 0.95639 had no confirmed file. Platform submission ID is still unconfirmed."
+    },
+    {
+      "release_id": "decision_v2_leaderboard_diagnostic",
+      "date_reported": "2026-09-25",
+      "platform_status": "SCORED (user-reported)",
+      "platform_submission_performed": true,
+      "local_matching_file": "/home/sidvish/Downloads/v2-decision/matching_results.tsv",
+      "local_matching_sha256": "103015f1cc84b1660de9e98c53ebacb5331542ce611993f3406acbc8041ca0a1",
+      "uploaded_file_sha256_confirmed_by_platform": null,
+      "platform_submission_id": null,
+      "failure_reason": null,
+      "public_score": 0.964,
+      "daily_quota_consumed": null,
+      "note": "User reports 0.964 for the LF-only decision-v2 leaderboard file. Exact uploaded bytes and platform submission ID are unconfirmed; the later assignment-only LF diagnostic scored 0.965 (user-reported)."
+    },
+    {
+      "release_id": "assignment_only_lf_leaderboard_diagnostic",
+      "date_reported": "2026-09-25",
+      "platform_status": "SCORED (user-reported)",
+      "platform_submission_performed": true,
+      "local_matching_file": "/home/sidvish/Downloads/assignment-only-lf/matching_results.tsv",
+      "local_matching_sha256": "3e0c6206c03ba06f8cb6d3d8e5a1e916230dff5c025061af3eab38120750bfbd",
+      "uploaded_file_sha256_confirmed_by_platform": null,
+      "platform_submission_id": null,
+      "failure_reason": null,
+      "public_score": 0.965,
+      "daily_quota_consumed": null,
+      "note": "User reports 0.965 for the LF-only assignment-only file. Exact uploaded bytes and platform submission ID are unconfirmed. This is the best public score. The later hybrid scored 0.964."
+    },
+    {
+      "release_id": "final_hybrid_lf_leaderboard_diagnostic",
+      "date_reported": "2026-09-26",
+      "platform_status": "SCORED (user-reported)",
+      "platform_submission_performed": true,
+      "local_matching_file": "/home/sidvish/Downloads/final-hybrid-lf/matching_results.tsv",
+      "local_matching_sha256": "7e478002835ac86d4365ddbc0b0fabc4b5464d942ccb92546d0d39ece41506a0",
+      "uploaded_file_sha256_confirmed_by_platform": null,
+      "platform_submission_id": null,
+      "failure_reason": null,
+      "public_score": 0.964,
+      "daily_quota_consumed": null,
+      "note": "User reports 0.964 for the LF hybrid file. It did not beat assignment-only at 0.965. Exact uploaded bytes and platform submission ID are unconfirmed."
     }
   ]
 }
