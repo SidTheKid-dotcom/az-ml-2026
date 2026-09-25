@@ -2,7 +2,7 @@
 
 **Team Name:** techquilla-shots
 
-**Draft status:** Frozen holdout evaluation and complete test candidate generation are verified. Full-test matching and supplied-validator results are pending. No leaderboard score is claimed.
+**Release status:** Full-test predictions and candidates passed supplied and strict validation for all 1,732,544 S1s. No leaderboard score is claimed.
 
 ## 1. Executive Summary
 
@@ -30,7 +30,7 @@ The initial quick sample used seed 20260925. A separate 60,000-S1 medium sample 
 - **Representation:** Original-script `business_name | business_address`, prefixed `query: ` for S1 and `passage: ` for targets; maximum length 128, 384 dimensions, L2 normalization.
 - **Retrieval rule:** Exhaustive top 50 dot-product search, without an approximate-neighbor index. Target vectors are stored as float16; dot products use float32 with float32 queries. This is exact search over the stored representations, not a claim of unquantized encoder equivalence.
 - **Training target scope:** All 10,320,219 original S2/S3 training records. Medium TRAIN+TUNE has 2,399,950 candidate pairs; TUNE has 600,000.
-- **Official-test scope:** All 1,732,544 S1s against 9,969,589 S2/S3 targets. Candidate generation completed with **86,627,200 unique pairs**, exactly 50 for every S1; final matching/TSV validation is running.
+- **Official-test scope:** All 1,732,544 S1s against 9,969,589 S2/S3 targets. Candidate generation completed with **86,627,200 unique pairs**, exactly 50 for every S1; final matching/TSV validation passed.
 - **Miss accounting:** No positive candidate injection. Ground-truth targets missing from retrieval may be retained as compact records solely for scoring; their missing edges still count as missed links. TUNE link recall is 0.984208; perfect classification of these candidates would yield macro F0.5 of 0.994090.
 
 This selected release uses dense candidates. Earlier lexical/phonetic/dense union experiments are separate procedures and are not silently substituted during inference.
@@ -66,19 +66,19 @@ The matched 600-step comparison scored 0.966067 with 531 false links; the select
 
 ## 6. Conclusion
 
-Full-pool retrieval and difficult negatives substantially changed model selection compared with the easier sampled pool. The frozen dense/tree/BGE procedure retained its development performance on the untouched holdout. Complete official-test prediction and validation are running; release claims will be updated only from verified artifacts.
+Full-pool retrieval and difficult negatives substantially changed model selection compared with the easier sampled pool. The frozen dense/tree/BGE procedure retained its development performance on the untouched holdout. Complete official-test prediction and validation passed. The platform score remains unknown.
 
 ## Appendix
 
 ### A. Code Artefacts
 
-Source, tests and pinned CPU/GPU environments ship under `code/business_entity_resolution/`. Its `README.md` gives the exact data preparation, training, inference and validation commands. The finalized package includes the selected weights in `models/` and configuration, source/model digests, measured runtime, holdout evidence, the unchanged organizer validator and completed release reports in `resources/`.
+The submission ZIP ships both output TSVs, source, a pinned GPU environment, reproduction README, selected configuration and source/model digests. The original dataset and trained weights are external because the ZIP must stay under 500 MB. Its `code/business_entity_resolution/README.md` gives the preparation, training, inference and validation commands; exact replay requires the recorded checkpoint weights.
 
-- `src/reproduce.py --dataset <supplied-dataset> --work-dir <empty-fast-directory>` verifies the included frozen weights/source, prepares the complete test candidate set, predicts every S1 and validates both files. Only filesystem locations change in a recorded relocated configuration; model, gate, blend and threshold stay fixed.
+- `src/reproduce.py --dataset <supplied-dataset> --work-dir <empty-fast-directory>` uses the separately supplied frozen weights and source, prepares the complete test candidate set, predicts every S1 and validates both files. Only filesystem locations change in a recorded relocated configuration; model, gate, blend and threshold stay fixed.
 - Preparation/training modules: `ber.prepare`, `ber.hf_experiment`, `ber.full_embeddings`, `ber.full_dense_candidates`, `ber.tabular_sweep`, `ber.cross_encoder_experiment`. TRAIN/TUNE comparisons select a model; retraining is not claimed to produce bit-identical GPU weights.
 - `ber.validate_release` invokes the unchanged supplied validator with `--check-ids`, then enforces exact coverage, valid IDs, duplicate rejection and match-subset consistency. It checks format/integrity, not test accuracy.
-- `src/package_submission.py` builds the final ZIP only from a completed, validated release and the exact recorded weights/source. Every archived file is verified against its SHA256. The original TSVs are unchanged in `output/`; no script uploads to the platform.
+- The validated ZIP was built from the frozen release. Both archived output TSVs were streamed and verified against their SHA256. The original TSVs are unchanged in `output/`; no script uploads to the platform.
 
 ### B. Additional Results
 
-Full configurations and rejected approaches are in `learnings/scoreboard.md` and `EXPERIMENT_DECISIONS.md`. The earlier union score 0.969812 used 2,400 different TUNE S1s and a different candidate rule; it is not the selected dense model's score. The complete fixed eval report is `learnings/first_submission_holdout.json`; the official validator report and final file hashes will be appended after verification.
+Full configurations and rejected approaches are in `learnings/scoreboard.md` and `EXPERIMENT_DECISIONS.md`. The earlier union score 0.969812 used 2,400 different TUNE S1s and a different candidate rule; it is not the selected dense model's score. The complete fixed eval report is `learnings/first_submission_holdout.json`; the official validator report and final file hashes are recorded in `docs/submission_v1_release.json`.

@@ -35,12 +35,15 @@ commands are **not this project's active runtime**. Use the runbook below.
 contents and all problem-statement files. Originals remain separate from experiments.
 
 Small-pool scores around 0.986 were optimistic. Full-pool hard-negative training
-is now the decision basis. No official test score or submission-ready test TSV
-exists yet; development TSVs must not be uploaded as test predictions.
+is now the decision basis. The first full-test matching and candidate TSVs are complete and passed the
+unchanged official validator plus strict coverage/subset checks. Exact release
+hashes and local paths are in
+[submission_v1_release.json](docs/submission_v1_release.json). The platform score
+is still unknown; development TSVs must not be uploaded as test predictions.
 
 The frozen first matcher uses **35,999 labeled training businesses**, with 12,000
 separate tuning businesses and a 12,001-business holdout. Its verified holdout
-F0.5 is **0.968292**; full official-test scoring and validation are running. E5 was fine-tuned on
+F0.5 is **0.968292**; full official-test format and integrity validation passed. E5 was fine-tuned on
 the earlier quick TRAIN split. Searching all 10,320,219 training targets does
 not mean fitting on every labeled training business. Official inference covers
 all 1,732,544 test businesses and all 9,969,589 test targets; labels remain hidden.
@@ -54,7 +57,8 @@ PYTHONPATH=code/business_entity_resolution/src .venv/bin/python -m ber.scoreboar
 A fresh agent with this checkout, supplied data and authorized GPU access can
 follow the loop through experiments, fixed-model replay, validation and final
 packaging. Git alone cannot supply private SSH credentials or model/data binaries.
-The final package includes exact model weights; the private Git repository stays
+The 500 MB submission ZIP includes both output TSVs, source, pinned dependencies
+and methodology. Model weights are external; the private Git repository stays
 small. Use `learnings/submissions.json` for actual platform uploads/scores.
 
 The current architecture is replaceable. Inventory entries and prior results are

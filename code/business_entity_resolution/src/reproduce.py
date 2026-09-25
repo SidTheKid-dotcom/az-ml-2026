@@ -13,8 +13,10 @@ REPO = CODE.parents[1]
 
 
 def resource(name: str, fallback: Path) -> Path:
-    packaged = CODE / 'resources' / name
-    return packaged if packaged.exists() else fallback
+    for packaged in (CODE / 'resources' / name, CODE / 'src' / 'resources' / name):
+        if packaged.exists():
+            return packaged
+    return fallback
 
 
 def verify_sources(config: dict, code: Path = CODE) -> None:

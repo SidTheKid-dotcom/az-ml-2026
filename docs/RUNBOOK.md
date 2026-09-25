@@ -157,9 +157,9 @@ TSVs, and verifies durable copies under
 `/workspace/az-ml-new/releases/submission_v1`. Only its successful `ready.json`
 marks the files ready for the user to upload. It does not upload to the platform.
 No benchmark prefix is allowed in release outputs. Runtime benchmarks are complete;
-no further model search is queued before v1 release. Holdout finished; full test
-scoring is supervisor 46635, `logs/first_submission_v1.log`. Check live status
-before any restart. The frozen config flags describe selection time; later
+v1 test scoring and validation finished successfully. Inspect
+`output/submission_v1/ready.json` before using either file; do not relaunch the
+finished supervisor 46635. The frozen config flags describe selection time; later
 evaluation/readiness is recorded separately and must not rewrite its digest.
 
 Official outputs: `output/matching_results.tsv` (`source1_entity_id`,
@@ -169,7 +169,8 @@ Include all 1,732,544 test S1 exactly once; every predicted ID must be in the
 actual candidate set. Use `data/raw/utils/validate_submission.py --help`, then
 validate with **`--check-ids`**, both files, and the supplied test sources. Independently
 assert candidate subset/coverage: the supplied validator emits warnings for some
-violations. No submission file is ready yet. At most five public submissions/day;
+violations. The first submission files passed official and strict validation. Their local
+paths and verified hashes are in `docs/submission_v1_release.json`. At most five public submissions/day;
 save hashes, configuration, reported score and exact file for each. Final packaging
 also needs reproducible code and the supplied methodology template.
 

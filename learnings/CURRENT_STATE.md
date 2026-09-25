@@ -48,21 +48,27 @@ change models, gate, blend, threshold or source after inspecting the holdout.
 - Repeated tuning can overfit. France has no training labels; US/India results
   do not measure French accuracy. **No official score is available.**
 
-## Remaining release work
+## First submission validated and available
 
-1. Holdout is complete and must not be rerun for model selection. Test candidates
-   are also complete: **86,627,200 edges**, every S1 has its actual 50 candidates.
-2. Full test scoring is running: supervisor **46635**,
-   `logs/first_submission_v1.log`, `output/submission_v1`. Do not duplicate it.
-3. Its wrapper automatically runs both file validators and preserves verified
-   release copies. Download final TSVs only after `ready.json` confirms success.
+The frozen v1 run is complete. The unchanged official validator with `--check-ids`
+and our strict stream check passed with no warnings: exactly **1,732,544 test S1
+rows**, **5,753,111 predicted links**, and **86,627,200 candidate links**.
+`matching_results.tsv` has exactly the original test S1 IDs in the same order,
+with no missing, extra or duplicate reference. Both local output hashes match the
+verified `ready.json`; no hidden-test metric has been computed.
 
-Reproduction uses `run_frozen_holdout.sh` then `run_first_submission.sh`, each
-with the explicit finalized pipeline SHA256; both have already been launched. No further model search is scheduled before v1 release. After recording the first
-platform result, resume bounded TRAIN/TUNE comparisons in separate outputs; the
-evaluated v1 holdout must not steer new thresholds or training choices.
-No official-test prediction files have been validated yet. Development TSVs are
-not submission files. Notify the user when the first complete validated pair is ready.
+Use the exact local files under `output/submission_v1/`; hard links to the two
+TSVs also exist directly under `output/`. The **435,776,601-byte**
+`techquilla-shots_submission.zip` contains both output TSVs, source, pinned
+requirements, README and filled methodology in the requested tree. Upload the
+same `matching_results.tsv` separately to the leaderboard.
+[submission_v1_release.json](../docs/submission_v1_release.json) records their
+SHA256 hashes, sizes and validation. Model weights and raw data are external to
+the ZIP so it fits the 500 MB code-upload field; exact replay needs those weights.
+
+Platform submission and platform F0.5 are still pending. Once uploaded, record
+the result and exact file hash in `submissions.json`. Keep subsequent experiments
+separate from this frozen release; v1 holdout labels are no longer untouched.
 
 ## Existing artifacts — inspect before relaunching
 
@@ -93,8 +99,9 @@ hyperparameters, not 107 independent approaches). See
 
 Portable replay and final ZIP packaging commands are in the code README. The ZIP
 builder verifies complete release reports, exact checkpoint/source/output hashes,
-required structure and every archived byte. Team name is `techquilla-shots`;
-member names are unspecified. It requires a validated release; no production ZIP exists while inference is incomplete.
+required structure and every archived byte. Team name is `techquilla-shots`; member names are unspecified. The validated
+submission ZIP and matching TSV now exist locally; adding trained weights would
+exceed the portal code-upload limit.
 The expanded suite passes 47 tests, including rejection of incomplete coverage,
 modified predictions/weights and archive overwrite. All 47 also pass in a fresh
 Git checkout using the existing CPU environment, with no data/weights/credentials

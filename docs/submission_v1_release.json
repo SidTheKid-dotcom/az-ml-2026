@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "team": "techquilla-shots",
+  "status": "official and strict format validated; platform score pending",
+  "pipeline_sha256": "9ac4050a72c64b05c032a17ec26f2a13b339c1b8c135791bf07b737534371f5e",
+  "source1_rows": 1732544,
+  "candidate_links": 86627200,
+  "validation": {
+    "official_validator_passed_without_warnings": true,
+    "strict_stream_passed": true,
+    "report": "output/submission_v1/validation.json",
+    "kind": "format and integrity only"
+  },
+  "matching_results": {
+    "path": "output/submission_v1/matching_results.tsv",
+    "bytes": 98313151,
+    "sha256": "5df9ddbf42137d4e403f0072fe85169aaabc0167a0b431f675f926754371e1ed",
+    "also_at": "output/matching_results.tsv"
+  },
+  "candidate_pairs": {
+    "path": "output/submission_v1/candidate_pairs.tsv",
+    "bytes": 1140585855,
+    "sha256": "fc0ec7a43888208b25fef4deecea352a98dcce75797ea9288c0f7fb9e6ebca34",
+    "also_at": "output/candidate_pairs.tsv"
+  },
+  "official_test_f05": null,
+  "platform_submission_performed": false,
+  "note": "The ZIP contains the exact validated TSVs; the leaderboard TSV is also uploaded separately. Raw data and trained weights are external to meet the 500 MB cap. Exact replay needs those recorded weights.",
+  "submission_zip": {
+    "path": "output/submission_v1/techquilla-shots_submission.zip",
+    "bytes": 435776601,
+    "sha256": "878350f81e15ba2593e70ac4fb63d067f5a5e2ba39e6debd0c95813160089085",
+    "entries": 47,
+    "compression": "bzip2",
+    "max_allowed_bytes": 500000000,
+    "contains": [
+      "output/matching_results.tsv",
+      "output/candidate_pairs.tsv",
+      "code/business_entity_resolution/src/",
+      "code/business_entity_resolution/README.md",
+      "code/business_entity_resolution/requirements.txt",
+      "Documentation_template.md"
+    ]
+  }
+}
