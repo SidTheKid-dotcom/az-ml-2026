@@ -69,6 +69,19 @@ source, weights, inference job and threshold were not changed.
   rank plus phonetic hits recovers 152 with 177,515 added pairs (oracle 0.995513).
   No union-only pair has a valid saved tree/CE score; the oracle gain is **not**
   a matcher improvement. [Configuration](../artifacts/cpu_medium_union_screen_20260925/experiment_config.json).
+- [CPU lexical-only matcher screen](../artifacts/cpu_lexical_rescue_20260925/results.json):
+  scored all **177,515** extra top-20 TUNE candidates with a new TRAIN-fitted
+  CatBoost, using a disjoint TRAIN calibration split (28,763 FIT / 7,236 CAL S1s).
+  Just 91 of 107,189 CAL edges were true; even at score 0.97 it found 6 true and
+  2 false links. Its fixed CAL `TP−5×FP` rule abstains, giving **no TUNE F0.5 gain**
+  over v1's **0.968992**, 494 false links. Pair features took 84s; total CPU run
+  100s. [Configuration](../artifacts/cpu_lexical_rescue_20260925/experiment_config.json).
+- A 0.75 lexical-only CatBoost-probability gate chosen from TRAIN-CAL has frozen
+  **118 CAL + 203 TUNE** candidate/text pairs for a small BGE experiment after
+  v1 release. Individual shortlist pairs were selected without TUNE labels; all
+  their CE scores are still missing. The text/pairs remain outside Git; the
+  [identity/count manifest](../artifacts/cpu_lexical_rescue_20260925/ce_shortlist_manifest.json)
+  preserves the exact queue and checkpoint identities.
 - A new **sealed confirmation holdout** was reserved by ID only from unused
   training S1s: 12,000 references, seed **20260928**, 4,787 India / 7,213 US,
   sorted-ID SHA256 `ec057370b8dc8b3dbef24e277a6920f905a08481ca2b35a5245dcdf9d22f5187`.
@@ -76,12 +89,12 @@ source, weights, inference job and threshold were not changed.
   truth nor the v1 eval errors were opened. [Reservation recipe/provenance](../artifacts/holdout_reserve_20260928/reservation.json);
   the ID list stays outside Git in that worktree's ignored `artifacts/` directory.
 
-Strongest next controlled comparison after v1 release: build the **medium**
-dense+top20-lexical/phonetic union from saved full-pool edges, recompute all
-candidate-dependent features, train/score a new matcher on fixed TRAIN/TUNE,
-and compare its real false links, macro F0.5 and inference cost against the
-same-reference dense baseline. Freeze a finalist before opening the reserved
-confirmation holdout. France remains unmeasured.
+Strongest next bounded comparison after v1 release: score all 321 shortlisted
+CAL/TUNE pairs with the **frozen BGE checkpoint**, choose an add-link decision
+on TRAIN-CAL only, then measure the fixed rule's real macro F0.5/false links on
+all 12,000 medium TUNE S1s. If promising, recompute candidate-dependent features
+and train/score the fuller medium union matcher; only then freeze a finalist for
+the reserved confirmation holdout. France remains unmeasured.
 
 ## Remaining release work
 

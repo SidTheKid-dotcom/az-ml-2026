@@ -1,0 +1,181 @@
+{
+  "baseline": {
+    "macro_f05": 0.9689921356332671,
+    "micro_precision": 0.9874714684250571,
+    "micro_recall": 0.9387597646831903,
+    "reference_count": 12000,
+    "predicted_links": 39430,
+    "true_links": 41476,
+    "threshold": 0.775,
+    "f05_India": 0.9633385505244482,
+    "f05_US": 0.972744209931883,
+    "singleton_accuracy": 0.9526542324246772,
+    "false_positive_links": 494,
+    "entities_with_false_positive": 462,
+    "singleton_false_merges": 33,
+    "retrieved_true_links_rejected": 1885
+  },
+  "calibration": {
+    "choice": {
+      "threshold": 1.01,
+      "true_links": 0,
+      "false_links": 0,
+      "utility_tp_minus_5fp": 0
+    },
+    "grid": [
+      {
+        "threshold": 0.001,
+        "true_links": 88,
+        "false_links": 22980,
+        "utility_tp_minus_5fp": -114812
+      },
+      {
+        "threshold": 0.003,
+        "true_links": 87,
+        "false_links": 12799,
+        "utility_tp_minus_5fp": -63908
+      },
+      {
+        "threshold": 0.01,
+        "true_links": 87,
+        "false_links": 7163,
+        "utility_tp_minus_5fp": -35728
+      },
+      {
+        "threshold": 0.03,
+        "true_links": 84,
+        "false_links": 4442,
+        "utility_tp_minus_5fp": -22126
+      },
+      {
+        "threshold": 0.1,
+        "true_links": 80,
+        "false_links": 2276,
+        "utility_tp_minus_5fp": -11300
+      },
+      {
+        "threshold": 0.3,
+        "true_links": 61,
+        "false_links": 655,
+        "utility_tp_minus_5fp": -3214
+      },
+      {
+        "threshold": 0.5,
+        "true_links": 52,
+        "false_links": 300,
+        "utility_tp_minus_5fp": -1448
+      },
+      {
+        "threshold": 0.75,
+        "true_links": 35,
+        "false_links": 83,
+        "utility_tp_minus_5fp": -380
+      },
+      {
+        "threshold": 0.9,
+        "true_links": 16,
+        "false_links": 20,
+        "utility_tp_minus_5fp": -84
+      },
+      {
+        "threshold": 0.97,
+        "true_links": 6,
+        "false_links": 2,
+        "utility_tp_minus_5fp": -4
+      },
+      {
+        "threshold": 0.99,
+        "true_links": 0,
+        "false_links": 0,
+        "utility_tp_minus_5fp": 0
+      },
+      {
+        "threshold": 0.995,
+        "true_links": 0,
+        "false_links": 0,
+        "utility_tp_minus_5fp": 0
+      }
+    ],
+    "train_fit_positive_candidates": 387,
+    "train_fit_negative_candidates": 422380,
+    "cal_true_candidates": 91,
+    "cal_candidates": 107189
+  },
+  "new_branch_tune": {
+    "macro_f05": 0.9689921356332674,
+    "macro_f1": 0.9548413641591466,
+    "precision": 0.9874714684250571,
+    "recall": 0.9387597646831903,
+    "predicted_links": 39430,
+    "true_links": 41476,
+    "false_links": 494,
+    "singleton_accuracy": 0.9526542324246772,
+    "singleton_false_merges": 33,
+    "added_true_links": 0,
+    "added_false_links": 0,
+    "f05_India": 0.9633385505244482,
+    "added_true_India": 0,
+    "added_false_India": 0,
+    "f05_US": 0.972744209931883,
+    "added_true_US": 0,
+    "added_false_US": 0
+  },
+  "additional_candidate_counts": {
+    "all": 707471,
+    "fit": 422767,
+    "cal": 107189,
+    "tune": 177515,
+    "tune_true": 152
+  },
+  "accepted_target_name_script": {},
+  "paired_tune": {
+    "reference_count": 12000,
+    "n_bootstrap": 2000,
+    "confidence": 0.95,
+    "seed": 20260925,
+    "sampling_unit": "source1_entity",
+    "paired": true,
+    "stratum_sizes": null,
+    "method": "percentile bootstrap",
+    "estimates": {
+      "left_mean": 0.9689921356332674,
+      "right_mean": 0.9689921356332674,
+      "left_minus_right": 0.0
+    },
+    "confidence_intervals": {
+      "left_mean": [
+        0.9670247456649476,
+        0.9708142194103283
+      ],
+      "right_mean": [
+        0.9670247456649476,
+        0.9708142194103283
+      ],
+      "left_minus_right": [
+        0.0,
+        0.0
+      ]
+    },
+    "bootstrap_standard_errors": {
+      "left_mean": 0.0009867391474773766,
+      "right_mean": 0.0009867391474773766,
+      "left_minus_right": 0.0
+    },
+    "limitation": "Conditional on fixed models, retrieval and thresholds; tuning-set intervals do not establish held-out generalization."
+  },
+  "entities_improved": 0,
+  "entities_worsened": 0,
+  "entities_unchanged": 12000,
+  "checkpoint_sha256": "69433a397389c474caa06ec26bcbc42ed83c3afa53183242e40f05f580144d8b",
+  "new_pair_sha256": "4af8a0d17ff4573213872040ea4682940f3490495af7ccaf4c77d987136b3a16",
+  "features_sha256": "b3b5ec12d9f00b16e461249d09c7e016968b0feee729e6bbbba449038f2e156d",
+  "tune_probability_sha256": "fdb6b9bbebb3fba6c8ba9597ca292eac77038725ab53156a554b4cf63e9e141b",
+  "timing_seconds": {
+    "feature_build": 84.24042081699008,
+    "training": 1.86638361599762,
+    "scoring_cal_and_tune": 0.08877755899447948,
+    "total": 100.46348342699639
+  },
+  "scope": "35,999 original TRAIN S1s split by entity into FIT/CAL; all 12,000 medium TUNE S1s and all originally mined full-pool candidates retained for evaluation.",
+  "limitations": "TUNE has already been reused; this is development evidence, not independent confirmation or French/test accuracy. CE scores are valid only for dense candidates. A separately trained lexical branch may shift precision on unseen distractors."
+}
