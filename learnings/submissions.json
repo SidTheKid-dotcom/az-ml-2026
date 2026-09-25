@@ -24,9 +24,9 @@
       "uploaded_file_sha256_confirmed_by_platform": null,
       "platform_submission_id": null,
       "failure_reason": null,
-      "public_score": 0.956,
+      "public_score": 0.956390,
       "daily_quota_consumed": null,
-      "note": "User on 2026-09-26 attributes public F0.5 0.956 to Downloads/matching_results.tsv. Those bytes match the original v1 matching TSV (same sha256 as the earlier FAILED row). An earlier report of 0.95639 had no confirmed file. Platform submission ID is still unconfirmed."
+      "note": "Upload #1 in learnings/negative_side_analysis_manual.md. Public F0.5 0.956390. Bytes match the original v1 matching TSV (same sha256 as the earlier FAILED row). Platform submission ID is still unconfirmed."
     },
     {
       "release_id": "decision_v2_leaderboard_diagnostic",
@@ -38,9 +38,9 @@
       "uploaded_file_sha256_confirmed_by_platform": null,
       "platform_submission_id": null,
       "failure_reason": null,
-      "public_score": 0.964,
+      "public_score": 0.964232,
       "daily_quota_consumed": null,
-      "note": "User reports 0.964 for the LF-only decision-v2 leaderboard file. Exact uploaded bytes and platform submission ID are unconfirmed; the later assignment-only LF diagnostic scored 0.965 (user-reported)."
+      "note": "Upload #2. v1 plus one-owner, plus 34,797 undisputed removals, 5,672 additions, and a cap at 11. Public F0.5 0.964232. Platform submission ID is still unconfirmed."
     },
     {
       "release_id": "assignment_only_lf_leaderboard_diagnostic",
@@ -52,9 +52,9 @@
       "uploaded_file_sha256_confirmed_by_platform": null,
       "platform_submission_id": null,
       "failure_reason": null,
-      "public_score": 0.965,
+      "public_score": 0.964563,
       "daily_quota_consumed": null,
-      "note": "User reports 0.965 for the LF-only assignment-only file. Exact uploaded bytes and platform submission ID are unconfirmed. This is the best public score. The later hybrid scored 0.964."
+      "note": "Upload #3. v1 plus the one-owner rule only. Public F0.5 0.964563. Best scored file. Platform submission ID is still unconfirmed."
     },
     {
       "release_id": "final_hybrid_lf_leaderboard_diagnostic",
@@ -66,9 +66,9 @@
       "uploaded_file_sha256_confirmed_by_platform": null,
       "platform_submission_id": null,
       "failure_reason": null,
-      "public_score": 0.964,
+      "public_score": 0.964258,
       "daily_quota_consumed": null,
-      "note": "User reports 0.964 for the LF hybrid file. It did not beat assignment-only at 0.965. Exact uploaded bytes and platform submission ID are unconfirmed."
+      "note": "Upload #4. France from #3, US/India from #2. Public F0.5 0.964258. France effect vs #2 is +0.000026; US/India effect vs #3 is -0.000305. Platform submission ID is still unconfirmed."
     }
   ]
 }

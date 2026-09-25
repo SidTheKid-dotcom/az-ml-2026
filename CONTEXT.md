@@ -1,21 +1,27 @@
 # Operating context
 
-Public leaderboard leaders are at **0.988**. Our best scored file is **0.965**.
+Public leaderboard leaders are at **0.988**. Our best scored file is **0.964563**.
 Local medium-tune F0.5 for frozen v1 is **0.968992**. Holdout, opened once, is
 **0.968292**. Do not retune on that holdout. HOLDOUT-2 (50,000 S1s, seed
 20260929) stays sealed.
 
-## Scored files (user, 2026-09-26)
+How to price a link, read an upload, and train the next model:
+[learnings/negative_side_analysis_manual.md](learnings/negative_side_analysis_manual.md).
+Record every public score to five decimals. 0.001 of the board is about 1,733
+entity-points.
 
-| File | Public F0.5 |
-| --- | ---: |
-| `Downloads/matching_results.tsv` | 0.956 |
-| `Downloads/v2-decision/matching_results.tsv` | 0.964 |
-| `Downloads/assignment-only-lf/matching_results.tsv` | **0.965** |
-| `Downloads/final-hybrid-lf/matching_results.tsv` | 0.964 |
+## Scored files
 
-Assignment-only beat the France/US-India hybrid. Stop stacking decision rules
-on the same v1 scores. Hashes are in `learnings/submissions.json`.
+| # | File | Public F0.5 |
+| --- | --- | ---: |
+| 1 | `Downloads/matching_results.tsv` | 0.956390 |
+| 2 | `Downloads/v2-decision/matching_results.tsv` | 0.964232 |
+| 3 | `Downloads/assignment-only-lf/matching_results.tsv` | **0.964563** |
+| 4 | `Downloads/final-hybrid-lf/matching_results.tsv` | 0.964258 |
+
+#3 is v1 plus the one-owner rule only. #2 added blanket removals and additions
+on top of that and lost. France’s share of #2→#3 was +0.000026; US/India’s
+share was +0.000305. Hashes are in `learnings/submissions.json`.
 
 ## What moved the score
 
@@ -75,9 +81,19 @@ not cross zero. When that queue exits, `keep_gpu_busy.sh` starts
 
 ## Next code, in this order
 
+The manual’s priced headroom on the current files, if every contest winner
+were right, is 3,944 entity-points (about 0.0023 of the full test). The
+larger miss is the scorer: retrieval recall 0.984 versus final recall 0.939,
+and a simulated France v1 near 0.889.
+
 1. Let the 14,400 and field-format runs finish and read their tune scores.
-2. Read the conflict-only tune score the same way.
-3. Score the union's extra pairs with the frozen BGE. Do not refit CatBoost
-   on all 2M businesses in one process.
-4. Add a yes/no adapter and train Qwen3-Reranker-0.6B on the same medium
-   pairs. That is the second family. Longer BGE on the same 36k rows is not it.
+2. Read the conflict-only tune score the same way. Those negatives are the
+   same-name, same-digits, different-unit pairs in the manual.
+3. Train the contest resolver on a competitor-complete out-of-fold world
+   (manual section 7). Keep a claimant only above that list’s addition
+   break-even, about 0.73–0.79. Otherwise drop the record from everyone.
+4. Weight matcher examples by the entity-point value of a wrong short list
+   (manual section 4.3). Score the union’s extra pairs with the frozen BGE.
+5. Add a yes/no adapter and train Qwen3-Reranker-0.6B. French exact-key
+   pairs are the pseudo-label source (manual section 8); spot-check them
+   before training.
