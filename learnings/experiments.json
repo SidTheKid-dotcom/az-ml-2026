@@ -1282,5 +1282,65 @@
     "false_positive_links": 553,
     "scope": "full pool; 12000 tuning references",
     "source": "artifacts/medium_dense_bge_ce1800/results.json"
+  },
+  {
+    "setup": "v2_p1_decision",
+    "model": "assignment_delta_0.00",
+    "macro_f05": 0.9690291726703043,
+    "precision": 0.9875215582834533,
+    "recall": 0.9387597646831903,
+    "threshold": 0.775,
+    "singleton_accuracy": 0.9526542324246772,
+    "false_positive_links": 492,
+    "scope": "full pool; 12000 reused medium TUNE references; fixed candidates; v1 threshold; decision only",
+    "source": "artifacts/v2_p1_decision/results.json"
+  },
+  {
+    "setup": "v2_p1_decision",
+    "model": "calibrated_expected_f05_no_source_oof",
+    "macro_f05": 0.9700623637060792,
+    "precision": 0.9884875961489481,
+    "recall": 0.9357218632462146,
+    "threshold": null,
+    "singleton_accuracy": 0.9598278335724534,
+    "false_positive_links": 452,
+    "scope": "full pool; 12000 reused medium TUNE references; fixed candidates; OOF calibration; decision only",
+    "source": "artifacts/v2_p1_decision/source_balance_ablation.json"
+  },
+  {
+    "setup": "v2_p1_decision",
+    "model": "calibrated_expected_f05_no_source_plus_assignment_0",
+    "macro_f05": 0.9700994007431162,
+    "precision": 0.9885379521141111,
+    "recall": 0.9357218632462146,
+    "threshold": null,
+    "singleton_accuracy": 0.9598278335724534,
+    "false_positive_links": 450,
+    "scope": "full pool; 12000 reused medium TUNE references; fixed candidates; OOF calibration; decision only",
+    "source": "artifacts/v2_p1_decision/decision_review.json"
+  },
+  {
+    "setup": "v2_p1_decision",
+    "model": "calibrated_expected_f05_nested_source_plus_assignment_0",
+    "macro_f05": 0.9702215801668629,
+    "precision": 0.9882505531395438,
+    "recall": 0.9369032693605941,
+    "threshold": null,
+    "singleton_accuracy": 0.9598278335724534,
+    "false_positive_links": 462,
+    "scope": "full pool; 12000 reused medium TUNE references; fixed candidates; OOF calibration; decision only",
+    "source": "artifacts/v2_p1_decision/decision_review.json"
+  },
+  {
+    "setup": "v2_tree_dense_compat",
+    "model": "catboost_1200_train_dense_only_screen",
+    "macro_f05": 0.9376228819888678,
+    "precision": 0.9766182227704189,
+    "recall": 0.8781463979168675,
+    "threshold": 0.65,
+    "singleton_accuracy": 0.9196556671449068,
+    "false_positive_links": 872,
+    "scope": "full pool; 12000 reused medium TUNE references; 1200 sampled medium TRAIN; dense-only compatibility screen",
+    "source": "artifacts/v2_tree_screen/dense_compat_final/results.json"
   }
 ]
