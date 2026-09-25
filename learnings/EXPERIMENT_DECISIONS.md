@@ -9,7 +9,7 @@ This is the evidence snapshot from completed local artifacts. “Established” 
 - **Hard pool:** the original quick TRAIN/TUNE references, but candidates mined against all **10,320,219** original training targets. Retained records are compact; candidate edges retain the actual full-pool retrieval result. All true links remain in scoring, including misses.
 - **Country transfer:** train and choose threshold using one country's TRAIN/TUNE references, then inspect the other country's TUNE references. This is development stress, not France validation.
 - **Fresh medium dense:** 35,999 TRAIN / 12,000 TUNE S1s disjoint from quick, with dense K50 candidates from all 10,320,219 training targets. Compare its models only on this same population.
-- The fresh medium eval labels remain untouched. No official test score is available. Retrieval oracle F0.5 assumes perfect candidate classification and is not a model score.
+- Medium eval was opened once after freezing v1: F0.5 0.968292 on 12,001 S1s (see `first_submission_holdout.json`). It must not become a tuning set. No official test score is available. Retrieval oracle F0.5 assumes perfect candidate classification and is not a model score.
 
 ## Completed approach comparisons
 
@@ -57,7 +57,7 @@ TRAIN-only fitting and entity-disjoint splits prevent several obvious leakage mo
 
 ## Unfinished evidence and registry boundaries
 
-Full-pool dense retrieval, quick-reference unions, both fresh-medium BGE budgets, and medium lexical retrieval have completed local reports. The selected dense procedure is frozen; checkpoint preservation is complete and verified. Measured inference settings are CE batch128 with stable length sorting and pad8, reference batches of 1,000, maximum length256, and dense tiles512/50k. No medium eval labels were used for these selections. Holdout evidence and complete, validated official-test outputs remain separate release requirements. Check the root runbook for live job state.
+Full-pool dense retrieval, quick-reference unions, both fresh-medium BGE budgets, and medium lexical retrieval have completed local reports. The selected dense procedure is frozen; checkpoint preservation is complete and verified. Measured inference settings are CE batch128 with stable length sorting and pad8, reference batches of 1,000, maximum length256, and dense tiles512/50k. No medium eval labels were used for these selections. Holdout evidence is now recorded in `first_submission_holdout.json`; complete, validated official-test outputs remain a release requirement. Check the root runbook for live job state.
 
 The generated scoreboard reports the current count of completed model configurations, including hyperparameters and blend weights rather than independent model families. Residual+CE and BGE blend rows are included; their repeated tree/gated baselines are excluded. Retrieval-only ablations, scale stress, and anchor checks above are kept outside that model count. Failed launches contribute no score.
 

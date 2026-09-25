@@ -8,3 +8,11 @@ output/
 catboost_info/
 .cache/
 *.log
+models/
+releases/
+.env
+.env.*
+*.pem
+*.key
+id_ed25519*
+id_rsa*

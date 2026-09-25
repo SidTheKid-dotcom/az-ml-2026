@@ -35,7 +35,9 @@ unmeasured score or guaranteed rank. Keep explanations and new infrastructure le
 ## Guardrails that protect useful results
 
 - Split by S1 business, never by pair. Fit on TRAIN; choose thresholds/blends on
-  TUNE. The initial quick eval is development data; fresh medium eval stays sealed.
+  TUNE. Quick eval is development data. Medium eval was opened once for the frozen
+  v1 model (F0.5 0.968292); never use it to tune subsequent models. Reserve a new
+  entity-disjoint holdout from unused training S1s before the next selection cycle.
 - Do not inject true edges into retrieval. Retaining missed truth *records* for
   accounting is allowed; missed links must still lower the reported score.
 - Preserve one row for every scored S1, even without candidates. Follow the exact
@@ -47,6 +49,34 @@ unmeasured score or guaranteed rank. Keep explanations and new infrastructure le
   the public leaderboard covers only a subset. Record every public submission.
 - Official files override conflicting inherited controller notes. Existing user
   authorization covers GPU experimentation and suitable Hugging Face models.
+
+## Avoid anchoring on the current winner
+
+The chosen E5/tree/BGE pipeline is a baseline, not a required architecture. After
+v1 is safely released, test different licensed HF models, retrieval unions,
+training sizes, negative sampling or calibration when a bounded comparison can
+answer a concrete question. The inherited `models.yaml` is a checked inventory,
+not an organizer-mandated model list; verify license/size and use an explicit
+updated `--allowlist` for additions. New architectures may need a new adapter;
+the current CE trainer supports only its tested single-logit model families.
+
+Keep failed results and their scope; discard weak compute runs, not evidence.
+Do not compare different reference samples as if they were a controlled test.
+Changing retrieval requires recomputing candidate-dependent features and checking
+the matcher again. Hypotheses are not proven by one favorable tuning score.
+Country and script differences, test distractor shift, and repeated selection
+remain limitations; no report establishes absence of bias or overfitting.
+
+## Release and handoff
+
+Use `learnings/CURRENT_STATE.md` for mutable job status; frozen manifests are
+historical selection snapshots. Never edit the source/checkpoints used by an
+active release. Develop a new experiment in a separate output/code checkout.
+`code/business_entity_resolution/README.md` covers portable replay, training and
+the validated final ZIP. An agent needs the supplied data and authorized GPU/key
+access as well as Git; secrets, large data and weights are deliberately external.
+Update the decision table, current state and release hashes; commit small useful
+changes. Do not add a dashboard or another overlapping status document.
 
 ## GPU use
 

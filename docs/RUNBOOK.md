@@ -47,11 +47,11 @@ its NumPy version differs from the local environment. Do not overwrite the share
 | --- | --- |
 | `data/raw/dataset/{train,test}` | Original supplied TSVs, extracted from `student_resource.zip` |
 | `data/quick` | 12,000 reference businesses; train 7,199 / tune 2,400 / old eval 2,401 |
-| `data/medium` | Disjoint 60,000 refs; train 35,999 / tune 12,000 / sealed eval 12,001 |
+| `data/medium` | Disjoint 60,000 refs; train 35,999 / tune 12,000 / evaluated holdout 12,001 |
 | `data/hard` | Quick TRAIN+TUNE, mined against full raw pool; reuse its candidate edges |
 | `data/medium_hard` | Larger TRAIN+TUNE full-pool lexical/phonetic mining output |
 | `artifacts/full_train_e5_ft200` | Full raw S2-then-S3 embeddings + progress/completion manifests |
-| `artifacts/full_test_e5_ft200`, `artifacts/full_dense_test` | Label-free official test encoding/retrieval, currently preparing |
+| `artifacts/full_test_e5_ft200`, `artifacts/full_dense_test` | Complete label-free test encoding/retrieval; 86,627,200 pairs |
 | `artifacts/full_dense_{quick,medium}` | Full-pool dense candidates and compact records |
 | `data/{hard_union,medium_union}` | Exact lexical/phonetic/dense candidate unions |
 | `artifacts/*sweep`, `artifacts/*ce*` | Configs, scores, selected checkpoints/probabilities |
@@ -75,9 +75,11 @@ The selected first dense procedure is **medium BGE1800**, 75% CE, threshold
 2,400 different quick-reference TUNE businesses and is not its validation score.
 `docs/checkpoints.json` records all promoted paths/digests. The active frozen JSON
 is `docs/frozen_dense_pipeline.json`, preserved as
-`/workspace/az-ml-new/models/frozen_dense_pipeline.json`. Root is finalizing its
-runtime batch setting; model/gate/blend/threshold stay fixed. CE length is 256
-and reference batches are 1,000. No holdout or official test score exists yet.
+`/workspace/az-ml-new/models/submission_v1_pipeline.json`. Runtime is frozen:
+CE batch 128, length 256, reference batches 1,000, length sorting and pad8. Verified
+holdout F0.5 is 0.968292 on all 12,001 eval S1s against the full training pool.
+That holdout is now consumed for evaluation, not available for future tuning.
+No official test score exists.
 
 ## Data and exact score
 
@@ -113,7 +115,7 @@ These digests are SHA256 of newline-joined, sorted IDs, without a trailing newli
 | Medium all | 60,000 | `451f7e94bc76080b0be4de8dfd1dd3d3ff452d66aa899f77eb29520281f80042` |
 | Medium TRAIN | 35,999 | `47ec6f4736aaa6069c9dbddde67354637b3046d414165bea0c54ab0dcd5bc0dc` |
 | Medium TUNE | 12,000 | `5bb5759fa52ac19df8839520c7ccf147bae01a5499a2900af5d1b4ebeb1dbaa2` |
-| Medium sealed eval | 12,001 | `a777ea1b07cfa375119233991ce3f36e16e01ab2c72d2493fcbc82208daf14b9` |
+| Medium v1 holdout | 12,001 | `a777ea1b07cfa375119233991ce3f36e16e01ab2c72d2493fcbc82208daf14b9` |
 
 The 600/1800 comparison additionally verifies identical text/row-order reference,
 pool, pair, base-probability and training-truth digests in their
@@ -155,8 +157,10 @@ TSVs, and verifies durable copies under
 `/workspace/az-ml-new/releases/submission_v1`. Only its successful `ready.json`
 marks the files ready for the user to upload. It does not upload to the platform.
 No benchmark prefix is allowed in release outputs. Runtime benchmarks are complete;
-no further model search is queued. The first holdout launch is supervisor 43996,
-`logs/frozen_holdout_v1.log`; inspect live status before any restart.
+no further model search is queued before v1 release. Holdout finished; full test
+scoring is supervisor 46635, `logs/first_submission_v1.log`. Check live status
+before any restart. The frozen config flags describe selection time; later
+evaluation/readiness is recorded separately and must not rewrite its digest.
 
 Official outputs: `output/matching_results.tsv` (`source1_entity_id`,
 `matched_entity_ids`) and `output/candidate_pairs.tsv` (`source1_entity_id`,
@@ -178,3 +182,26 @@ hashes; it validates format and integrity, **not score**. Run on actual final fi
 `docs/source_integrity.json` verifies all ten extracted resource files against the
 original ZIP's byte counts and CRC32, and inventories the six original statement
 files. The ZIP, statement and raw dataset are preserved; experiment caches are separate.
+
+## Fresh checkout and final package
+
+Git contains code, evidence, rules and provenance; it intentionally does not
+contain credentials, raw data, caches, model binaries or generated TSVs. On this
+workstation the ZIP and `data/raw/` are at the repository root. On another machine
+bring the supplied archive, extract it to `data/raw/`, and verify its identities
+against `docs/source_integrity.json`. GPU access requires an authorized SSH key;
+private GitHub access alone does not grant GPU access. If the endpoint changes,
+read the existing RunPod pod's Connect details; do not recreate or delete it.
+
+For exact prediction replay, use the three promoted model paths in
+`docs/checkpoints.json`, not a newly trained approximation. For new experiments,
+copy only required code/configs to a separate GPU work directory and reuse the
+data/cache read-only. Never sync `.git`, secrets or the whole cache to the pod.
+The portable recipe, pinned GPU dependencies, final bundle command and module
+map are in `code/business_entity_resolution/README.md`. A final bundle includes
+the exact weights; Git stays small. Build only after the actual TSVs validate.
+
+Record each platform attempt in `learnings/submissions.json`: release ID, file
+SHA256, public score, platform status and whether the submission was actually
+performed. A validator PASS is not a leaderboard score. Historical artifacts
+retain their paths and hashes even when a newer model wins.

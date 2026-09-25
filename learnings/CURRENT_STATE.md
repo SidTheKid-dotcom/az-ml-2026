@@ -1,5 +1,15 @@
 # Handoff — resume here
 
+## Verified first-submission holdout
+
+The frozen model scored **F0.5 0.968292**, macro **F1 0.953967**, precision
+**0.987270**, recall **0.939456** on all **12,001 untouched eval businesses**,
+searching all **10,320,219 training targets**. F0.5 95% bootstrap interval:
+**[0.966268, 0.970217]**. False links: **506**; singleton accuracy: **0.932650**.
+India: 0.962826; US: 0.971919. This is close to TUNE, supporting generalization
+on those countries; France remains unmeasured. Exact report:
+[first_submission_holdout.json](first_submission_holdout.json).
+
 ## Frozen first-submission procedure
 
 The selected **dense** model is `medium_dense_bge_ce1800`: E5-small fine-tuned200,
@@ -40,17 +50,17 @@ change models, gate, blend, threshold or source after inspecting the holdout.
 
 ## Remaining release work
 
-1. Frozen runtime is complete. Track `logs/frozen_holdout_v1.log`; the one fixed
-   holdout job is running. Do not launch a duplicate or tune from its result.
-2. Retrieve candidates for the **12,001 sealed medium eval S1s**, apply the frozen
-   model once, then score committed predictions with complete truth, including
-   missed links and empty singletons. Commands and guard limits are in the runbook.
-3. Finish label-free official test encoding/retrieval and predict **all 1,732,544
-   test S1s** against **9,969,589 test targets**. Verify ID/coverage/subset integrity
-   and run the supplied validator with **`--check-ids`** before the user uploads.
+1. Holdout is complete and must not be rerun for model selection. Test candidates
+   are also complete: **86,627,200 edges**, every S1 has its actual 50 candidates.
+2. Full test scoring is running: supervisor **46635**,
+   `logs/first_submission_v1.log`, `output/submission_v1`. Do not duplicate it.
+3. Its wrapper automatically runs both file validators and preserves verified
+   release copies. Download final TSVs only after `ready.json` confirms success.
 
-Use `run_frozen_holdout.sh` followed by `run_first_submission.sh`, each with the
-explicit finalized pipeline SHA256. No further model search is scheduled.
+Reproduction uses `run_frozen_holdout.sh` then `run_first_submission.sh`, each
+with the explicit finalized pipeline SHA256; both have already been launched. No further model search is scheduled before v1 release. After recording the first
+platform result, resume bounded TRAIN/TUNE comparisons in separate outputs; the
+evaluated v1 holdout must not steer new thresholds or training choices.
 No official-test prediction files have been validated yet. Development TSVs are
 not submission files. Notify the user when the first complete validated pair is ready.
 
@@ -64,9 +74,9 @@ Paths are relative to GPU `/tmp/az-ml-new` unless absolute. Live state can chang
 | `artifacts/full_dense_medium` | Complete; TRAIN+TUNE only, 2,399,950 pairs; TUNE link recall 0.984208. |
 | `artifacts/medium_dense_frozen_for_ce` | Exact original medium tree, SHA256 `b5c7ca0876adbd15ee9cb193098e437d5970025f1afb7ba5eec50bec534063cb`. |
 | `artifacts/medium_dense_bge_ce600`, `...ce1800` | Both complete; supervisor 41896 finished; reports local and checkpoints durable. |
-| `logs/test_candidates.log`, `artifacts/full_test_e5_ft200` | All 9,969,589 target embeddings complete; test S1 encoding/retrieval running. |
+| `logs/test_candidates.log`, `artifacts/full_test_e5_ft200` | Complete: all test inputs searched, 86,627,200 candidate pairs. |
 | `data/medium_hard` | Complete: 2,987,950 edges; extra union queue 39793 stopped. Do not resume training before first submission. |
-| `artifacts/final_holdout_dense_v1`, `output/holdout_v1` | Fixed holdout pipeline started; check log and completion markers. |
+| `artifacts/final_holdout_dense_v1`, `output/holdout_v1` | Complete: fixed F0.5 0.968292; labels now evaluated, no further tuning here. |
 
 Medium seed **20260926** excludes all 12,000 quick references (seed 20260925).
 Verified quick/medium ID overlap is zero. Split counts and exact ID fingerprints
@@ -78,3 +88,17 @@ files verified against original ZIP byte counts/CRC32 in
 The local ledger records **107** scored configurations (including weights and
 hyperparameters, not 107 independent approaches). See
 [EXPERIMENT_DECISIONS.md](EXPERIMENT_DECISIONS.md) for what each established.
+
+## Repository handoff audit
+
+Portable replay and final ZIP packaging commands are in the code README. The ZIP
+builder verifies complete release reports, exact checkpoint/source/output hashes,
+required structure and every archived byte. Team name is `techquilla-shots`;
+member names are unspecified. It requires a validated release; no production ZIP exists while inference is incomplete.
+The expanded suite passes 47 tests, including rejection of incomplete coverage,
+modified predictions/weights and archive overwrite. New replay was dry-run checked;
+a full clean-machine replay/retraining has not been performed.
+
+Git excludes binaries/data by design. A new agent needs the supplied data and
+authorized GPU/key access; its working credential path, runtime and durable model
+registry are in `docs/`. No official submission is recorded yet.

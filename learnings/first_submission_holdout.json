@@ -1,0 +1,72 @@
+{
+  "scope": "Untouched 12,001 S1; all 10,320,219 training targets",
+  "pipeline_sha256": "9ac4050a72c64b05c032a17ec26f2a13b339c1b8c135791bf07b737534371f5e",
+  "score": {
+    "reference_count": 12001,
+    "macro_f05": 0.9682919715895607,
+    "macro_f1": 0.9539670999167151,
+    "micro_precision": 0.9872697997383516,
+    "micro_recall": 0.9394556031696631,
+    "false_positive_links": 506,
+    "false_negative_links": 2529,
+    "singleton_accuracy": 0.9326500732064422,
+    "country": {
+      "India": {
+        "macro_f05": 0.9628260945963929,
+        "macro_f1": 0.9464753942254279
+      },
+      "US": {
+        "macro_f05": 0.9719189681471284,
+        "macro_f1": 0.9589383773140245
+      }
+    },
+    "uncertainty": {
+      "macro_f05": {
+        "reference_count": 12001,
+        "n_bootstrap": 10000,
+        "confidence": 0.95,
+        "seed": 20260925,
+        "sampling_unit": "source1_entity",
+        "paired": false,
+        "stratum_sizes": null,
+        "method": "percentile bootstrap",
+        "estimates": {
+          "left_mean": 0.9682919715895607
+        },
+        "confidence_intervals": {
+          "left_mean": [
+            0.966267769098607,
+            0.9702174749685852
+          ]
+        },
+        "bootstrap_standard_errors": {
+          "left_mean": 0.0010049110610829974
+        },
+        "limitation": "Conditional on fixed models, retrieval and thresholds; tuning-set intervals do not establish held-out generalization."
+      },
+      "macro_f1": {
+        "reference_count": 12001,
+        "n_bootstrap": 10000,
+        "confidence": 0.95,
+        "seed": 20260925,
+        "sampling_unit": "source1_entity",
+        "paired": false,
+        "stratum_sizes": null,
+        "method": "percentile bootstrap",
+        "estimates": {
+          "left_mean": 0.9539670999167151
+        },
+        "confidence_intervals": {
+          "left_mean": [
+            0.9516748622217873,
+            0.9561328274427742
+          ]
+        },
+        "bootstrap_standard_errors": {
+          "left_mean": 0.001133471930421076
+        },
+        "limitation": "Conditional on fixed models, retrieval and thresholds; tuning-set intervals do not establish held-out generalization."
+      }
+    }
+  }
+}

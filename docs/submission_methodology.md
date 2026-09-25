@@ -1,6 +1,8 @@
 # ML Challenge 2026: Business Entity Resolution Solution
 
-**Draft status:** Selected method documented; final holdout score, complete official-test candidate count and supplied-validator results are pending verification. This document does not claim submission readiness or a leaderboard score.
+**Team Name:** techquilla-shots
+
+**Draft status:** Frozen holdout evaluation and complete test candidate generation are verified. Full-test matching and supplied-validator results are pending. No leaderboard score is claimed.
 
 ## 1. Executive Summary
 
@@ -20,7 +22,7 @@ Only supplied business records and training labels were used; no external busine
 
 **Core Contribution:** Train and select against the complete competing target pool, preserve each S1's full candidate group for relative features, and combine multilingual semantic evidence with explicit identity-bearing string and numeric differences.
 
-The initial quick sample used seed 20260925. A separate 60,000-S1 medium sample used seed 20260926 and excluded all 12,000 quick references. Country-stratified, entity-disjoint medium partitions contain 35,999 TRAIN, 12,000 TUNE and 12,001 sealed eval S1s. E5 used quick TRAIN only; the selected tree and BGE used medium TRAIN, with model/threshold selection on medium TUNE. Split fingerprints and country counts are recorded in `docs/RUNBOOK.md`.
+The initial quick sample used seed 20260925. A separate 60,000-S1 medium sample used seed 20260926 and excluded all 12,000 quick references. Country-stratified, entity-disjoint medium partitions contain 35,999 TRAIN, 12,000 TUNE and 12,001 eval S1s (sealed until v1 was frozen). E5 used quick TRAIN only; the selected tree and BGE used medium TRAIN, with model/threshold selection on medium TUNE. Split fingerprints and country counts are recorded in the repository runbook; replay instructions are in the code README.
 
 ## 3. Candidate Generation (Blocking)
 
@@ -28,7 +30,7 @@ The initial quick sample used seed 20260925. A separate 60,000-S1 medium sample 
 - **Representation:** Original-script `business_name | business_address`, prefixed `query: ` for S1 and `passage: ` for targets; maximum length 128, 384 dimensions, L2 normalization.
 - **Retrieval rule:** Exhaustive top 50 dot-product search, without an approximate-neighbor index. Target vectors are stored as float16; dot products use float32 with float32 queries. This is exact search over the stored representations, not a claim of unquantized encoder equivalence.
 - **Training target scope:** All 10,320,219 original S2/S3 training records. Medium TRAIN+TUNE has 2,399,950 candidate pairs; TUNE has 600,000.
-- **Official-test scope:** All 1,732,544 S1s against 9,969,589 S2/S3 targets. Final produced pair count and coverage await completed artifacts and validation.
+- **Official-test scope:** All 1,732,544 S1s against 9,969,589 S2/S3 targets. Candidate generation completed with **86,627,200 unique pairs**, exactly 50 for every S1; final matching/TSV validation is running.
 - **Miss accounting:** No positive candidate injection. Ground-truth targets missing from retrieval may be retained as compact records solely for scoring; their missing edges still count as missed links. TUNE link recall is 0.984208; perfect classification of these candidates would yield macro F0.5 of 0.994090.
 
 This selected release uses dense candidates. Earlier lexical/phonetic/dense union experiments are separate procedures and are not silently substituted during inference.
@@ -60,24 +62,23 @@ For each S1 with true matches, `F0.5 = 5×TP / (4×predicted_count + true_count)
 
 Development stress identified wrong merges between near-twin names at shared addresses and distinct units/house numbers. It also showed that strict numeric rejection can discard legitimate address variants. These earlier diagnostic examples do not establish the frequency of error types in the selected model's 494 false links.
 
-The matched 600-step comparison scored 0.966067 with 531 false links; the selected 1,800-step model adds 206 true links and removes 37 false links on the same TUNE population. Repeated tuning can overfit. **Final holdout results are pending; France has no supplied training labels and no measured validation accuracy; official-test labels remain hidden.**
+The matched 600-step comparison scored 0.966067 with 531 false links; the selected 1,800-step model adds 206 true links and removes 37 false links on the same TUNE population. Repeated tuning can overfit. The untouched **12,001-S1 holdout** scores **macro F0.5 0.968292** (95% business-bootstrap interval [0.966268,0.970217]) and **macro F1 0.953967**. Precision/recall: 0.987270/0.939456; false links: 506; missed links: 2,529; singleton accuracy: 0.932650. India/US F0.5: 0.962826/0.971919. Models, thresholds and source hashes were frozen before access; no adjustment followed this result. **France has no supplied training labels or measured validation accuracy; official-test labels remain hidden.**
 
 ## 6. Conclusion
 
-Full-pool retrieval and difficult negatives substantially changed model selection compared with the easier sampled pool. The frozen dense/tree/BGE procedure is ready for its fixed holdout and complete test-generation pipeline; performance and release claims will be updated only from completed, verified artifacts.
+Full-pool retrieval and difficult negatives substantially changed model selection compared with the easier sampled pool. The frozen dense/tree/BGE procedure retained its development performance on the untouched holdout. Complete official-test prediction and validation are running; release claims will be updated only from verified artifacts.
 
 ## Appendix
 
 ### A. Code Artefacts
 
-Source is under `code/business_entity_resolution/src/ber/`, with `README.md`, `requirements.txt` and unit tests in the same code package. Python 3.12 and the measured CUDA environment are documented in `docs/RUNBOOK.md` and `docs/gpu_runtime.json`.
+Source, tests and pinned CPU/GPU environments ship under `code/business_entity_resolution/`. Its `README.md` gives the exact data preparation, training, inference and validation commands. The finalized package includes the selected weights in `models/` and configuration, source/model digests, measured runtime, holdout evidence, the unchanged organizer validator and completed release reports in `resources/`.
 
-- Preparation and training: `ber.prepare`, `ber.hf_experiment`, `ber.full_embeddings`, `ber.full_dense_candidates`, `ber.tabular_sweep`, `ber.cross_encoder_experiment`. Saved configs record exact seeds, candidate/data digests and training choices.
-- Preserved weights and SHA256 identities: `docs/checkpoints.json`; selected modeling settings: `docs/frozen_dense_pipeline.json`. The finalized executable release configuration is `/workspace/az-ml-new/models/submission_v1_pipeline.json`.
-- From the GPU project root, `bash code/business_entity_resolution/run_frozen_holdout.sh "$selected_pipeline_sha"` freezes the finalized configuration and produces the one fixed eval report. `bash code/business_entity_resolution/run_test_candidates.sh` prepares label-free test candidates; inspect existing completion markers before launching it.
-- `bash code/business_entity_resolution/run_first_submission.sh "$selected_pipeline_sha"` requires that same pipeline's complete holdout, writes `output/submission_v1/matching_results.tsv` and `candidate_pairs.tsv`, invokes `ber.validate_release` with the unchanged supplied validator's `--check-ids`, and checks exact coverage/ID/subset integrity. Set the variable to the explicitly recorded finalized pipeline digest.
-- Only successful validation and hash-verified durable copies create `ready.json` under `/workspace/az-ml-new/releases/submission_v1`. The script does not upload to the competition platform. Original files remain unchanged; `docs/source_integrity.json` records ZIP/statement integrity.
+- `src/reproduce.py --dataset <supplied-dataset> --work-dir <empty-fast-directory>` verifies the included frozen weights/source, prepares the complete test candidate set, predicts every S1 and validates both files. Only filesystem locations change in a recorded relocated configuration; model, gate, blend and threshold stay fixed.
+- Preparation/training modules: `ber.prepare`, `ber.hf_experiment`, `ber.full_embeddings`, `ber.full_dense_candidates`, `ber.tabular_sweep`, `ber.cross_encoder_experiment`. TRAIN/TUNE comparisons select a model; retraining is not claimed to produce bit-identical GPU weights.
+- `ber.validate_release` invokes the unchanged supplied validator with `--check-ids`, then enforces exact coverage, valid IDs, duplicate rejection and match-subset consistency. It checks format/integrity, not test accuracy.
+- `src/package_submission.py` builds the final ZIP only from a completed, validated release and the exact recorded weights/source. Every archived file is verified against its SHA256. The original TSVs are unchanged in `output/`; no script uploads to the platform.
 
 ### B. Additional Results
 
-Full configurations and rejected approaches are in `learnings/scoreboard.md` and `EXPERIMENT_DECISIONS.md`. The earlier union score 0.969812 used 2,400 different TUNE S1s and a different candidate rule; it is not the selected dense model's score. The frozen model's complete eval report, official validator report and final file hashes will be appended after verification.
+Full configurations and rejected approaches are in `learnings/scoreboard.md` and `EXPERIMENT_DECISIONS.md`. The earlier union score 0.969812 used 2,400 different TUNE S1s and a different candidate rule; it is not the selected dense model's score. The complete fixed eval report is `learnings/first_submission_holdout.json`; the official validator report and final file hashes will be appended after verification.
