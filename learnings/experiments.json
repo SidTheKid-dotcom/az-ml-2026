@@ -1186,5 +1186,101 @@
     "false_positive_links": 442,
     "scope": "full pool; 12000 tuning references",
     "source": "artifacts/medium_dense_residual_sweep/results.json"
+  },
+  {
+    "setup": "medium_dense_bge_ce600",
+    "model": "blend_0.25",
+    "macro_f05": 0.9624764214732653,
+    "precision": 0.989665701088233,
+    "recall": 0.914336001543061,
+    "threshold": 0.6,
+    "singleton_accuracy": 0.9555236728837877,
+    "false_positive_links": 396,
+    "scope": "full pool; 12000 tuning references",
+    "source": "artifacts/medium_dense_bge_ce600/results.json"
+  },
+  {
+    "setup": "medium_dense_bge_ce600",
+    "model": "blend_0.5",
+    "macro_f05": 0.9660665995943103,
+    "precision": 0.986475127989608,
+    "recall": 0.9337930369370239,
+    "threshold": 0.575,
+    "singleton_accuracy": 0.93974175035868,
+    "false_positive_links": 531,
+    "scope": "full pool; 12000 tuning references",
+    "source": "artifacts/medium_dense_bge_ce600/results.json"
+  },
+  {
+    "setup": "medium_dense_bge_ce600",
+    "model": "blend_0.75",
+    "macro_f05": 0.9657628543242145,
+    "precision": 0.9880726414610373,
+    "recall": 0.9287539782042628,
+    "threshold": 0.775,
+    "singleton_accuracy": 0.9483500717360115,
+    "false_positive_links": 465,
+    "scope": "full pool; 12000 tuning references",
+    "source": "artifacts/medium_dense_bge_ce600/results.json"
+  },
+  {
+    "setup": "medium_dense_bge_ce600",
+    "model": "blend_1",
+    "macro_f05": 0.9617287949848872,
+    "precision": 0.9832400807337575,
+    "recall": 0.9278860063651269,
+    "threshold": 0.95,
+    "singleton_accuracy": 0.9411764705882353,
+    "false_positive_links": 656,
+    "scope": "full pool; 12000 tuning references",
+    "source": "artifacts/medium_dense_bge_ce600/results.json"
+  },
+  {
+    "setup": "medium_dense_bge_ce1800",
+    "model": "blend_0.25",
+    "macro_f05": 0.9627783027278934,
+    "precision": 0.9895996246481076,
+    "recall": 0.9153486353553862,
+    "threshold": 0.6,
+    "singleton_accuracy": 0.9540889526542324,
+    "false_positive_links": 399,
+    "scope": "full pool; 12000 tuning references",
+    "source": "artifacts/medium_dense_bge_ce1800/results.json"
+  },
+  {
+    "setup": "medium_dense_bge_ce1800",
+    "model": "blend_0.5",
+    "macro_f05": 0.9683741382280858,
+    "precision": 0.986134655770058,
+    "recall": 0.9397000675089208,
+    "threshold": 0.575,
+    "singleton_accuracy": 0.9497847919655668,
+    "false_positive_links": 548,
+    "scope": "full pool; 12000 tuning references",
+    "source": "artifacts/medium_dense_bge_ce1800/results.json"
+  },
+  {
+    "setup": "medium_dense_bge_ce1800",
+    "model": "blend_0.75",
+    "macro_f05": 0.9689921356332671,
+    "precision": 0.9874714684250571,
+    "recall": 0.9387597646831903,
+    "threshold": 0.775,
+    "singleton_accuracy": 0.9526542324246772,
+    "false_positive_links": 494,
+    "scope": "full pool; 12000 tuning references",
+    "source": "artifacts/medium_dense_bge_ce1800/results.json"
+  },
+  {
+    "setup": "medium_dense_bge_ce1800",
+    "model": "blend_1",
+    "macro_f05": 0.9674521506721792,
+    "precision": 0.9859527015012574,
+    "recall": 0.9358183045616743,
+    "threshold": 0.975,
+    "singleton_accuracy": 0.9598278335724534,
+    "false_positive_links": 553,
+    "scope": "full pool; 12000 tuning references",
+    "source": "artifacts/medium_dense_bge_ce1800/results.json"
   }
 ]

@@ -21,11 +21,19 @@ from .uncertainty import paired_bootstrap
 
 
 def rerank_batch(reference, pool, pairs, base, config, scorer):
-    """Scorer receives only gated pairs and their compact, locally indexed records."""
+    """Score compact gated pairs; optionally omit provably rejected CE calls.
+
+    The shortcut preserves accepted links and candidate rows. Scores for pairs
+    that cannot reach the frozen threshold become zero, rather than a full CE
+    blend. Compute the upper bound with the same float32 blend as inference.
+    """
     base = np.asarray(base, dtype=np.float32)
     if base.shape != (len(pairs),) or not np.isfinite(base).all() or np.any((base != -1) & ((base < 0) | (base > 1))):
         raise ValueError("Tree probabilities must align with pairs and lie in [0,1] or equal anchor sentinel -1")
     selected, cross = base >= config["gate"], np.zeros(len(base), dtype=np.float32)
+    if config.get("skip_provably_rejected_pairs", False):
+        upper = blend_probabilities(base, np.ones(len(base), dtype=np.float32), selected, config["alpha"])
+        selected &= np.asarray(upper, dtype=np.float64) >= config["threshold"]
     if selected.any():
         compact = pairs.loc[selected, ["left_idx", "right_idx"]].copy()
         left, compact["left_idx"] = np.unique(compact.left_idx, return_inverse=True)
@@ -83,10 +91,20 @@ def run(args, *, scorer=None):
             raise ValueError("Frozen alpha/gate must lie in [0,1], and threshold must be positive")
     if any(type(config[key]) is not int or config[key] <= 0 for key in ("max_length", "inference_batch_size")):
         raise ValueError("Frozen sequence and batch sizes must be positive integers")
+    if type(config.get("skip_provably_rejected_pairs", False)) is not bool:
+        raise ValueError("Frozen skip_provably_rejected_pairs must be a boolean")
+    if "length_bucketing" in config:
+        if type(config["length_bucketing"]) is not bool:
+            raise ValueError("Frozen length_bucketing must be a boolean")
+        multiple = config.get("pad_to_multiple_of", 8)
+        if multiple is not None and (type(multiple) is not int or multiple <= 0):
+            raise ValueError("Frozen pad_to_multiple_of must be a positive integer or null")
     completed = json.loads((tree / "complete.json").read_text())
     tree_report = json.loads((tree / "report.json").read_text())
     if completed.get("state") != "complete" or completed.get("report") != tree_report or tree_report.get("benchmark_only"):
         raise ValueError("Tree predictions must be a committed complete population")
+    if tree_report.get("scorer", "frozen_tree") != "frozen_tree":
+        raise ValueError("Input must contain raw tree scores; refusing to rerank an existing CE blend")
     if tree_report["checkpoint_sha256"] != config["tree_checkpoint_sha256"] or file_digest(Path(tree_report["checkpoint"])) != config["tree_checkpoint_sha256"]:
         raise ValueError("Frozen tree checkpoint digest disagrees with tree predictions")
     if Path(tree_report["data"]).resolve() != data.resolve() or tree_report.get("pair_order") != ["left_idx", "right_idx"]:
@@ -95,6 +113,14 @@ def run(args, *, scorer=None):
     if ce["sha256"] != config["cross_encoder_sha256"]:
         raise ValueError("Frozen CE checkpoint digest mismatch")
     reference, pool = load_records(data)
+    reference_batch_size = config.get("reference_batch_size", args.reference_batch_size)
+    runtime = {"device": args.device, "threads": getattr(args, "threads", 2), "interop_threads": 1,
+        "reference_batch_size": reference_batch_size, "max_pairs_per_batch": args.max_pairs_per_batch,
+        "inference_batch_size": config["inference_batch_size"], "max_length": config["max_length"],
+        "inference_backend": "batched" if "length_bucketing" in config else "legacy",
+        "skip_provably_rejected_pairs": config.get("skip_provably_rejected_pairs", False),
+        "length_bucketing": config.get("length_bucketing"),
+        "pad_to_multiple_of": config.get("pad_to_multiple_of", 8) if "length_bucketing" in config else None}
     pair_path, candidate_path = tree / "scored_pairs.parquet", tree / "candidate_pairs.tsv"
     base = np.load(tree / "probabilities.npy", mmap_mode="r")
     count = pq.ParquetFile(pair_path).metadata.num_rows
@@ -103,7 +129,7 @@ def run(args, *, scorer=None):
     output.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(pipeline, output / "frozen_pipeline.json")
     manifest = {"pipeline_sha256": pipeline_hash, "pipeline": config, "cross_encoder_identity": ce,
-        "tree_prediction_directory": str(tree.resolve()), "labels_accessed": False,
+        "tree_prediction_directory": str(tree.resolve()), "labels_accessed": False, "runtime": runtime,
         "input_sha256": {name: file_digest(tree / name) for name in ("probabilities.npy", "scored_pairs.parquet", "candidate_pairs.tsv")}}
     atomic_json(output / "frozen_manifest.json", manifest)
     if scorer is None:
@@ -112,8 +138,16 @@ def run(args, *, scorer=None):
         torch.set_num_threads(args.threads)
         torch.set_num_interop_threads(1)
         model, tokenizer = load_reranker(config["cross_encoder_checkpoint"], args.device)
-        scoring = SimpleNamespace(device=args.device, max_length=config["max_length"], inference_batch_size=config["inference_batch_size"])
-        scorer = lambda left, right, pairs: score_reranker(model, tokenizer, left, right, pairs, np.ones(len(pairs), bool), scoring)
+        scoring = SimpleNamespace(device=args.device, max_length=config["max_length"],
+                                  inference_batch_size=config["inference_batch_size"],
+                                  length_bucketing=config.get("length_bucketing", False),
+                                  pad_to_multiple_of=config.get("pad_to_multiple_of", 8))
+        score_function = score_reranker
+        if "length_bucketing" in config:
+            from .rerank_inference import score_reranker_batched
+
+            score_function = score_reranker_batched
+        scorer = lambda left, right, pairs: score_function(model, tokenizer, left, right, pairs, np.ones(len(pairs), bool), scoring)
     values_path, cross_path, matching = (output / name for name in ("probabilities.npy.tmp", "cross_probabilities.npy.tmp", "matching_results.tsv.tmp"))
     values = np.lib.format.open_memmap(values_path, mode="w+", dtype=np.float32, shape=(count,))
     cross_values = np.lib.format.open_memmap(cross_path, mode="w+", dtype=np.float32, shape=(count,))
@@ -124,7 +158,7 @@ def run(args, *, scorer=None):
         writer.writerow(["source1_entity_id", "matched_entity_ids"])
         if next(candidates, None) != ["source1_entity_id", "candidate_entity_ids"]:
             raise ValueError("Unexpected candidate TSV header")
-        for batch in iter_reference_batches(pair_path, len(reference), len(pool), args.reference_batch_size,
+        for batch in iter_reference_batches(pair_path, len(reference), len(pool), reference_batch_size,
                 max_pairs_per_batch=args.max_pairs_per_batch, require_sorted_right=True):
             end = offset + len(batch.pairs)
             blended, cross, selected = rerank_batch(reference, pool, batch.pairs, base[offset:end], config, scorer)
@@ -160,9 +194,7 @@ def run(args, *, scorer=None):
             shutil.copyfile(source, output / source.name)
     report = {"pipeline_sha256": pipeline_hash, "reference_count": len(reference), "candidate_pairs": count,
         "reranked_pairs": gated, "threshold": config["threshold"], "labels_accessed": False,
-        "runtime": {"device": args.device, "threads": getattr(args, "threads", 2), "interop_threads": 1,
-                    "reference_batch_size": args.reference_batch_size, "inference_batch_size": config["inference_batch_size"],
-                    "max_length": config["max_length"]},
+        "runtime": runtime,
         "probability_order": "scored_pairs.parquet row order", "ready_for_submission": False,
         "output_sha256": {name: file_digest(output / name) for name in ("matching_results.tsv", "candidate_pairs.tsv", "probabilities.npy")}}
     atomic_json(output / "predictions_fixed.json", report)

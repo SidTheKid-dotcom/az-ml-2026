@@ -444,6 +444,7 @@ def run_unlabeled(args) -> dict:
                 "references_without_candidates": topk["references_without_candidates"],
                 "all_input_references_retained": True, "labels_accessed": False,
                 "positive_candidate_injection": False, "pair_order": ["left_idx", "right_idx"],
+                "rank_columns_preserved": ["dense_rank", "retrieval_rank"],
                 "pairs_unique": True, "top_k": args.top_k,
                 "elapsed_seconds": time.time() - started, "mining": topk,
                 "feature_semantics": {"name_score": "unavailable; zero", "address_score": "unavailable; zero",

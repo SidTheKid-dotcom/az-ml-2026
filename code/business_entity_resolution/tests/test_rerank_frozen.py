@@ -90,6 +90,57 @@ class FrozenRerankerTests(unittest.TestCase):
             self.assertEqual(report["score"]["macro_f1"], .75)
             self.assertIn("uncertainty", report["score"])
 
+    def test_provably_rejected_shortcut_preserves_decisions_and_float64_boundary(self):
+        rng = np.random.default_rng(913)
+        base = np.concatenate([np.array([-1, 0, np.nextafter(np.float32(.01), np.float32(0)),
+            .01, .02, .1, .7, 1], np.float32), rng.random(256, dtype=np.float32)])
+        reference = pd.DataFrame({"entity_id": ["S1-0"]})
+        pool = pd.DataFrame({"entity_id": np.arange(len(base))})
+        pairs = pd.DataFrame({"left_idx": np.zeros(len(base), dtype=np.int64), "right_idx": np.arange(len(base))})
+        arbitrary = rng.random(len(base), dtype=np.float32)
+        for alpha in (0., .25, .75, 1.):
+            for threshold in (.7, float(np.float32(.7)), .775, 1., np.nextafter(1., np.inf)):
+                for cross in (np.zeros(len(base), np.float32), np.ones(len(base), np.float32), arbitrary):
+                    with self.subTest(alpha=alpha, threshold=threshold, cross=float(cross.sum())):
+                        config = {"gate": .01, "alpha": alpha, "threshold": threshold}
+                        def scorer(left, right, compact):
+                            return cross[right.entity_id.to_numpy()[compact.right_idx.to_numpy()]]
+                        full, _, gated = frozen.rerank_batch(reference, pool, pairs, base, config, scorer)
+                        reduced, skipped_cross, selected = frozen.rerank_batch(reference, pool, pairs, base,
+                            {**config, "skip_provably_rejected_pairs": True}, scorer)
+                        np.testing.assert_array_equal(reduced.astype(np.float64) >= threshold,
+                                                      full.astype(np.float64) >= threshold)
+                        upper = blend_probabilities(base, np.ones(len(base), np.float32), gated, alpha)
+                        np.testing.assert_array_equal(selected, gated & (upper.astype(np.float64) >= threshold))
+                        self.assertTrue(np.all(reduced[~selected] == 0))
+                        self.assertTrue(np.all(skipped_cross[~selected] == 0))
+                        self.assertFalse(selected[0])  # Anchor sentinel never reaches the scorer.
+                        if alpha == 0 and threshold == .7:
+                            self.assertFalse(selected[6])  # float32(.7) lies strictly below float64 .7.
+
+    def test_optional_batched_scorer_dispatch_preserves_legacy_default(self):
+        from ber import rerank_inference
+
+        fake_torch = SimpleNamespace(set_num_threads=lambda value: None, set_num_interop_threads=lambda value: None)
+        for use_helper in (False, True):
+            with self.subTest(use_helper=use_helper), tempfile.TemporaryDirectory() as directory:
+                args, reference, pool, pairs, base, config = self.fixture(Path(directory))
+                args.threads = 1
+                if use_helper:
+                    config.update(length_bucketing=True, pad_to_multiple_of=8, skip_provably_rejected_pairs=True)
+                args.pipeline.write_text(json.dumps(config))
+                def score(model, tokenizer, left, right, compact, selected, options):
+                    self.assertEqual(options.length_bucketing, use_helper)
+                    return self.scorer(left, right, compact)
+                with patch.dict("sys.modules", {"torch": fake_torch}), \
+                        patch.object(frozen, "load_reranker", return_value=(None, None)), \
+                        patch.object(frozen, "score_reranker", side_effect=score) as legacy, \
+                        patch.object(rerank_inference, "score_reranker_batched", side_effect=score) as helper:
+                    report = frozen.run(args)
+                self.assertEqual(bool(helper.call_count), use_helper)
+                self.assertEqual(bool(legacy.call_count), not use_helper)
+                self.assertEqual(report["runtime"]["inference_backend"], "batched" if use_helper else "legacy")
+
     def test_unsorted_right_indices_are_rejected_without_reordering_probabilities(self):
         with tempfile.TemporaryDirectory() as directory:
             args, reference, pool, pairs, base, config = self.fixture(Path(directory))
@@ -113,6 +164,17 @@ class FrozenRerankerTests(unittest.TestCase):
             path = args.tree_predictions / "candidate_pairs.tsv"
             path.write_text(path.read_text().replace("S2-0,S2-2", "S2-0"))
             with self.assertRaisesRegex(ValueError, "alignment"):
+                frozen.run(args, scorer=self.scorer)
+
+    def test_existing_blend_cannot_be_reranked_again(self):
+        with tempfile.TemporaryDirectory() as directory:
+            args, *unused = self.fixture(Path(directory))
+            report_path = args.tree_predictions / "report.json"
+            report = json.loads(report_path.read_text())
+            report["scorer"] = "frozen_tree_ce"
+            report_path.write_text(json.dumps(report))
+            (args.tree_predictions / "complete.json").write_text(json.dumps({"state": "complete", "report": report}))
+            with self.assertRaisesRegex(ValueError, "existing CE blend"):
                 frozen.run(args, scorer=self.scorer)
 
 

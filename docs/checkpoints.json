@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "generated_at_utc": "2026-09-25T02:00:32.497083+00:00",
+  "status": "Dense procedure frozen from completed TRAIN/TUNE experiments for first submission; no final holdout or official-test labels used.",
+  "checkpoint_digest_definition": "ber.full_embeddings.checkpoint_identity: SHA256 of json.dumps(sorted file records {path,size,sha256}, sort_keys=True). Derived from verified preservation manifests.",
+  "retrieval_encoder": {
+    "model_id": "intfloat/multilingual-e5-small",
+    "path": "/workspace/az-ml-new/models/e5_small_ft200",
+    "checkpoint_sha256": "ec16354f88e56789b4da51e5b45b07d969050a66d9eb9d1e16551aa7fe7a0252"
+  },
+  "rerankers": {
+    "hard_residual_minilm_ce_v1": {
+      "checkpoint": "/workspace/az-ml-new/models/hard_residual_minilm_ce_v1/cross_encoder",
+      "checkpoint_sha256": "dce3a010619eba75b937e6e7746a0a0f787a4802d75b2825d0122c24ce9845ea",
+      "weights_sha256": "4f5945b843479eccad49f6939ab209c44981d751a5255863b3f53d1762631ef4",
+      "tree_components": {
+        "original_gate.joblib": {
+          "path": "/workspace/az-ml-new/models/hard_residual_minilm_ce_v1/original_gate.joblib",
+          "sha256": "eafefab2b328a1a21418a8ecb5218ca48c87394bb0bed2ac49b02a268eee3a63"
+        },
+        "residual_tree.joblib": {
+          "path": "/workspace/az-ml-new/models/hard_residual_minilm_ce_v1/residual_tree.joblib",
+          "sha256": "2527e30c4216ff1fd42eed7dc3ffb623b185371e60d1b962442772d7c9db5157"
+        }
+      },
+      "gate": 0.01,
+      "max_length": 256,
+      "preservation_manifest": "/workspace/az-ml-new/models/hard_residual_minilm_ce_v1/manifest.json",
+      "tune_choice": {
+        "alpha": 0.5,
+        "threshold": 0.6,
+        "macro_f05": 0.9501148501573455,
+        "reference_count": 2400
+      }
+    },
+    "hard_bge_ce600": {
+      "checkpoint": "/workspace/az-ml-new/models/hard_bge_ce600/checkpoint",
+      "checkpoint_sha256": "46cf88a01c84640d71cd35a2ad78e33043910c9beb69821b5a0924a70e1320b6",
+      "weights_sha256": "a875fd8c38f84037d411d15a322d489ea81d53e31e701c34e890f002bc441f39",
+      "tree_components": {
+        "original_gate_and_tree.joblib": {
+          "path": "/workspace/az-ml-new/models/hard_bge_ce600/original_gate_and_tree.joblib",
+          "sha256": "eafefab2b328a1a21418a8ecb5218ca48c87394bb0bed2ac49b02a268eee3a63"
+        }
+      },
+      "gate": 0.01,
+      "max_length": 256,
+      "preservation_manifest": "/workspace/az-ml-new/models/hard_bge_ce600/manifest.json",
+      "tune_choice": {
+        "alpha": 0.75,
+        "threshold": 0.7999999999999999,
+        "macro_f05": 0.9549693028789618,
+        "reference_count": 2400
+      }
+    },
+    "hard_union_bge_ce600": {
+      "checkpoint": "/workspace/az-ml-new/models/hard_union_bge_ce600/checkpoint",
+      "checkpoint_sha256": "d128b81c20e126929fd3cb59881d73002f016dcd8f03350e1714cc64d5c374e1",
+      "weights_sha256": "5381d4ff7c8be3bdf951fe9f37918fcd65a75d9446447b56f46b0f0556372edb",
+      "tree_components": {
+        "original_gate_and_tree.joblib": {
+          "path": "/workspace/az-ml-new/models/hard_union_bge_ce600/original_gate_and_tree.joblib",
+          "sha256": "bf6af4d6270c1154f3b9ee7c670cce995e5f6da932716783d2b80f597502ea6e"
+        }
+      },
+      "gate": 0.01,
+      "max_length": 256,
+      "preservation_manifest": "/workspace/az-ml-new/models/hard_union_bge_ce600/manifest.json",
+      "tune_choice": {
+        "alpha": 0.5,
+        "threshold": 0.5499999999999999,
+        "macro_f05": 0.9698122422100732,
+        "reference_count": 2400
+      }
+    },
+    "medium_dense_bge_ce600": {
+      "checkpoint": "/workspace/az-ml-new/models/medium_dense_bge_ce600/checkpoint",
+      "checkpoint_sha256": "74ba695593bd34b65296d1387ddd3cebf566757f44d786456ae8a19641cd3279",
+      "weights_sha256": "442a1aece56628e36c2e0e759aa0bb9372f2b926a8491ed866c983ee2dacd6c8",
+      "tree_components": {
+        "original_gate_and_tree.joblib": {
+          "path": "/workspace/az-ml-new/models/medium_dense_bge_ce600/original_gate_and_tree.joblib",
+          "sha256": "b5c7ca0876adbd15ee9cb193098e437d5970025f1afb7ba5eec50bec534063cb"
+        }
+      },
+      "gate": 0.01,
+      "max_length": 256,
+      "preservation_manifest": "/workspace/az-ml-new/models/medium_dense_bge_ce600/manifest.json",
+      "tune_choice": {
+        "alpha": 0.5,
+        "threshold": 0.575,
+        "macro_f05": 0.9660665995943103,
+        "reference_count": 12000
+      }
+    },
+    "medium_dense_bge_ce1800": {
+      "checkpoint": "/workspace/az-ml-new/models/medium_dense_bge_ce1800/checkpoint",
+      "checkpoint_sha256": "91883cb6c8bfd5477dc98c8697226b8cefad1f5c46dd52579ccb6403eb159a65",
+      "weights_sha256": "91153fb62785b59ccd1f7d87be2c2349eac35a6e34c9b6532d9d7b4942c12650",
+      "tree_components": {
+        "original_gate_and_tree.joblib": {
+          "path": "/workspace/az-ml-new/models/medium_dense_bge_ce1800/original_gate_and_tree.joblib",
+          "sha256": "b5c7ca0876adbd15ee9cb193098e437d5970025f1afb7ba5eec50bec534063cb"
+        }
+      },
+      "gate": 0.01,
+      "max_length": 256,
+      "preservation_manifest": "/workspace/az-ml-new/models/medium_dense_bge_ce1800/manifest.json",
+      "tune_choice": {
+        "alpha": 0.75,
+        "threshold": 0.775,
+        "macro_f05": 0.9689921356332671,
+        "reference_count": 12000
+      }
+    }
+  },
+  "trees": [
+    {
+      "setup": "hard_tabular_sweep",
+      "durable_path": "/workspace/az-ml-new/models/promoted_trees/hard_tabular_sweep/best_eafefab2b328.joblib",
+      "sha256": "eafefab2b328a1a21418a8ecb5218ca48c87394bb0bed2ac49b02a268eee3a63"
+    },
+    {
+      "setup": "hard_residual_sweep",
+      "durable_path": "/workspace/az-ml-new/models/promoted_trees/hard_residual_sweep/best_2527e30c4216.joblib",
+      "sha256": "2527e30c4216ff1fd42eed7dc3ffb623b185371e60d1b962442772d7c9db5157"
+    },
+    {
+      "setup": "hard_dense_sweep",
+      "durable_path": "/workspace/az-ml-new/models/promoted_trees/hard_dense_sweep/best_c94f0ed3f4e7.joblib",
+      "sha256": "c94f0ed3f4e7dd89026468be34f2f07e8859b48babb92567cc99462a9537a5e3"
+    },
+    {
+      "setup": "hard_union_sweep",
+      "durable_path": "/workspace/az-ml-new/models/promoted_trees/hard_union_sweep/best_bf6af4d6270c.joblib",
+      "sha256": "bf6af4d6270c1154f3b9ee7c670cce995e5f6da932716783d2b80f597502ea6e"
+    },
+    {
+      "setup": "medium_dense_sweep",
+      "durable_path": "/workspace/az-ml-new/models/promoted_trees/medium_dense_sweep/best_b5c7ca0876ad.joblib",
+      "sha256": "b5c7ca0876adbd15ee9cb193098e437d5970025f1afb7ba5eec50bec534063cb"
+    },
+    {
+      "setup": "medium_dense_frozen_for_ce",
+      "durable_path": "/workspace/az-ml-new/models/promoted_trees/medium_dense_frozen_for_ce/best_b5c7ca0876ad.joblib",
+      "sha256": "b5c7ca0876adbd15ee9cb193098e437d5970025f1afb7ba5eec50bec534063cb"
+    },
+    {
+      "setup": "medium_dense_residual_sweep",
+      "durable_path": "/workspace/az-ml-new/models/promoted_trees/medium_dense_residual_sweep/best_2f3e88f98f27.joblib",
+      "sha256": "2f3e88f98f274827b73c5abc576c889a81c20161b05b7fda7735c470a8fbdd13"
+    }
+  ],
+  "selected_pipeline": "docs/frozen_dense_pipeline.json",
+  "selected_pipeline_sha256": "9ac4050a72c64b05c032a17ec26f2a13b339c1b8c135791bf07b737534371f5e",
+  "selected_pipeline_durable_path": "/workspace/az-ml-new/models/submission_v1_pipeline.json"
+}

@@ -16,7 +16,9 @@ import json
 import multiprocessing as mp
 import os
 from pathlib import Path
+import shutil
 import time
+from types import SimpleNamespace
 
 import joblib
 import numpy as np
@@ -24,7 +26,7 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from .full_embeddings import atomic_json, file_digest
+from .full_embeddings import atomic_json, checkpoint_identity, file_digest
 from .models import predict_proba
 from .predict import feature_batch
 from .prepare import log
@@ -226,7 +228,75 @@ def accepted_mask(values: np.ndarray, threshold: float) -> np.ndarray:
     return np.asarray(values, dtype=np.float64) >= threshold
 
 
-def run(args) -> dict:
+def _prepare_pipeline(args, checkpoint_hash: str, output: Path) -> dict | None:
+    path_value = getattr(args, "pipeline", None)
+    if not path_value:
+        return None
+    path = Path(path_value).resolve()
+    config, digest = json.loads(path.read_text()), file_digest(path)
+    for name in ("alpha", "gate"):
+        if not np.isfinite(config[name]) or not 0 <= config[name] <= 1:
+            raise ValueError("Frozen pipeline alpha and gate must lie in [0,1]")
+    if not np.isfinite(config["threshold"]) or config["threshold"] <= 0:
+        raise ValueError("Frozen blend threshold must be finite and positive")
+    if any(type(config[name]) is not int or config[name] <= 0 for name in ("max_length", "inference_batch_size")):
+        raise ValueError("Frozen CE sequence and inference batch sizes must be positive integers")
+    if type(config.get("skip_provably_rejected_pairs", False)) is not bool:
+        raise ValueError("Frozen skip_provably_rejected_pairs must be a boolean")
+    if config.get("reference_batch_size", args.reference_batch_size) != args.reference_batch_size:
+        raise ValueError("Reference batch size differs from the frozen pipeline's CE grouping")
+    if "length_bucketing" in config:
+        if type(config["length_bucketing"]) is not bool:
+            raise ValueError("Frozen length_bucketing must be a boolean")
+        multiple = config.get("pad_to_multiple_of", 8)
+        if multiple is not None and (type(multiple) is not int or multiple <= 0):
+            raise ValueError("Frozen pad_to_multiple_of must be a positive integer or null")
+    if config["tree_checkpoint_sha256"] != checkpoint_hash:
+        raise ValueError("Frozen pipeline identifies a different tree checkpoint")
+    ce = checkpoint_identity(Path(config["cross_encoder_checkpoint"]))
+    if ce["sha256"] != config["cross_encoder_sha256"]:
+        raise ValueError("Frozen pipeline CE checkpoint digest mismatch")
+    runtime = {"device": getattr(args, "ce_device", "cuda"), "threads": getattr(args, "ce_threads", 2),
+               "interop_threads": 1, "reference_batch_size": args.reference_batch_size,
+               "inference_batch_size": config["inference_batch_size"], "max_length": config["max_length"],
+               "gpu_memory_fraction": getattr(args, "ce_gpu_memory_fraction", None),
+               "inference_backend": "batched" if "length_bucketing" in config else "legacy",
+               "skip_provably_rejected_pairs": config.get("skip_provably_rejected_pairs", False),
+               "length_bucketing": config.get("length_bucketing"),
+               "pad_to_multiple_of": config.get("pad_to_multiple_of", 8) if "length_bucketing" in config else None}
+    shutil.copyfile(path, output / "frozen_pipeline.json")
+    if file_digest(output / "frozen_pipeline.json") != digest:
+        raise ValueError("Frozen pipeline changed while being copied")
+    value = {"pipeline": config, "pipeline_path": str(path), "pipeline_sha256": digest,
+             "cross_encoder_identity": ce, "runtime": runtime, "labels_accessed": False}
+    atomic_json(output / "frozen_pipeline_manifest.json", value)
+    return value
+
+
+def _load_ce_scorer(pipeline: dict):
+    from .cross_encoder_experiment import load_reranker, score_reranker
+    import torch
+
+    runtime, config = pipeline["runtime"], pipeline["pipeline"]
+    torch.set_num_threads(runtime["threads"])
+    torch.set_num_interop_threads(1)
+    if runtime["device"].startswith("cuda") and runtime["gpu_memory_fraction"] is not None:
+        torch.cuda.set_per_process_memory_fraction(runtime["gpu_memory_fraction"])
+    model, tokenizer = load_reranker(config["cross_encoder_checkpoint"], runtime["device"])
+    options = SimpleNamespace(device=runtime["device"], max_length=config["max_length"],
+                              inference_batch_size=config["inference_batch_size"],
+                              length_bucketing=config.get("length_bucketing", False),
+                              pad_to_multiple_of=config.get("pad_to_multiple_of", 8))
+    scorer = score_reranker
+    if "length_bucketing" in config:
+        from .rerank_inference import score_reranker_batched
+
+        scorer = score_reranker_batched
+    return lambda reference, pool, pairs: scorer(model, tokenizer, reference, pool, pairs,
+                                                 np.ones(len(pairs), dtype=bool), options)
+
+
+def run(args, *, ce_scorer=None) -> dict:
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
     import fcntl
@@ -236,10 +306,10 @@ def run(args) -> dict:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError as error:
             raise RuntimeError("Another predictor owns this output directory") from error
-        return _run_locked(args, output)
+        return _run_locked(args, output, ce_scorer=ce_scorer)
 
 
-def _run_locked(args, output: Path) -> dict:
+def _run_locked(args, output: Path, *, ce_scorer=None) -> dict:
     started = time.perf_counter()
     data = Path(args.data)
     if (output / "complete.json").exists():
@@ -259,12 +329,20 @@ def _run_locked(args, output: Path) -> dict:
         raise ValueError("Frozen matcher must include its ordered feature columns")
     del bundle
     gc.collect()
+    pipeline = _prepare_pipeline(args, checkpoint_hash, output)
+    tree_threshold = threshold
+    if pipeline is not None:
+        threshold = float(pipeline["pipeline"]["threshold"])
     reference, pool = load_records(data)
     if args.expected_references is not None and len(reference) != args.expected_references:
         raise ValueError("Reference count differs from --expected-references")
     benchmark = args.benchmark_references is not None
     reference_count = min(args.benchmark_references, len(reference)) if benchmark else len(reference)
     pair_count = _prefix_pair_count(pairs_path, reference_count, len(reference))
+    reuse_pairs = bool(getattr(args, "reuse_sorted_pairs", False))
+    save_cross = bool(getattr(args, "save_cross_probabilities", False))
+    if reuse_pairs and reference_count != len(reference):
+        raise ValueError("A benchmark prefix cannot hardlink the full candidate file")
     config = {"checkpoint": str(checkpoint), "checkpoint_sha256": checkpoint_hash,
               "threshold": threshold, "anchor_threshold": anchor_threshold,
               "feature_columns": feature_columns, "reference_count": reference_count,
@@ -276,17 +354,30 @@ def _run_locked(args, output: Path) -> dict:
               "max_pairs_per_batch": args.max_pairs_per_batch,
               "pair_order": ["left_idx", "right_idx"], "probability_order": "scored_pairs.parquet row order",
               "threshold_changed": False, "labels_accessed": False, "scorer": "frozen_tree"}
+    config["pair_artifact_mode"] = "hardlink" if reuse_pairs else "streamed_rewrite"
+    if pipeline is not None:
+        config.update(scorer="frozen_tree_ce", tree_threshold=tree_threshold,
+                      pipeline_sha256=pipeline["pipeline_sha256"], pipeline=pipeline["pipeline"],
+                      cross_encoder_sha256=pipeline["cross_encoder_identity"]["sha256"], ce_runtime=pipeline["runtime"],
+                      cross_probabilities_saved=save_cross)
     atomic_json(output / "prediction_config.json", config)
     probabilities_path = output / "probabilities.npy.tmp"
     probabilities = np.lib.format.open_memmap(probabilities_path, mode="w+", dtype=np.float32, shape=(pair_count,))
+    base_probabilities = cross_probabilities = None
+    if pipeline is not None:
+        base_probabilities = np.lib.format.open_memmap(output / "base_probabilities.npy.tmp", mode="w+", dtype=np.float32, shape=(pair_count,))
+        if save_cross:
+            cross_probabilities = np.lib.format.open_memmap(output / "cross_probabilities.npy.tmp", mode="w+", dtype=np.float32, shape=(pair_count,))
     pool_ids, reference_ids = pool.entity_id.to_numpy(), reference.entity_id.to_numpy()
     pairs_temporary = output / "scored_pairs.parquet.tmp"
     match_temporary, candidate_temporary = output / "matching_results.tsv.tmp", output / "candidate_pairs.tsv.tmp"
     batches = iter_reference_batches(pairs_path, len(reference), len(pool), args.reference_batch_size,
-                                     args.pair_read_batch_size, args.max_pairs_per_batch, reference_count)
+                                     args.pair_read_batch_size, args.max_pairs_per_batch, reference_count,
+                                     require_sorted_right=reuse_pairs)
     pending, executor, writer = deque(), None, None
     read_prepare_seconds = worker_feature_seconds = worker_predict_seconds = 0.
     row_offset = references_written = accepted_pairs = batches_written = 0
+    reranked_pairs, ce_seconds = 0, 0.
     pipeline_started = time.perf_counter()
     try:
         if args.workers == 1:
@@ -294,6 +385,13 @@ def _run_locked(args, output: Path) -> dict:
         else:
             executor = ProcessPoolExecutor(max_workers=args.workers, mp_context=mp.get_context("spawn"),
                                            initializer=initialize_worker, initargs=(str(checkpoint), checkpoint_hash))
+        if pipeline is not None:
+            # Imported only in the parent, avoiding the module cycle and keeping
+            # CUDA/model state out of the spawned CPU feature workers.
+            from .rerank_frozen import rerank_batch
+
+            if ce_scorer is None:
+                ce_scorer = _load_ce_scorer(pipeline)
         with match_temporary.open("w", newline="") as matches_stream, candidate_temporary.open("w", newline="") as candidates_stream:
             matches, candidates = csv.writer(matches_stream, delimiter="\t"), csv.writer(candidates_stream, delimiter="\t")
             matches.writerow(["source1_entity_id", "matched_entity_ids"])
@@ -325,11 +423,20 @@ def _run_locked(args, output: Path) -> dict:
                 end_offset = row_offset + len(values)
                 if end_offset > pair_count:
                     raise ValueError("Scored more candidate rows than the input Parquet records")
+                if pipeline is not None:
+                    base_probabilities[row_offset:end_offset] = values
+                    ce_started = time.perf_counter()
+                    values, cross, gated = rerank_batch(reference, pool, batch.pairs, values, pipeline["pipeline"], ce_scorer)
+                    ce_seconds += time.perf_counter() - ce_started
+                    if cross_probabilities is not None:
+                        cross_probabilities[row_offset:end_offset] = cross
+                    reranked_pairs += int(gated.sum())
                 probabilities[row_offset:end_offset] = values
-                table = pa.Table.from_pandas(batch.pairs, preserve_index=False)
-                if writer is None:
-                    writer = pq.ParquetWriter(pairs_temporary, table.schema, compression="zstd")
-                writer.write_table(table, row_group_size=max(1, len(batch.pairs)))
+                if not reuse_pairs:
+                    table = pa.Table.from_pandas(batch.pairs, preserve_index=False)
+                    if writer is None:
+                        writer = pq.ParquetWriter(pairs_temporary, table.schema, compression="zstd")
+                    writer.write_table(table, row_group_size=max(1, len(batch.pairs)))
                 left = batch.pairs.left_idx.to_numpy(dtype=np.int64)
                 right = batch.pairs.right_idx.to_numpy(dtype=np.int64)
                 boundaries = np.searchsorted(left, np.arange(batch.start, batch.end + 1, dtype=np.int64))
@@ -353,18 +460,36 @@ def _run_locked(args, output: Path) -> dict:
             writer.close()
     if row_offset != pair_count or references_written != reference_count:
         raise ValueError("Final reference/candidate counts do not match the selected input")
-    if writer is None:
+    if reuse_pairs:
+        # Do not silently allocate another multi-GB copy if the caller requested
+        # zero-copy reuse. Keep outputs on the candidate filesystem for this mode.
+        os.link(pairs_path, pairs_temporary)
+    elif writer is None:
         empty = pa.Table.from_batches([], schema=pq.ParquetFile(pairs_path).schema_arrow)
         pq.write_table(empty, pairs_temporary, compression="zstd")
     probabilities.flush()
+    if pipeline is not None:
+        base_probabilities.flush()
+        if cross_probabilities is not None:
+            cross_probabilities.flush()
+        if file_digest(Path(pipeline["pipeline_path"])) != pipeline["pipeline_sha256"]:
+            raise ValueError("Frozen pipeline changed during streaming inference")
+        if file_digest(output / "frozen_pipeline.json") != pipeline["pipeline_sha256"]:
+            raise ValueError("Saved pipeline identity changed during streaming inference")
+        if checkpoint_identity(Path(pipeline["pipeline"]["cross_encoder_checkpoint"]))["sha256"] != pipeline["cross_encoder_identity"]["sha256"]:
+            raise ValueError("Frozen CE checkpoint changed during streaming inference")
     if file_digest(checkpoint) != checkpoint_hash:
         raise ValueError("Frozen checkpoint changed during prediction")
     if any(_file_identity(Path(identity["path"])) != identity for identity in inputs.values()):
         raise ValueError("Reference, pool, or candidate input changed during prediction")
-    for temporary, final in [(probabilities_path, output / "probabilities.npy"),
-                             (pairs_temporary, output / "scored_pairs.parquet"),
-                             (match_temporary, output / "matching_results.tsv"),
-                             (candidate_temporary, output / "candidate_pairs.tsv")]:
+    completed_files = [(probabilities_path, output / "probabilities.npy"),
+                       (pairs_temporary, output / "scored_pairs.parquet"),
+                       (match_temporary, output / "matching_results.tsv"),
+                       (candidate_temporary, output / "candidate_pairs.tsv")]
+    if pipeline is not None:
+        arrays = ["base_probabilities"] + (["cross_probabilities"] if save_cross else [])
+        completed_files.extend((output / f"{name}.npy.tmp", output / f"{name}.npy") for name in arrays)
+    for temporary, final in completed_files:
         _fsync(temporary)
         temporary.replace(final)
     elapsed = time.perf_counter() - started
@@ -377,6 +502,9 @@ def _run_locked(args, output: Path) -> dict:
               "worker_predict_seconds_sum": worker_predict_seconds,
               "all_selected_references_written": True, "ready_for_submission": False,
               "validation_required": "Run the official validator and verify the selected full test population."}
+    if pipeline is not None:
+        report.update(reranked_pairs=reranked_pairs, ce_seconds=ce_seconds,
+                      base_probability_order="scored_pairs.parquet row order")
     atomic_json(output / "report.json", report)
     atomic_json(output / "complete.json", {"state": "complete", "report": report})
     log(json.dumps({key: report[key] for key in ("scorer", "reference_count", "candidate_pairs", "accepted_pairs",
@@ -398,13 +526,25 @@ def main():
     parser.add_argument("--expected-references", type=int)
     parser.add_argument("--benchmark-references", type=int,
                         help="Explicit development-only S1 prefix; output is not a full submission")
+    parser.add_argument("--pipeline", help="Optional frozen CE blend JSON; overlaps parent GPU reranking with CPU workers")
+    parser.add_argument("--ce-device", default="cuda")
+    parser.add_argument("--ce-threads", type=int, default=2)
+    parser.add_argument("--ce-gpu-memory-fraction", type=float, help="Optional bounded CUDA allocator fraction for a shared GPU")
+    parser.add_argument("--reuse-sorted-pairs", action="store_true",
+                        help="Require already sorted pairs and hardlink the immutable full input instead of rewriting it")
+    parser.add_argument("--save-cross-probabilities", action="store_true",
+                        help="Optional diagnostic CE array; normally only base and final probabilities are stored")
     args = parser.parse_args()
-    if min(args.workers, args.reference_batch_size, args.pair_read_batch_size, args.max_pairs_per_batch) <= 0:
+    if min(args.workers, args.reference_batch_size, args.pair_read_batch_size, args.max_pairs_per_batch, args.ce_threads) <= 0:
         parser.error("Worker and batch limits must be positive")
     if args.benchmark_references is not None and args.benchmark_references <= 0:
         parser.error("--benchmark-references must be positive")
     if args.expected_references is not None and args.expected_references < 0:
         parser.error("--expected-references must be nonnegative")
+    if args.ce_gpu_memory_fraction is not None and not 0 < args.ce_gpu_memory_fraction <= 1:
+        parser.error("--ce-gpu-memory-fraction must lie in (0,1]")
+    if args.save_cross_probabilities and not args.pipeline:
+        parser.error("--save-cross-probabilities requires --pipeline")
     run(args)
 
 

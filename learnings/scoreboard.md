@@ -1,6 +1,6 @@
 # Completed model comparisons
 
-99 scored configurations, including ensembles/blend weights and hyperparameter variants. Repeated baseline evaluations and failed runs are not counted. These are not independent model families.
+107 scored configurations, including ensembles/blend weights and hyperparameter variants. Repeated baseline evaluations and failed runs are not counted. These are not independent model families.
 
 **Development scores do not establish submission readiness.** The initial model fell from 0.981500 to 0.832719 on the same 1,000 businesses when evaluated against 9,290,818 possible targets. Subsequent hard-pool experiments use all 10,320,219 original training targets. A fresh final holdout takes priority over additional tuning gains.
 
@@ -10,8 +10,16 @@
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | hard_union_bge_ce600 | blend_0.5 | 0.969812 | 0.987683 | 0.934743 | 97 | full pool; 2400 tuning references |
 | hard_union_bge_ce600 | blend_0.75 | 0.969290 | 0.986712 | 0.937027 | 105 | full pool; 2400 tuning references |
+| medium_dense_bge_ce1800 | blend_0.75 | 0.968992 | 0.987471 | 0.938760 | 494 | full pool; 12000 tuning references |
+| medium_dense_bge_ce1800 | blend_0.5 | 0.968374 | 0.986135 | 0.939700 | 548 | full pool; 12000 tuning references |
+| medium_dense_bge_ce1800 | blend_1 | 0.967452 | 0.985953 | 0.935818 | 553 | full pool; 12000 tuning references |
 | hard_union_bge_ce600 | blend_1 | 0.966240 | 0.983946 | 0.935464 | 127 | full pool; 2400 tuning references |
+| medium_dense_bge_ce600 | blend_0.5 | 0.966067 | 0.986475 | 0.933793 | 531 | full pool; 12000 tuning references |
+| medium_dense_bge_ce600 | blend_0.75 | 0.965763 | 0.988073 | 0.928754 | 465 | full pool; 12000 tuning references |
+| medium_dense_bge_ce1800 | blend_0.25 | 0.962778 | 0.989600 | 0.915349 | 399 | full pool; 12000 tuning references |
+| medium_dense_bge_ce600 | blend_0.25 | 0.962476 | 0.989666 | 0.914336 | 396 | full pool; 12000 tuning references |
 | hard_union_bge_ce600 | blend_0.25 | 0.961914 | 0.984629 | 0.923807 | 120 | full pool; 2400 tuning references |
+| medium_dense_bge_ce600 | blend_1 | 0.961729 | 0.983240 | 0.927886 | 656 | full pool; 12000 tuning references |
 | medium_dense_residual_sweep | residual_d8_neg1 | 0.958655 | 0.985494 | 0.914023 | 558 | full pool; 12000 tuning references |
 | medium_dense_residual_sweep | residual_d8_neg4 | 0.958124 | 0.988383 | 0.906669 | 442 | full pool; 12000 tuning references |
 | medium_dense_residual_sweep | residual_d8_neg2 | 0.957716 | 0.990062 | 0.903173 | 376 | full pool; 12000 tuning references |

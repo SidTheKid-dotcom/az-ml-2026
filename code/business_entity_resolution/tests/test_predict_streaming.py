@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -8,6 +9,7 @@ import numpy as np
 import pandas as pd
 
 from ber.features import BASE_FEATURE_NAMES, CONTEXT_FEATURE_NAMES
+from ber.full_embeddings import checkpoint_identity, file_digest
 from ber.models import HeuristicModel
 from ber.numeric_features import NAMES as NUMERIC_NAMES
 from ber.predict import feature_batch, run as original_predict
@@ -137,6 +139,63 @@ class StreamingPredictionTests(unittest.TestCase):
                                                threshold=np.nextafter(1., np.inf))
             self.assertEqual(report["threshold"], np.nextafter(1., np.inf))
             self.assertEqual(report["accepted_pairs"], 0)
+
+    def test_integrated_pipeline_matches_separate_frozen_reranker(self):
+        from ber.rerank_frozen import run as rerank
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            reference, pool = records(13, "S1"), records(8, "S3")
+            pairs = candidate_frame([0, 0, 1, 3, 3, 3, 7, 12], [3, 1, 4, 2, 1, 6, 0, 7])
+            self._compare_predictions(root, reference, pool, pairs, workers=1)
+            ce = root / "ce"
+            ce.mkdir()
+            (ce / "model.safetensors").write_bytes(b"deterministic synthetic CE")
+            pipeline = {"tree_checkpoint_sha256": file_digest(root / "model.joblib"),
+                        "cross_encoder_checkpoint": str(ce), "cross_encoder_sha256": checkpoint_identity(ce)["sha256"],
+                        "alpha": .5, "gate": .3, "threshold": .7, "max_length": 128,
+                        "inference_batch_size": 16, "reference_batch_size": 7,
+                        "length_bucketing": True, "pad_to_multiple_of": 8,
+                        "skip_provably_rejected_pairs": True}
+            path = root / "pipeline.json"
+            path.write_text(json.dumps(pipeline))
+
+            def scorer(left, right, candidate_pairs):
+                return np.asarray([.2 + .15 * (int(right.iloc[r].entity_id.split("-")[1]) % 5)
+                                   for r in candidate_pairs.right_idx], dtype=np.float32)
+
+            rerank(SimpleNamespace(data=str(root / "data"), tree_predictions=str(root / "streamed"),
+                                   pipeline=str(path), output=str(root / "reranked"), truth=None, device="cpu",
+                                   threads=1, reference_batch_size=7, max_pairs_per_batch=100), scorer=scorer)
+            options = SimpleNamespace(data=str(root / "data"), pairs=str(root / "data/pairs.parquet"),
+                                      checkpoint=str(root / "model.joblib"), output=str(root / "integrated"),
+                                      workers=2, reference_batch_size=7, pair_read_batch_size=2,
+                                      max_pairs_per_batch=100, expected_references=13, benchmark_references=None,
+                                      pipeline=str(path), ce_device="cpu", ce_threads=1, save_cross_probabilities=True)
+            report = streaming_predict(options, ce_scorer=scorer)
+            self.assertEqual(report["scorer"], "frozen_tree_ce")
+            self.assertEqual(report["pipeline_sha256"], file_digest(path))
+            np.testing.assert_array_equal(np.load(root / "integrated/base_probabilities.npy"), np.load(root / "streamed/probabilities.npy"))
+            for name in ("probabilities.npy", "cross_probabilities.npy"):
+                np.testing.assert_array_equal(np.load(root / "integrated" / name), np.load(root / "reranked" / name))
+            for name in ("candidate_pairs.tsv", "matching_results.tsv"):
+                self.assertEqual((root / "integrated" / name).read_bytes(), (root / "reranked" / name).read_bytes())
+            options.output = str(root / "reuse")
+            options.pairs = str(root / "streamed/scored_pairs.parquet")
+            options.reuse_sorted_pairs = True
+            options.save_cross_probabilities = False
+            reused = streaming_predict(options, ce_scorer=scorer)
+            self.assertEqual(reused["pair_artifact_mode"], "hardlink")
+            self.assertEqual((root / "reuse/scored_pairs.parquet").stat().st_ino,
+                             (root / "streamed/scored_pairs.parquet").stat().st_ino)
+            self.assertFalse((root / "reuse/cross_probabilities.npy").exists())
+            np.testing.assert_array_equal(np.load(root / "reuse/probabilities.npy"), np.load(root / "integrated/probabilities.npy"))
+            pipeline["tree_checkpoint_sha256"] = "0" * 64
+            path.write_text(json.dumps(pipeline))
+            options.output = str(root / "bad_hash")
+            with self.assertRaisesRegex(ValueError, "different tree checkpoint"):
+                streaming_predict(options, ce_scorer=scorer)
+            self.assertFalse((root / "bad_hash/complete.json").exists())
 
 
 if __name__ == "__main__":
