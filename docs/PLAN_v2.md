@@ -566,6 +566,11 @@ experiment and every upload, with the attribution line.
   own worktrees, deliver code + tests + reports for review.
 - **agent-R** (27 Sep morning): release path — portable reproduction of the
   final pipeline, ZIP builder update, methodology draft.
+- **External CPU agents** (user-run, local machine, ≤ 2 threads / 2.5 GB each):
+  briefs in `docs/briefs/` — A generator forensics (Cursor + Grok), B no-match
+  businesses + train/test shift (opencode GPT-6 sol), C India native-script
+  recall (opencode GPT-6 astra; replaces the C7 GPU probe unless it fails).
+  Results land in `/home/sidvish/Documents/Work/Personal/ext-experiments/<A|B|C>/`.
 - **User:** clicks uploads and reports five-decimal scores. If the terminal
   session closes, the pod finishes its queue but no new decisions are made;
   `/loop` keeps the controller running unattended.
@@ -620,18 +625,19 @@ Owners: `ctl` controller, `D` agent-D, `F` agent-F, `R` agent-R, `user`.
 - [x] ctl — Copy v1 test arrays and test reference/pool locally (hash-verified)
 
 ### Groundwork (running)
-- [ ] D — C0 rule reproduced on TUNE; U5 file built, validated, priced
-- [ ] D — `arena_decision.py` + tests (reproduces 0.968992, 0.969029, +0.003962)
+- [x] D — C0 rule reproduced on TUNE (+0.003962); U5 built, validated, priced +0.0035 to +0.0042 (`output/u5_name_only/`, sha 2b61949c)
+- [x] D — `arena_decision.py` + tests (reproduces 0.968992, 0.969029, +0.003962); decoder loses on raw pair probabilities (−0.0015): needs list-aware calibration (C4)
 - [ ] F — `forensic_features.py` + tests
 - [ ] F — France P+/P−, audits, pseudo-holdout; diagnostics on v1 and #3
 - [x] ctl — R0 field-format 7,200: 0.973686 vs 0.968992 (+0.0047)
 - [ ] ctl — R0 plain 14,400 (running): separates steps from format
 
 ### On "begin"
-- [ ] ctl — Merge `codex/v2-plan-20260925` into the integration branch
+- [x] ctl — Merge `codex/v2-plan-20260925` into the integration branch
 - [ ] ctl — `run_queue_v3.py` supervisor; move test pool vectors off `/tmp`
 - [ ] ctl — `fast_trainer.py`; Q1 G0 + G0b
-- [ ] ctl — `arena_build.py`, `arena_score.py`; Q2 arena
+- [x] ctl — `arena_build.py` prepare: 2,072,821 S1s, 103,641,050 pairs, 10,170,471 pool records
+- [ ] ctl — Arena scored with frozen v1 code (running); labels; copy arrays local
 - [ ] D — Components, partitions, fidelity check, arena D-grid
 - [ ] user — Upload U5
 
