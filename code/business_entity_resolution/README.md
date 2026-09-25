@@ -125,20 +125,24 @@ write to a new output directory. Use `--help` for supported adapters. There is n
 requirement to keep E5/BGE: verify licenses and parameter count for other models,
 add an adapter where necessary, and measure a controlled comparison first.
 
-## Final submission ZIP
+## Full archival bundle
 
-The live release wrapper creates `ready.json` only after complete prediction,
-validation and durable-copy hash checks. From the **repository root**, build:
+The validated portal ZIP is `output/submission_v1/Techquilla Shots_submission.zip`;
+its exact layout and hashes are in `docs/submission_v1_release.json`. The command
+below builds a larger archival bundle with weights and does **not** fit the
+portal's 500 MB limit. The live release wrapper creates `ready.json` only after
+complete prediction, validation and durable-copy hash checks. From the
+**repository root**, build the archival bundle with:
 
 ```bash
 PYTHONPATH=code/business_entity_resolution/src python \
   code/business_entity_resolution/src/package_submission.py \
   --release /workspace/az-ml-new/releases/submission_v1 \
   --models-root /workspace/az-ml-new/models --destination releases/v1 \
-  --team-name techquilla-shots
+  --team-name "Techquilla Shots"
 ```
 
-The supplied team name is `techquilla-shots`. Add `--team-members` only with real
+The supplied team name is `Techquilla Shots`. Add `--team-members` only with real
 names when available; an unspecified member line is omitted, never invented. The builder refuses pending files,
 failed/incomplete validation, changed hashes or overwritten archives. It includes:
 

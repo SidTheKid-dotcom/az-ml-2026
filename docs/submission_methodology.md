@@ -1,6 +1,6 @@
 # ML Challenge 2026: Business Entity Resolution Solution
 
-**Team Name:** techquilla-shots
+**Team Name:** Techquilla Shots
 
 **Release status:** Full-test predictions and candidates passed supplied and strict validation for all 1,732,544 S1s. No leaderboard score is claimed.
 

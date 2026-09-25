@@ -36,8 +36,8 @@ def checked_release(release: Path, pipeline: Path) -> dict:
 
 def build(args) -> Path:
     repo, release, models = (Path(p).resolve() for p in (args.repo, args.release, args.models_root))
-    if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}', args.team_name):
-        raise ValueError('Use a filename-safe team name (letters, digits, underscore, hyphen)')
+    if not re.fullmatch(r'[A-Za-z0-9](?:[A-Za-z0-9 _-]{0,78}[A-Za-z0-9])?', args.team_name):
+        raise ValueError('Use a filename-safe team name (letters, digits, spaces, underscore, hyphen)')
     code = repo / 'code/business_entity_resolution'
     pipeline = repo / 'docs/frozen_dense_pipeline.json'
     ready = checked_release(release, pipeline)

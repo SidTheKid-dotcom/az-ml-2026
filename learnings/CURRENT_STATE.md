@@ -58,8 +58,8 @@ with no missing, extra or duplicate reference. Both local output hashes match th
 verified `ready.json`; no hidden-test metric has been computed.
 
 Use the exact local files under `output/submission_v1/`; hard links to the two
-TSVs also exist directly under `output/`. The **435,776,601-byte**
-`techquilla-shots_submission.zip` contains both output TSVs, source, pinned
+TSVs also exist directly under `output/`. The **435,776,769-byte**
+`Techquilla Shots_submission.zip` contains both output TSVs, source, pinned
 requirements, README and filled methodology in the requested tree. Upload the
 same `matching_results.tsv` separately to the leaderboard.
 [submission_v1_release.json](../docs/submission_v1_release.json) records their
@@ -97,10 +97,10 @@ hyperparameters, not 107 independent approaches). See
 
 ## Repository handoff audit
 
-Portable replay and final ZIP packaging commands are in the code README. The ZIP
-builder verifies complete release reports, exact checkpoint/source/output hashes,
-required structure and every archived byte. Team name is `techquilla-shots`; member names are unspecified. The validated
-submission ZIP and matching TSV now exist locally; adding trained weights would
+Portable replay and archival packaging commands are in the code README. The
+portal ZIP has the required tree and every archived output byte was checked
+against the validated release. Team name is `Techquilla Shots`; member names are
+unspecified. The validated submission ZIP and matching TSV now exist locally; adding trained weights would
 exceed the portal code-upload limit.
 The expanded suite passes 47 tests, including rejection of incomplete coverage,
 modified predictions/weights and archive overwrite. All 47 also pass in a fresh

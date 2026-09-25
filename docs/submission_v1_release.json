@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "team": "techquilla-shots",
+  "team": "Techquilla Shots",
   "status": "official and strict format validated; platform score pending",
   "pipeline_sha256": "9ac4050a72c64b05c032a17ec26f2a13b339c1b8c135791bf07b737534371f5e",
   "source1_rows": 1732544,
@@ -26,11 +26,11 @@
   },
   "official_test_f05": null,
   "platform_submission_performed": false,
-  "note": "The ZIP contains the exact validated TSVs; the leaderboard TSV is also uploaded separately. Raw data and trained weights are external to meet the 500 MB cap. Exact replay needs those recorded weights.",
+  "note": "The local ZIP uses the exact team name and contains the validated TSVs; GitHub normalized the space in its private release asset name to a dot. Upload the local matching TSV separately to the leaderboard. Raw data and trained weights are external to meet the 500 MB cap; exact replay needs those recorded weights.",
   "submission_zip": {
-    "path": "output/submission_v1/techquilla-shots_submission.zip",
-    "bytes": 435776601,
-    "sha256": "878350f81e15ba2593e70ac4fb63d067f5a5e2ba39e6debd0c95813160089085",
+    "path": "output/submission_v1/Techquilla Shots_submission.zip",
+    "bytes": 435776769,
+    "sha256": "095a5423cd69636c08aa7978c47fcc33a3174265f4108da90f86b10e998c85a7",
     "entries": 47,
     "compression": "bzip2",
     "max_allowed_bytes": 500000000,
@@ -42,7 +42,8 @@
       "code/business_entity_resolution/requirements.txt",
       "Documentation_template.md"
     ],
-    "github_asset": "https://github.com/SidTheKid-dotcom/az-ml-2026/releases/download/submission-v1-files/techquilla-shots_submission.zip"
+    "github_asset": "https://github.com/SidTheKid-dotcom/az-ml-2026/releases/download/submission-v1-files/Techquilla.Shots_submission.zip",
+    "github_asset_name": "Techquilla.Shots_submission.zip"
   },
   "release": "submission-v1-files"
 }

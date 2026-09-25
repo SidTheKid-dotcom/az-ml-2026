@@ -61,7 +61,7 @@ class PackageTests(unittest.TestCase):
             'pipeline_sha256': file_digest(self.pipeline),
             'file_sha256': {p.name: file_digest(p) for p in self.release.iterdir()}})
         self.args = argparse.Namespace(repo=self.repo, release=self.release, models_root=self.models,
-            destination=self.repo / 'bundles', team_name='Test_Team', team_members='Fixture member')
+            destination=self.repo / 'bundles', team_name='Techquilla Shots', team_members='Fixture member')
 
     @staticmethod
     def write(path, value):
@@ -100,13 +100,14 @@ class PackageTests(unittest.TestCase):
         # full-data validation itself is tested separately in test_validate_release.
         with patch('package_submission.subprocess.run', return_value=SimpleNamespace(stdout='fixturecommit\n')):
             archive = build(self.args)
+            self.assertEqual(archive.name, 'Techquilla Shots_submission.zip')
             with zipfile.ZipFile(archive) as bundle:
                 self.assertIsNone(bundle.testzip())
                 for name in ('matching_results.tsv', 'candidate_pairs.tsv'):
                     self.assertEqual(bundle.read('output/' + name), (self.release / name).read_bytes())
                 self.assertIn('code/business_entity_resolution/models/e5_small_ft200/model.safetensors', bundle.namelist())
                 self.assertIn('code/business_entity_resolution/resources/validate_submission.py', bundle.namelist())
-                self.assertIn('Team Name:** Test_Team', bundle.read('Documentation_template.md').decode())
+                self.assertIn('Team Name:** Techquilla Shots', bundle.read('Documentation_template.md').decode())
                 manifest = json.loads(bundle.read('package_manifest.json'))
                 self.assertEqual(manifest['pipeline_sha256'], file_digest(self.pipeline))
             self.assertTrue(archive.with_suffix('.zip.sha256').is_file())
