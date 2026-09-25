@@ -1,0 +1,409 @@
+{
+  "population": "medium TRAIN/TUNE only; all 10,320,219 training targets competed in retrieval",
+  "reference_count": 12000,
+  "candidate_pairs": 2399950,
+  "tune_pairs": 600000,
+  "scored_ce_pairs": 58938,
+  "provenance": {
+    "reference": {
+      "bytes": 3145050,
+      "sha256": "d54036d8ab23c2e532b2f2862bc2946546f705f0fd38e324a33c1d02ff182c4f"
+    },
+    "pool": {
+      "bytes": 112436563,
+      "sha256": "51fd3a7e240814114597955842dc818e624479bf8bf862111a92f7651db7753e"
+    },
+    "truth": {
+      "bytes": 4448952,
+      "sha256": "fc284f3912e3f9c2faa41f25682bd972f5b27c2266b1b3a5944184e2f7894633"
+    },
+    "data_metadata": {
+      "bytes": 1298,
+      "sha256": "1d02a363eb10b5c1f7a0054c352693c26863c92ed3eb36d07787705ac358e0cb"
+    },
+    "data_complete": {
+      "bytes": 4847,
+      "sha256": "83677cbb70602d62b8c4abe3e848ec4706d432f5a9347e736fab21363801aec4"
+    },
+    "pairs": {
+      "bytes": 49176909,
+      "sha256": "2ee011c665a01871126786c8c2cd1764bef2e72b5d4058848a28a575092b929d"
+    },
+    "base": {
+      "bytes": 9599928,
+      "sha256": "ecd6e60b12c6f1574cd8f523c6f390e2786903bbae239e46b8275ab19e909de8"
+    },
+    "cross": {
+      "bytes": 9599928,
+      "sha256": "e1c3183401cc9d3e1e60666da404b6a5f0190bc25bf137c04c7fd653b2579dc8"
+    },
+    "gate": {
+      "bytes": 2400078,
+      "sha256": "221a53b521260420c9b7bf5ab094c309d923a210911f7ffccc992229a967343a"
+    },
+    "selected_blend": {
+      "bytes": 9599928,
+      "sha256": "97409fe65b2e6d1e55d7b294a0a3fd2c8ef8fbd2f4d40328922553b61a82d03e"
+    },
+    "saved_config": {
+      "bytes": 1874,
+      "sha256": "930e15b4fab925004ce5a150760513cca5e1430973cd9d0e336ab8a6c95a06e5"
+    },
+    "saved_report": {
+      "bytes": 22110,
+      "sha256": "c4f7893bd7da91c0b38694a586e38e8d015f6809ea2322962fc228b869b29b8d"
+    },
+    "numeric": {
+      "bytes": 6260861,
+      "sha256": "a9ba731d5a37eae3a64cbb3de6eee2856aec9b63f293034ca90d6772aab8c1ab"
+    },
+    "numeric_pairs": {
+      "bytes": 49176909,
+      "sha256": "2ee011c665a01871126786c8c2cd1764bef2e72b5d4058848a28a575092b929d"
+    },
+    "reference_digest": "0fa5e2881f5acbf67c086e681f5b3bc3fc662adab44886f06c28da841d018b48",
+    "pool_digest": "4624bb5a07e77d6689bc4364b23d9f81058db37a3080ee50e2051b3c36ec0b6f",
+    "pair_digest": "10fe9d4d5df4bb566b1efd38b191ad395d4bb6a814f05a6ba1701cd58cbc2196",
+    "tune_id_sha256": "5bb5759fa52ac19df8839520c7ccf147bae01a5499a2900af5d1b4ebeb1dbaa2",
+    "encoder_checkpoint_sha256": "ec16354f88e56789b4da51e5b45b07d969050a66d9eb9d1e16551aa7fe7a0252",
+    "reranker_model": "BAAI/bge-reranker-v2-m3",
+    "threshold": 0.775,
+    "tree_gate": 0.01,
+    "reranker_checkpoint_sha256": "91883cb6c8bfd5477dc98c8697226b8cefad1f5c46dd52579ccb6403eb159a65",
+    "tree_checkpoint_sha256": "b5c7ca0876adbd15ee9cb193098e437d5970025f1afb7ba5eec50bec534063cb"
+  },
+  "baseline": {
+    "macro_f05": 0.9689921356332674,
+    "micro_precision": 0.9874714684250571,
+    "micro_recall": 0.9387597646831903,
+    "reference_count": 12000,
+    "predicted_links": 39430,
+    "true_links": 41476,
+    "threshold": 0.775,
+    "f05_India": 0.9633385505244482,
+    "f05_US": 0.972744209931883,
+    "singleton_accuracy": 0.9526542324246772,
+    "false_positive_links": 494,
+    "entities_with_false_positive": 462,
+    "singleton_false_merges": 33,
+    "retrieved_true_links_rejected": 1885
+  },
+  "diagnostics": {
+    "accepted_false_links": 494,
+    "accepted_true_links": 38936,
+    "retrieved_true_links_rejected": 1885,
+    "numeric_conflicts": {
+      "num_unit_conflict": {
+        "false_links": 9,
+        "true_links": 250,
+        "missed_retrieved_true_links": 2
+      },
+      "num_name_conflict": {
+        "false_links": 0,
+        "true_links": 6,
+        "missed_retrieved_true_links": 1
+      },
+      "num_postcode_conflict": {
+        "false_links": 8,
+        "true_links": 187,
+        "missed_retrieved_true_links": 17
+      },
+      "num_alpha_prefix_conflict_same_digits": {
+        "false_links": 1,
+        "true_links": 112,
+        "missed_retrieved_true_links": 0
+      },
+      "num_alpha_suffix_conflict_same_digits": {
+        "false_links": 1,
+        "true_links": 36,
+        "missed_retrieved_true_links": 1
+      },
+      "num_short_small_offset": {
+        "false_links": 37,
+        "true_links": 412,
+        "missed_retrieved_true_links": 141
+      },
+      "num_shared_only_long": {
+        "false_links": 0,
+        "true_links": 25,
+        "missed_retrieved_true_links": 1
+      }
+    },
+    "score_quartiles": {
+      "false_links": {
+        "tree": [
+          0.3257778212428093,
+          0.5177791714668274,
+          0.8457975834608078
+        ],
+        "ce": [
+          0.9683812260627747,
+          0.9883127808570862,
+          0.9975274205207825
+        ],
+        "blend": [
+          0.8068050593137741,
+          0.8556931912899017,
+          0.9440258145332336
+        ]
+      },
+      "true_links": {
+        "tree": [
+          0.988574430346489,
+          0.998855322599411,
+          0.9998966455459595
+        ],
+        "ce": [
+          0.9999097585678101,
+          0.9999452829360962,
+          0.9999485015869141
+        ],
+        "blend": [
+          0.9968986213207245,
+          0.9996252357959747,
+          0.9999285936355591
+        ]
+      }
+    }
+  },
+  "runtime_seconds": 22.814997191002476,
+  "limitation": "TUNE reuse; no medium eval/official test labels or French labels inspected.",
+  "baseline_macro_f1": 0.9548413641591466,
+  "comparisons": [
+    {
+      "rule": "tree_floor_0.25",
+      "fixed_blend_threshold": 0.775,
+      "score": {
+        "macro_f05": 0.9677329918465345,
+        "micro_precision": 0.9893603384181515,
+        "micro_recall": 0.9304175908959398,
+        "reference_count": 12000,
+        "predicted_links": 39005,
+        "true_links": 41476,
+        "threshold": 0.775,
+        "f05_India": 0.9608959738151074,
+        "f05_US": 0.9722704665888665,
+        "singleton_accuracy": 0.9612625538020086,
+        "false_positive_links": 415,
+        "entities_with_false_positive": 388,
+        "singleton_false_merges": 27,
+        "retrieved_true_links_rejected": 2231
+      },
+      "macro_f1": 0.951021074495107,
+      "removed_false_links": 79,
+      "removed_true_links": 346,
+      "entities_improved": 77,
+      "entities_worsened": 326,
+      "entities_unchanged": 11597,
+      "paired_tune_bootstrap": {
+        "reference_count": 12000,
+        "n_bootstrap": 2000,
+        "confidence": 0.95,
+        "seed": 20260925,
+        "sampling_unit": "source1_entity",
+        "paired": true,
+        "stratum_sizes": null,
+        "method": "percentile bootstrap",
+        "estimates": {
+          "left_mean": 0.9677329918465345,
+          "right_mean": 0.9689921356332674,
+          "left_minus_right": -0.0012591437867328107
+        },
+        "confidence_intervals": {
+          "left_mean": [
+            0.9657886157397533,
+            0.9696147852061188
+          ],
+          "right_mean": [
+            0.9670247456649476,
+            0.9708142194103283
+          ],
+          "left_minus_right": [
+            -0.0019915915984403537,
+            -0.000509890627705742
+          ]
+        },
+        "bootstrap_standard_errors": {
+          "left_mean": 0.0009893377123328586,
+          "right_mean": 0.0009867391474773766,
+          "left_minus_right": 0.00037333216582886196
+        },
+        "limitation": "Conditional on fixed models, retrieval and thresholds; tuning-set intervals do not establish held-out generalization."
+      },
+      "country_and_name_script": {
+        "India/ascii_name": {
+          "references": 4787,
+          "baseline_f05": 0.9633385505244482,
+          "variant_f05": 0.9608959738151074,
+          "delta_f05": -0.002442576709341115
+        },
+        "US/ascii_name": {
+          "references": 7213,
+          "baseline_f05": 0.972744209931883,
+          "variant_f05": 0.9722704665888665,
+          "delta_f05": -0.00047374334301647167
+        }
+      },
+      "evaluation_seconds": 3.732143155997619
+    },
+    {
+      "rule": "tree_floor_0.50",
+      "fixed_blend_threshold": 0.775,
+      "score": {
+        "macro_f05": 0.9644469886058329,
+        "micro_precision": 0.9931701166333928,
+        "micro_recall": 0.9115633137235992,
+        "reference_count": 12000,
+        "predicted_links": 38068,
+        "true_links": 41476,
+        "threshold": 0.775,
+        "f05_India": 0.9554374333616945,
+        "f05_US": 0.9704262955452051,
+        "singleton_accuracy": 0.9713055954088953,
+        "false_positive_links": 260,
+        "entities_with_false_positive": 247,
+        "singleton_false_merges": 20,
+        "retrieved_true_links_rejected": 3013
+      },
+      "macro_f1": 0.9417249029923179,
+      "removed_false_links": 234,
+      "removed_true_links": 1128,
+      "entities_improved": 223,
+      "entities_worsened": 1008,
+      "entities_unchanged": 10769,
+      "paired_tune_bootstrap": {
+        "reference_count": 12000,
+        "n_bootstrap": 2000,
+        "confidence": 0.95,
+        "seed": 20260925,
+        "sampling_unit": "source1_entity",
+        "paired": true,
+        "stratum_sizes": null,
+        "method": "percentile bootstrap",
+        "estimates": {
+          "left_mean": 0.9644469886058329,
+          "right_mean": 0.9689921356332674,
+          "left_minus_right": -0.0045451470274342105
+        },
+        "confidence_intervals": {
+          "left_mean": [
+            0.9623904490298989,
+            0.9664262733691443
+          ],
+          "right_mean": [
+            0.9670247456649476,
+            0.9708142194103283
+          ],
+          "left_minus_right": [
+            -0.0058024595033178104,
+            -0.003261422990957092
+          ]
+        },
+        "bootstrap_standard_errors": {
+          "left_mean": 0.0010434263813101428,
+          "right_mean": 0.0009867391474773766,
+          "left_minus_right": 0.0006420754631338867
+        },
+        "limitation": "Conditional on fixed models, retrieval and thresholds; tuning-set intervals do not establish held-out generalization."
+      },
+      "country_and_name_script": {
+        "India/ascii_name": {
+          "references": 4787,
+          "baseline_f05": 0.9633385505244482,
+          "variant_f05": 0.9554374333616945,
+          "delta_f05": -0.007901117162753813
+        },
+        "US/ascii_name": {
+          "references": 7213,
+          "baseline_f05": 0.972744209931883,
+          "variant_f05": 0.9704262955452051,
+          "delta_f05": -0.0023179143866779465
+        }
+      },
+      "evaluation_seconds": 3.7765364259976195
+    },
+    {
+      "rule": "weak_tree_unsaturated_ce",
+      "fixed_blend_threshold": 0.775,
+      "score": {
+        "macro_f05": 0.968183886771656,
+        "micro_precision": 0.9927380242238764,
+        "micro_recall": 0.9228710579612306,
+        "reference_count": 12000,
+        "predicted_links": 38557,
+        "true_links": 41476,
+        "threshold": 0.775,
+        "f05_India": 0.9618581540326171,
+        "f05_US": 0.9723820404693934,
+        "singleton_accuracy": 0.9684361549497847,
+        "false_positive_links": 280,
+        "entities_with_false_positive": 267,
+        "singleton_false_merges": 22,
+        "retrieved_true_links_rejected": 2544
+      },
+      "macro_f1": 0.9484903747210249,
+      "removed_false_links": 214,
+      "removed_true_links": 659,
+      "entities_improved": 204,
+      "entities_worsened": 613,
+      "entities_unchanged": 11183,
+      "paired_tune_bootstrap": {
+        "reference_count": 12000,
+        "n_bootstrap": 2000,
+        "confidence": 0.95,
+        "seed": 20260925,
+        "sampling_unit": "source1_entity",
+        "paired": true,
+        "stratum_sizes": null,
+        "method": "percentile bootstrap",
+        "estimates": {
+          "left_mean": 0.968183886771656,
+          "right_mean": 0.9689921356332674,
+          "left_minus_right": -0.0008082488616111397
+        },
+        "confidence_intervals": {
+          "left_mean": [
+            0.9662427557161647,
+            0.9700262299986375
+          ],
+          "right_mean": [
+            0.9670247456649476,
+            0.9708142194103283
+          ],
+          "left_minus_right": [
+            -0.0018337557074581121,
+            0.0001973409234326559
+          ]
+        },
+        "bootstrap_standard_errors": {
+          "left_mean": 0.0009818440947579777,
+          "right_mean": 0.0009867391474773766,
+          "left_minus_right": 0.0005191714746385685
+        },
+        "limitation": "Conditional on fixed models, retrieval and thresholds; tuning-set intervals do not establish held-out generalization."
+      },
+      "country_and_name_script": {
+        "India/ascii_name": {
+          "references": 4787,
+          "baseline_f05": 0.9633385505244482,
+          "variant_f05": 0.9618581540326171,
+          "delta_f05": -0.0014803964918311445
+        },
+        "US/ascii_name": {
+          "references": 7213,
+          "baseline_f05": 0.972744209931883,
+          "variant_f05": 0.9723820404693934,
+          "delta_f05": -0.0003621694624896698
+        }
+      },
+      "evaluation_seconds": 3.7718371510127326
+    }
+  ],
+  "retrieval_ceiling": {
+    "pairs": 600000,
+    "pairs_per_reference": 50.0,
+    "link_recall": 0.9842077345934999,
+    "complete_match_set_recall": 0.9508979916836238,
+    "oracle_macro_f05": 0.9940898583338329
+  }
+}

@@ -1,0 +1,440 @@
+{
+  "schema": 1,
+  "retrieval_only": true,
+  "full_competing_target_pool": 10320219,
+  "reference_count": 12000,
+  "tune_id_sha256": "5bb5759fa52ac19df8839520c7ccf147bae01a5499a2900af5d1b4ebeb1dbaa2",
+  "input_sha256": {
+    "dense_reference": "d54036d8ab23c2e532b2f2862bc2946546f705f0fd38e324a33c1d02ff182c4f",
+    "dense_pool": "51fd3a7e240814114597955842dc818e624479bf8bf862111a92f7651db7753e",
+    "dense_pairs": "2ee011c665a01871126786c8c2cd1764bef2e72b5d4058848a28a575092b929d",
+    "dense_truth": "fc284f3912e3f9c2faa41f25682bd972f5b27c2266b1b3a5944184e2f7894633",
+    "dense_metadata": "1d02a363eb10b5c1f7a0054c352693c26863c92ed3eb36d07787705ac358e0cb",
+    "dense_complete": "83677cbb70602d62b8c4abe3e848ec4706d432f5a9347e736fab21363801aec4",
+    "lex_reference": "d54036d8ab23c2e532b2f2862bc2946546f705f0fd38e324a33c1d02ff182c4f",
+    "lex_pool": "c854be847ffb4b151c80967abd131b056ea2d29acdbbc125b9957e3890cc328e",
+    "lex_pairs": "0502684a8b30e6c1d9ef7b3acb31b25b0773eae04c194656257b8e113b3a6201",
+    "lex_truth": "5df46ea786947bbd71302e7362ef9143f1e741f5a768e403863bb6c3a657f982",
+    "lex_metadata": "ad21fda6cee8da10bc6c8bfff059c5ded45a28cd7ec152b59767d4c04b306d1d",
+    "dense_pair_config": "930e15b4fab925004ce5a150760513cca5e1430973cd9d0e336ab8a6c95a06e5"
+  },
+  "candidate_pairs": {
+    "dense": 600000,
+    "lexical_phonetic": 747894,
+    "union": 1243184,
+    "overlap": 104710,
+    "added_vs_dense": 643184
+  },
+  "true_link_origins": {
+    "both": 39053,
+    "left_only": 1768,
+    "right_only": 315,
+    "neither": 340
+  },
+  "lexical_only_truth_ranks": {
+    "rank_le_10": 109,
+    "rank_le_20": 145,
+    "rank_le_30": 167,
+    "rank_le_50": 288,
+    "phonetic_hit": 7,
+    "phonetic_only": 6
+  },
+  "retrieval": {
+    "dense": {
+      "references": 12000,
+      "true_links": 41476,
+      "retrieved_true_links": 40821,
+      "link_recall": 0.9842077345934999,
+      "complete_match_set_recall": 0.9508979916836238,
+      "oracle_macro_f05": 0.9940898583338328,
+      "oracle_macro_f1": 0.9899312545791842,
+      "oracle_micro_precision": 1.0,
+      "oracle_false_links": 0,
+      "oracle_singleton_accuracy": 1.0,
+      "true_singletons": 697,
+      "retrieval_missed_true_links": 655,
+      "by_country": {
+        "India": {
+          "references": 4787,
+          "true_links": 16587,
+          "retrieved_true_links": 16136,
+          "link_recall": 0.9728100319527341,
+          "oracle_macro_f05": 0.989012196949247
+        },
+        "US": {
+          "references": 7213,
+          "true_links": 24889,
+          "retrieved_true_links": 24685,
+          "link_recall": 0.9918036080196071,
+          "oracle_macro_f05": 0.9974597134631843
+        }
+      }
+    },
+    "lexical_phonetic": {
+      "references": 12000,
+      "true_links": 41476,
+      "retrieved_true_links": 39368,
+      "link_recall": 0.949175426752821,
+      "complete_match_set_recall": 0.8595063257542246,
+      "oracle_macro_f05": 0.9811815445584755,
+      "oracle_macro_f1": 0.9673456952225333,
+      "oracle_micro_precision": 1.0,
+      "oracle_false_links": 0,
+      "oracle_singleton_accuracy": 1.0,
+      "true_singletons": 697,
+      "retrieval_missed_true_links": 2108,
+      "by_country": {
+        "India": {
+          "references": 4787,
+          "true_links": 16587,
+          "retrieved_true_links": 15232,
+          "link_recall": 0.9183095195032254,
+          "oracle_macro_f05": 0.9686841024238894
+        },
+        "US": {
+          "references": 7213,
+          "true_links": 24889,
+          "retrieved_true_links": 24136,
+          "link_recall": 0.9697456707782555,
+          "oracle_macro_f05": 0.9894756323857684
+        }
+      }
+    },
+    "union": {
+      "references": 12000,
+      "true_links": 41476,
+      "retrieved_true_links": 41136,
+      "link_recall": 0.9918024881859389,
+      "complete_match_set_recall": 0.9733699017959834,
+      "oracle_macro_f05": 0.997253914816392,
+      "oracle_macro_f1": 0.9950319846225611,
+      "oracle_micro_precision": 1.0,
+      "oracle_false_links": 0,
+      "oracle_singleton_accuracy": 1.0,
+      "true_singletons": 697,
+      "retrieval_missed_true_links": 340,
+      "by_country": {
+        "India": {
+          "references": 4787,
+          "true_links": 16587,
+          "retrieved_true_links": 16349,
+          "link_recall": 0.9856514137577621,
+          "oracle_macro_f05": 0.9947727013661126
+        },
+        "US": {
+          "references": 7213,
+          "true_links": 24889,
+          "retrieved_true_links": 24787,
+          "link_recall": 0.9959018040098035,
+          "oracle_macro_f05": 0.9989006039591187
+        }
+      }
+    }
+  },
+  "rank_cap_screens": {
+    "top20_or_phonetic": {
+      "lexical_pairs_retained": 248903,
+      "union_pairs": 777515,
+      "new_pairs_vs_dense": 177515,
+      "new_true_links_vs_dense": 152,
+      "retrieval": {
+        "references": 12000,
+        "true_links": 41476,
+        "retrieved_true_links": 40973,
+        "link_recall": 0.9878725045809624,
+        "complete_match_set_recall": 0.9625763071750862,
+        "oracle_macro_f05": 0.9955128935757885,
+        "oracle_macro_f1": 0.9923921628702395,
+        "oracle_micro_precision": 1.0,
+        "oracle_false_links": 0,
+        "oracle_singleton_accuracy": 1.0,
+        "true_singletons": 697,
+        "retrieval_missed_true_links": 503,
+        "by_country": {
+          "India": {
+            "references": 4787,
+            "true_links": 16587,
+            "retrieved_true_links": 16239,
+            "link_recall": 0.9790197142340387,
+            "oracle_macro_f05": 0.9914840555836355
+          },
+          "US": {
+            "references": 7213,
+            "true_links": 24889,
+            "retrieved_true_links": 24734,
+            "link_recall": 0.9937723492305838,
+            "oracle_macro_f05": 0.9981866836032995
+          }
+        }
+      },
+      "paired_oracle_minus_dense": {
+        "reference_count": 12000,
+        "n_bootstrap": 2000,
+        "confidence": 0.95,
+        "seed": 20260925,
+        "sampling_unit": "source1_entity",
+        "paired": true,
+        "stratum_sizes": null,
+        "method": "percentile bootstrap",
+        "estimates": {
+          "left_mean": 0.9955128935757885,
+          "right_mean": 0.9940898583338328,
+          "left_minus_right": 0.0014230352419557864
+        },
+        "confidence_intervals": {
+          "left_mean": [
+            0.9946495053434191,
+            0.9962898756079122
+          ],
+          "right_mean": [
+            0.9931122312965303,
+            0.9949753212217338
+          ],
+          "left_minus_right": [
+            0.0010066760489207628,
+            0.001896357033736723
+          ]
+        },
+        "bootstrap_standard_errors": {
+          "left_mean": 0.00041720924881511,
+          "right_mean": 0.00047455797334279424,
+          "left_minus_right": 0.0002255688940973643
+        },
+        "limitation": "Conditional on fixed models, retrieval and thresholds; tuning-set intervals do not establish held-out generalization."
+      }
+    },
+    "top30_or_phonetic": {
+      "lexical_pairs_retained": 368894,
+      "union_pairs": 886247,
+      "new_pairs_vs_dense": 286247,
+      "new_true_links_vs_dense": 174,
+      "retrieval": {
+        "references": 12000,
+        "true_links": 41476,
+        "retrieved_true_links": 40995,
+        "link_recall": 0.9884029318159899,
+        "complete_match_set_recall": 0.9642572768291604,
+        "oracle_macro_f05": 0.9957231227756012,
+        "oracle_macro_f1": 0.9927477905758673,
+        "oracle_micro_precision": 1.0,
+        "oracle_false_links": 0,
+        "oracle_singleton_accuracy": 1.0,
+        "true_singletons": 697,
+        "retrieval_missed_true_links": 481,
+        "by_country": {
+          "India": {
+            "references": 4787,
+            "true_links": 16587,
+            "retrieved_true_links": 16250,
+            "link_recall": 0.979682884186411,
+            "oracle_macro_f05": 0.9918690029212673
+          },
+          "US": {
+            "references": 7213,
+            "true_links": 24889,
+            "retrieved_true_links": 24745,
+            "link_recall": 0.994214311543252,
+            "oracle_macro_f05": 0.99828095886914
+          }
+        }
+      },
+      "paired_oracle_minus_dense": {
+        "reference_count": 12000,
+        "n_bootstrap": 2000,
+        "confidence": 0.95,
+        "seed": 20260925,
+        "sampling_unit": "source1_entity",
+        "paired": true,
+        "stratum_sizes": null,
+        "method": "percentile bootstrap",
+        "estimates": {
+          "left_mean": 0.9957231227756012,
+          "right_mean": 0.9940898583338328,
+          "left_minus_right": 0.0016332644417683196
+        },
+        "confidence_intervals": {
+          "left_mean": [
+            0.9949091539269743,
+            0.9964870672265225
+          ],
+          "right_mean": [
+            0.9931122312965303,
+            0.9949753212217338
+          ],
+          "left_minus_right": [
+            0.0012023585534484099,
+            0.002137462761372405
+          ]
+        },
+        "bootstrap_standard_errors": {
+          "left_mean": 0.00040686813088080116,
+          "right_mean": 0.00047455797334279424,
+          "left_minus_right": 0.00024204999367850863
+        },
+        "limitation": "Conditional on fixed models, retrieval and thresholds; tuning-set intervals do not establish held-out generalization."
+      }
+    }
+  },
+  "script_of_truth_target": {
+    "business_name/Bengali": {
+      "true_links": 178,
+      "dense_found": 160,
+      "lexical_phonetic_found": 143,
+      "union_found": 171
+    },
+    "business_name/Devanagari": {
+      "true_links": 1753,
+      "dense_found": 1712,
+      "lexical_phonetic_found": 1394,
+      "union_found": 1729
+    },
+    "business_name/Gujarati": {
+      "true_links": 199,
+      "dense_found": 187,
+      "lexical_phonetic_found": 158,
+      "union_found": 191
+    },
+    "business_name/Gurmukhi": {
+      "true_links": 35,
+      "dense_found": 33,
+      "lexical_phonetic_found": 32,
+      "union_found": 35
+    },
+    "business_name/Kannada": {
+      "true_links": 267,
+      "dense_found": 236,
+      "lexical_phonetic_found": 194,
+      "union_found": 248
+    },
+    "business_name/Latin_or_other": {
+      "true_links": 38390,
+      "dense_found": 37929,
+      "lexical_phonetic_found": 36953,
+      "union_found": 38159
+    },
+    "business_name/Malayalam": {
+      "true_links": 134,
+      "dense_found": 130,
+      "lexical_phonetic_found": 114,
+      "union_found": 132
+    },
+    "business_name/Odia": {
+      "true_links": 48,
+      "dense_found": 41,
+      "lexical_phonetic_found": 39,
+      "union_found": 46
+    },
+    "business_name/Tamil": {
+      "true_links": 242,
+      "dense_found": 180,
+      "lexical_phonetic_found": 170,
+      "union_found": 208
+    },
+    "business_name/Telugu": {
+      "true_links": 230,
+      "dense_found": 213,
+      "lexical_phonetic_found": 171,
+      "union_found": 217
+    },
+    "business_address/Bengali": {
+      "true_links": 258,
+      "dense_found": 250,
+      "lexical_phonetic_found": 234,
+      "union_found": 255
+    },
+    "business_address/Devanagari": {
+      "true_links": 2178,
+      "dense_found": 2157,
+      "lexical_phonetic_found": 1995,
+      "union_found": 2167
+    },
+    "business_address/Gujarati": {
+      "true_links": 266,
+      "dense_found": 263,
+      "lexical_phonetic_found": 249,
+      "union_found": 263
+    },
+    "business_address/Gurmukhi": {
+      "true_links": 54,
+      "dense_found": 50,
+      "lexical_phonetic_found": 51,
+      "union_found": 53
+    },
+    "business_address/Kannada": {
+      "true_links": 324,
+      "dense_found": 315,
+      "lexical_phonetic_found": 284,
+      "union_found": 318
+    },
+    "business_address/Latin_or_other": {
+      "true_links": 37756,
+      "dense_found": 37174,
+      "lexical_phonetic_found": 35991,
+      "union_found": 37455
+    },
+    "business_address/Malayalam": {
+      "true_links": 96,
+      "dense_found": 95,
+      "lexical_phonetic_found": 88,
+      "union_found": 96
+    },
+    "business_address/Odia": {
+      "true_links": 51,
+      "dense_found": 48,
+      "lexical_phonetic_found": 46,
+      "union_found": 50
+    },
+    "business_address/Tamil": {
+      "true_links": 271,
+      "dense_found": 253,
+      "lexical_phonetic_found": 233,
+      "union_found": 261
+    },
+    "business_address/Telugu": {
+      "true_links": 222,
+      "dense_found": 216,
+      "lexical_phonetic_found": 197,
+      "union_found": 218
+    }
+  },
+  "paired_union_minus_dense_oracle_f05": {
+    "reference_count": 12000,
+    "n_bootstrap": 2000,
+    "confidence": 0.95,
+    "seed": 20260925,
+    "sampling_unit": "source1_entity",
+    "paired": true,
+    "stratum_sizes": null,
+    "method": "percentile bootstrap",
+    "estimates": {
+      "left_mean": 0.997253914816392,
+      "right_mean": 0.9940898583338328,
+      "left_minus_right": 0.0031640564825592154
+    },
+    "confidence_intervals": {
+      "left_mean": [
+        0.9966399080272781,
+        0.9977937260292078
+      ],
+      "right_mean": [
+        0.9931122312965303,
+        0.9949753212217338
+      ],
+      "left_minus_right": [
+        0.0024885796389881977,
+        0.00392753999928866
+      ]
+    },
+    "bootstrap_standard_errors": {
+      "left_mean": 0.0002952485447658461,
+      "right_mean": 0.00047455797334279424,
+      "left_minus_right": 0.0003630261093784046
+    },
+    "limitation": "Conditional on fixed models, retrieval and thresholds; tuning-set intervals do not establish held-out generalization."
+  },
+  "entities_oracle_improved": 277,
+  "entities_oracle_worsened": 0,
+  "entities_oracle_unchanged": 11723,
+  "runtime_seconds": 12.963018820999423,
+  "limitations": "An oracle knows which retrieved pairs are true: its precision=1/false links=0/singleton accuracy=1 are definitions, not matcher results. Union-only pairs have no aligned tree/CE score or recomputed candidate-dependent features. TUNE is reused; no holdout/French/official-test labels were inspected."
+}

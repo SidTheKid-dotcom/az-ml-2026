@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "seed": 20260925,
+  "device": "cpu",
+  "threads": 2,
+  "hypothesis": "Lexical/phonetic retrieval recovers true medium TUNE links missed by dense top50 when both search the same 10,320,219 targets.",
+  "changed_variable": "candidate set: dense top50 plus all or top-ranked lexical/phonetic edges",
+  "bounded_lexical_rank_caps": [
+    20,
+    30
+  ],
+  "phonetic_hits_always_retained": true,
+  "dense_source": "artifacts/full_dense_medium (completed TRAIN/TUNE full-pool mining)",
+  "lexical_source": "data/medium_hard (completed TRAIN/TUNE full-pool mining)",
+  "tune_id_sha256": "5bb5759fa52ac19df8839520c7ccf147bae01a5499a2900af5d1b4ebeb1dbaa2",
+  "reference_id_sha256": "3cc86ea65014e150c309365711f9f3d58f15b45fc984485a1e1561eee9803e8e",
+  "embedding_checkpoint_sha256": "ec16354f88e56789b4da51e5b45b07d969050a66d9eb9d1e16551aa7fe7a0252",
+  "bootstrap_replicates": 2000,
+  "evaluation_used": false,
+  "positive_candidate_injection": false,
+  "rebuild_indexes": false,
+  "matcher_scores_claimed": false
+}

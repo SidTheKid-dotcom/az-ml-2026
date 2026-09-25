@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "seed": 20260928,
+  "method": "smallest blake2b-64 rank of seed\\0entity_id within country",
+  "source": "original train_source1.tsv, entity_id and country only",
+  "source_rows": 2206821,
+  "source_sha256": "591af0e1dfeb65cab71ea6ee8cb69df00f92d6ba6fa79e05746c938775d14973",
+  "excluded_quick": 12000,
+  "excluded_quick_id_sha256": "8980d7ae3c65c38da6c9b9fddb7dfe23eec0c1659099d707af86a9f959f9464e",
+  "excluded_medium_all_splits": 60000,
+  "excluded_medium_id_sha256": "451f7e94bc76080b0be4de8dfd1dd3d3ff452d66aa899f77eb29520281f80042",
+  "exclusion_reference_sha256": {
+    "quick": "058841263c27fe30e27602ec629b6f317ae2c64550c83fcc4e3a00b572810d8e",
+    "medium": "07c17fd7a837a6c078424793295429611339f4adfb8028d1ddf2dcd45292af82"
+  },
+  "eligible_after_exclusion": {
+    "India": 854411,
+    "US": 1280410
+  },
+  "reserved_country_counts": {
+    "India": 4787,
+    "US": 7213
+  },
+  "reserved_ids": 12000,
+  "reserved_id_sha256": "ec057370b8dc8b3dbef24e277a6920f905a08481ca2b35a5245dcdf9d22f5187",
+  "id_file_sha256": "beda137f2b6e243a3706e653e2cb1c6a73203021dd845ee1bd9244e921636de2",
+  "labels_read": false,
+  "v1_holdout_truth_or_errors_read": false,
+  "usage": "Keep sealed until next procedure and thresholds are frozen; evaluate against all training targets.",
+  "runtime_seconds": 7.168539680002141
+}

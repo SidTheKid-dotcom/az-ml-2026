@@ -48,12 +48,48 @@ change models, gate, blend, threshold or source after inspecting the holdout.
 - Repeated tuning can overfit. France has no training labels; US/India results
   do not measure French accuracy. **No official score is available.**
 
+## Local CPU experiments while v1 inference runs
+
+In isolated worktree `/home/sidvish/Documents/Work/Personal/az-ml-cpu-decision`
+on `codex/cpu-tune-decision-20260925`, completed TRAIN/TUNE inputs were copied
+selectively and used locally with CUDA hidden and two CPU threads. The frozen v1
+source, weights, inference job and threshold were not changed.
+
+- [Saved-score decision report](../artifacts/cpu_decision_v1_tune_20260925/results.json):
+  independently reproduced the **0.968992** medium TUNE baseline, 494 false links,
+  all 12,000 S1s/600,000 TUNE pairs aligned. Pair-level tree floors 0.25/0.50
+  reduced F0.5 to **0.967733/0.964447**. A CE-conditional veto reached **0.968184**,
+  precision **0.992738** and 280 false links, but lost 659 true links; no measured
+  F0.5 gain. Keep v1's decision rule. [Configuration](../artifacts/cpu_decision_v1_tune_20260925/experiment_config.json).
+- [Same-reference retrieval screen](../artifacts/cpu_medium_union_screen_20260925/results.json):
+  dense top50 plus completed lexical/phonetic candidates recovers **315** of the
+  dense branch's 655 missed true links on the same 12,000 TUNE S1s against all
+  **10,320,219** targets. Recall 0.984208 → **0.991802**, **oracle** F0.5
+  0.994090 → **0.997254** at the cost of **643,184** added pairs. Top-20 lexical
+  rank plus phonetic hits recovers 152 with 177,515 added pairs (oracle 0.995513).
+  No union-only pair has a valid saved tree/CE score; the oracle gain is **not**
+  a matcher improvement. [Configuration](../artifacts/cpu_medium_union_screen_20260925/experiment_config.json).
+- A new **sealed confirmation holdout** was reserved by ID only from unused
+  training S1s: 12,000 references, seed **20260928**, 4,787 India / 7,213 US,
+  sorted-ID SHA256 `ec057370b8dc8b3dbef24e277a6920f905a08481ca2b35a5245dcdf9d22f5187`.
+  All quick and medium S1s, including consumed eval, are excluded. Neither its
+  truth nor the v1 eval errors were opened. [Reservation recipe/provenance](../artifacts/holdout_reserve_20260928/reservation.json);
+  the ID list stays outside Git in that worktree's ignored `artifacts/` directory.
+
+Strongest next controlled comparison after v1 release: build the **medium**
+dense+top20-lexical/phonetic union from saved full-pool edges, recompute all
+candidate-dependent features, train/score a new matcher on fixed TRAIN/TUNE,
+and compare its real false links, macro F0.5 and inference cost against the
+same-reference dense baseline. Freeze a finalist before opening the reserved
+confirmation holdout. France remains unmeasured.
+
 ## Remaining release work
 
 1. Holdout is complete and must not be rerun for model selection. Test candidates
    are also complete: **86,627,200 edges**, every S1 has its actual 50 candidates.
 2. Full test scoring is running: supervisor **46635**,
    `logs/first_submission_v1.log`, `output/submission_v1`. Do not duplicate it.
+   Last read-only check: supervisor still active; durable `ready.json` absent.
 3. Its wrapper automatically runs both file validators and preserves verified
    release copies. Download final TSVs only after `ready.json` confirms success.
 

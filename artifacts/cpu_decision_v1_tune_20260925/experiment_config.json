@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "seed": 20260925,
+  "device": "cpu",
+  "threads": 2,
+  "hypotheses": [
+    "Unconditional pair-level tree support may remove CE-overruled false links.",
+    "Where tree support is weak, requiring near-saturated CE may spare true links while removing less-certain false links (chosen after baseline score-quartile diagnosis)."
+  ],
+  "changed_variable": "additional label-free acceptance veto on otherwise accepted v1 pairs",
+  "tree_floors": [
+    0.25,
+    0.5
+  ],
+  "conditional_rule": {
+    "reject_if_tree_below": 0.5,
+    "and_ce_below": 0.999
+  },
+  "baseline_tree_gate": 0.01,
+  "blend_ce_weight": 0.75,
+  "fixed_blend_threshold": 0.775,
+  "bootstrap_replicates": 2000,
+  "train_references": 35999,
+  "tune_references": 12000,
+  "full_competing_target_pool": 10320219,
+  "candidate_pairs": 2399950,
+  "data_source": "artifacts/full_dense_medium (completed TRAIN/TUNE candidate cache)",
+  "score_source": "artifacts/medium_dense_bge_ce1800 (saved aligned gated CE/tree scores)",
+  "feature_source": "artifacts/medium_dense_sweep (aligned numeric features)",
+  "split_id_sha256": "5bb5759fa52ac19df8839520c7ccf147bae01a5499a2900af5d1b4ebeb1dbaa2",
+  "pair_digest": "10fe9d4d5df4bb566b1efd38b191ad395d4bb6a814f05a6ba1701cd58cbc2196",
+  "evaluation_used": false,
+  "no_threshold_retuning": true,
+  "name_script_proxy": "Non-ASCII in reference business_name; not a full Unicode script classifier"
+}
