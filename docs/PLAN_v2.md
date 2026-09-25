@@ -445,24 +445,18 @@ slack goes to idle-GPU bets and reruns.
 
 ---
 
-## 11. Uploads (9 left)
+## 11. Uploads (9 left: 4 on 26 Sep, 5 on 27 Sep)
+
+Uploads are trigger-based, not scheduled: **upload whenever a candidate beats
+the current best** on the arena (promotion rule §12) and its priced prediction
+is positive. France-only variants are uploaded when a France change needs
+measuring. The only fixed rule: the last upload must be the chosen final, so
+one slot on 27 Sep stays in reserve until the end.
 
 Every upload: per-country diff against the current best, arena-priced
 prediction, official validator with `--check-ids`, strict checks (row order,
 subset of candidates, zero contested IDs, LF endings), five-decimal result in
 `learnings/submissions.json`, attribution (manual §5).
-
-| Upload | When | Content | Question it answers |
-| --- | --- | --- | --- |
-| U5 | 26 Sep, as soon as validated | #3 + name-only rule | Does the rule hold on test? |
-| U6 | 26 Sep midday | C4 resolver + decoder on v1 scores | Is the arena-trained decision layer right on test? |
-| U7 | 26 Sep evening | C2 (+ C3 if kept) + C4 | First new-model stack |
-| U8 | 26 Sep late | U7 with France taken from U6 (or France-only pseudo-label variant) | France effect of the new models |
-| U9 | 27 Sep morning | Finals stack | |
-| U10 | 27 Sep midday | + noisy-student / second family if kept | |
-| U11 | 27 Sep ~16:30 | Intended final | |
-| U12 | 27 Sep 20:30 | Re-upload of the chosen final if U11 is not it | Last upload counts |
-| U13 | Emergency only | | |
 
 ---
 
@@ -590,7 +584,7 @@ experiment and every upload, with the attribution line.
 | Public board is a subset | Arena decides; ignore < 0.0003 public gains |
 | Engineering time (the real bottleneck) | Two workers in parallel; best-guess recipes; no speculative infrastructure |
 | Job death / memory | Detached supervisor, checkpoints, bounded tree fits |
-| Last upload counts | U12 reserved; no experiments after 20:30 on 27 Sep |
+| Last upload counts | One slot reserved for the chosen final |
 | Final inference overruns | Starts by 27 Sep 10:00; the previous uploaded file is the fallback |
 
 **Not doing:** hyperparameter sweeps of v1; blanket removals/additions; country
@@ -644,9 +638,9 @@ Owners: `ctl` controller, `D` agent-D, `F` agent-F, `R` agent-R, `user`.
 ### Core
 - [ ] ctl — `text_views.py`; Q3 C2 screen
 - [ ] ctl — `claimnet.py`; Q4 C3 screen
-- [ ] ctl — `resolver.py`; C4 on B-rest; U6 on v1 test scores
+- [ ] ctl — `resolver.py`; C4 on B-rest; apply to v1 test scores; upload if it beats the best
 - [ ] ctl — Q6 C7 native-script probe
-- [ ] ctl — First full stack on test → U7; France-only variant → U8
+- [ ] ctl — First full stack on test; France-only variant when France changes
 - [ ] ctl — Q8/Q9 finals; Q10 B-rest re-score; resolver refit
 
 ### Idle-GPU bets
@@ -660,6 +654,6 @@ Owners: `ctl` controller, `D` agent-D, `F` agent-F, `R` agent-R, `user`.
 ### Final (27 Sep)
 - [ ] ctl — Q11 final test inference (starts by 10:00)
 - [ ] ctl — 13:00 freeze; HOLDOUT-2 once
-- [ ] ctl — Final file validated; U11 by 16:30; U12 reserved for 20:30
+- [ ] ctl — Final file validated and uploaded last; one slot kept in reserve
 - [ ] R — Reproduction path, ZIP, methodology (pseudo-labels disclosed)
 - [ ] ctl — `learnings/`, CONTEXT.md, `submissions.json` updated after every result
