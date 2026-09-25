@@ -243,8 +243,17 @@ def load_reranker(path: str, device: str):
     return model.to(device), tokenizer
 
 
-def _amp_context(torch, device: str, dtype):
-    return torch.autocast(device_type="cuda", dtype=dtype) if device.startswith("cuda") else nullcontext()
+def _amp_context(torch, device: str, amp: str):
+    """Keep the historical CUDA BF16 default; make FP32 an explicit control."""
+    if amp not in {"fp32", "bf16"}:
+        raise ValueError("amp must be fp32 or bf16")
+    if not device.startswith("cuda"):
+        return nullcontext()  # CPU inference/training has always run in FP32.
+    if amp == "fp32":
+        return torch.autocast(device_type="cuda", enabled=False)
+    if not torch.cuda.is_bf16_supported():
+        raise ValueError("BF16 AMP requires a CUDA device with BF16 support")
+    return torch.autocast(device_type="cuda", dtype=torch.bfloat16)
 
 
 def _tokens(tokenizer, left_texts: list[str], right_texts: list[str],
@@ -270,9 +279,8 @@ def train_reranker(model, tokenizer, reference, pool, pairs, labels,
     negative_batch = args.batch_size - positive_batch
     left, right = pairs.left_idx.to_numpy(dtype=np.int64), pairs.right_idx.to_numpy(dtype=np.int64)
     left_texts, right_texts = record_texts(reference), record_texts(pool)
-    use_cuda = args.device.startswith("cuda")
-    amp_dtype = torch.bfloat16 if use_cuda and torch.cuda.is_bf16_supported() else torch.float16
-    scaler = torch.amp.GradScaler("cuda", enabled=use_cuda and amp_dtype == torch.float16)
+    amp = getattr(args, "amp", "bf16")
+    _amp_context(torch, args.device, amp)  # Fail before the first optimizer update.
     seen_positive, seen_negative, trace = set(), set(), []
     for step in range(args.steps):
         pids, nids = positive_cycle.take(positive_batch), negative_cycle.take(negative_batch)
@@ -282,20 +290,19 @@ def train_reranker(model, tokenizer, reference, pool, pairs, labels,
         tokens = _tokens(tokenizer, left_texts, right_texts, left, right, ids, args)
         target = torch.as_tensor(labels[ids], dtype=torch.float32, device=args.device)
         optimizer.zero_grad(set_to_none=True)
-        with _amp_context(torch, args.device, amp_dtype):
+        with _amp_context(torch, args.device, amp):
             logits = model(**tokens).logits
-            if logits.shape != (len(ids), 1):
-                raise ValueError(f"Expected (batch, 1) positive-match logits, got {tuple(logits.shape)}")
-            loss = F.binary_cross_entropy_with_logits(logits[:, 0].float(), target)
-        scaler.scale(loss).backward()
-        scaler.unscale_(optimizer)
+        if logits.shape != (len(ids), 1):
+            raise ValueError(f"Expected (batch, 1) positive-match logits, got {tuple(logits.shape)}")
+        # Loss and its target remain FP32 even when the forward uses BF16.
+        loss = F.binary_cross_entropy_with_logits(logits[:, 0].float(), target)
+        loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         warmup = max(1, args.steps // 10)
         factor = min((step + 1) / warmup, (args.steps - step) / max(1, args.steps - warmup))
         for group in optimizer.param_groups:
             group["lr"] = args.learning_rate * factor
-        scaler.step(optimizer)
-        scaler.update()
+        optimizer.step()
         if step == 0 or (step + 1) % 20 == 0 or step + 1 == args.steps:
             item = {"step": step + 1, "bce": float(loss.detach().cpu()),
                     "unique_train_positive_seen": len(seen_positive),
@@ -317,12 +324,12 @@ def score_reranker(model, tokenizer, reference, pool, pairs, selected, args) -> 
     probabilities = np.zeros(len(pairs), dtype=np.float32)
     left, right = pairs.left_idx.to_numpy(dtype=np.int64), pairs.right_idx.to_numpy(dtype=np.int64)
     left_texts, right_texts = record_texts(reference), record_texts(pool)
-    dtype = torch.bfloat16 if args.device.startswith("cuda") and torch.cuda.is_bf16_supported() else torch.float16
+    amp = getattr(args, "amp", "bf16")
     with torch.inference_mode():
         for start in range(0, len(ids), args.inference_batch_size):
             batch_ids = ids[start:start + args.inference_batch_size]
             tokens = _tokens(tokenizer, left_texts, right_texts, left, right, batch_ids, args)
-            with _amp_context(torch, args.device, dtype):
+            with _amp_context(torch, args.device, amp):
                 logits = model(**tokens).logits
             if logits.shape != (len(batch_ids), 1):
                 raise ValueError("Reranker inference must emit exactly one positive-match logit")
@@ -459,7 +466,8 @@ def run(args):
     train_ids = reference.loc[reference.split.eq("train"), "entity_id"]
     config = {"schema": 2, "model_id": model_id, "model_source": args.model, "seed": args.seed,
               "steps": args.steps, "batch_size": args.batch_size, "max_length": args.max_length,
-              "device": args.device, "inference_batch_size": args.inference_batch_size,
+              "device": args.device, "amp": getattr(args, "amp", "bf16"),
+              "inference_batch_size": args.inference_batch_size,
               "threads": args.threads, "gpu_memory_fraction": args.gpu_memory_fraction,
               "tune_only_inference": args.tune_only_inference,
               "learning_rate": args.learning_rate, "weight_decay": args.weight_decay,
@@ -526,7 +534,7 @@ def run(args):
                  "reranked_candidates": {split: candidate_report(reference, pool, pairs.loc[selected], truth,
                                                                   reference.split.eq(split)) for split in splits}}
     tune_pairs = reference.split.to_numpy()[pairs.left_idx.to_numpy(dtype=np.int64)] == "tune"
-    report = {"model_id": model_id, "licence": license_info["licence"],
+    report = {"model_id": model_id, "amp": config["amp"], "licence": license_info["licence"],
               "combined_params_b": license_info["combined_params_b"], "evaluation_used": args.evaluate,
               "base_bundle": base_provenance, "dataset_kind": dataset_kind,
               "conflict_fraction": args.conflict_fraction,
@@ -561,6 +569,8 @@ def main():
     parser.add_argument("--model-id", default=MODEL_ID)
     parser.add_argument("--allowlist", default=str(Path(__file__).resolve().parents[4] / "problem-statement/models.yaml"))
     parser.add_argument("--device", default="cuda")
+    parser.add_argument("--amp", choices=("fp32", "bf16"), default="bf16",
+                        help="CUDA forward precision; BF16 matches the existing A40 runtime (CPU stays FP32)")
     parser.add_argument("--threads", type=int, default=2)
     parser.add_argument("--gpu-memory-fraction", type=float,
                         help="Optional PyTorch allocator share on the selected GPU")

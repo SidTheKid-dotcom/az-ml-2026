@@ -1,5 +1,82 @@
 # Handoff — resume here
 
+## V2 P2–P5 live work — checked 2026-09-25
+
+- **P2 dense complete:** `/workspace/az-ml-new/v2/dense/dense_complete.json`
+  seals **106,141,050** dense K50 pairs for **2,122,821** S1s (2,072,821
+  eligible TRAIN/TUNE + sealed 50,000 HOLDOUT-2), against all 10,320,219
+  targets; no labels read. Six mismatched durable query-vector chunks were
+  repaired from hash-verified scratch without re-encoding; final embedding
+  SHA256 `a08417f6c467c102d758932376cb73eb45d8b8c5cd6134fda2a63e8776aa83e2`.
+- **P2 retrieval screens:** on the *same 12,000 medium TUNE S1s*, full key union
+  has **1,437,538** pairs, link recall **0.992743**, oracle F0.5 **0.997707**
+  versus saved union 1,243,184 / 0.991802 / 0.997254: **39** true links and
+  **194,354** pairs added. Paired oracle gain **0.000453**, 10k entity-bootstrap
+  CI **[0.000198, 0.000773]**; 301 links still missed. This is a retrieval
+  ceiling, not matcher F0.5. Report: `/workspace/az-ml-new/v2/lexical/medium_tune_union/`.
+  Separately, **10,000 eligible TRAIN S1s** against the full target pool yielded
+  713,524 raw → 434,328 retained pairs (max 40 negatives/S1); union recall
+  **0.988226** / oracle **0.996393**, versus dense **0.984368 / 0.995029**.
+  `/workspace/az-ml-new/v2/train_union/screen/ready.json` is complete. The
+  **full union is running** (`ber.v2_train_union full --follow`); at inspection
+  `full/raw_progress.json` was merging at 490,000/2,122,821 S1s, with no truth
+  read or final union marker. Recompute candidate-dependent features before fitting.
+- **P3:** a *dense-only compatibility* CatBoost fit on **1,200 medium TRAIN S1s**
+  scored **0.937623 / 872 false links** on reused 12,000 medium TUNE; its
+  600,000 candidates came from the full target pool, but it is neither a full
+  TRAIN fit nor the P2 union matcher. Saved as
+  [`dense_compat_final/results.json`](../artifacts/v2_tree_screen/dense_compat_final/results.json)
+  and separately ledgered. The bounded 750k-pair local memory probe passed;
+  1.5M pairs triggered swap and was stopped. No full-scale P3 tree/CE score yet.
+- **P4/P5:** cluster-mate retrieval adds only **3 true links / 21,371 pairs**
+  on dense TUNE; oracle gain **0.0000119**, below the **+0.003** gate, so cluster
+  scoring stops (`/workspace/az-ml-new/v2/cluster/v2_cluster_screen/screen_complete.json`).
+  Apache-licensed ByT5-small at 1,000 steps improves **full normalized-text
+  exact hits on 1,024 sampled TUNE true links from 15 to 163**, with zero
+  full-exact hits among 1,024 sampled nonlinks; keep for a bounded *feature*
+  test, not as a matcher score (`/workspace/az-ml-new/v2/denoiser/screen1000/report.json`).
+  P5 self-training has no completed result; a 128-row French text probe used
+  no labels and measures no French accuracy. HOLDOUT-2 remains unopened.
+
+## V2 P0/P1 completed — 2026-09-25
+
+- **P0 runtime:** scratch had **15.09 GiB free** after cleanup. On the saved
+  12,000 medium TUNE S1s / 600,000 dense candidates from the full 10,320,219-target
+  pool, selective BF16 inference (FP32 rescore within **±0.04** of threshold 0.775)
+  exactly reproduced the **fresh FP32 accept set** on the 2,000-pair probe and
+  all 12,000 references: **43,511** CE pairs, **1,065** rescored, **34.11s** vs
+  **106.53s** full FP32 (3.12×). That fresh FP32 run accepted **one more link**
+  than the saved v1 TUNE baseline (0.969008 vs 0.968992); do not count this as
+  a new matcher gain. Batch256 reached 1,414–1,474 pairs/s on the fixed 4,000
+  pairs, below the 1,700 gate; **retain batch128**. Complete report and arrays:
+  `/workspace/az-ml-new/v2/amp_selective/` (scratch `/tmp/az-ml-v2/amp_selective/`).
+- **P0 compatibility:** the bounded GPU-kind supervisor smoke completed with
+  exit code 0; the local CatBoost/feature-parquet smoke passed on **120 quick
+  TRAIN references / 4,474 sampled-pool pairs**. This was a compatibility check,
+  not a full-pool matcher score. Reports: `../artifacts/v2_p0_runner/`.
+- **P1 fixed-score decision:** on those same 12,000 medium TUNE S1s, the saved
+  v1 matcher scores **0.968992 / 494 false links**. Entity-disjoint TUNE
+  cross-fitted country calibration + TRAIN count-prior expected-F0.5 prefix,
+  **no source bonus**, then pure one-to-one assignment (margin 0) scores
+  **0.970099**, precision **0.988538**, recall **0.935722**, **450 false links**,
+  singleton accuracy **0.959828**. Paired gain **+0.001107**, 95% TUNE interval
+  **[0.000378, 0.001860]**. India **0.964359**, US **0.973909**; fixed dense
+  retrieval link recall **0.984208**. Review/config/probability provenance:
+  [`v2_p1_decision/decision_review.json`](../artifacts/v2_p1_decision/decision_review.json).
+  Source bonus gives a near-tie **0.970222 / 462 false links**, but its isolated
+  interval crosses zero; keep the higher-precision no-source candidate. The
+  composite-key override adds **zero** links on existing candidates; a new
+  key/digit retrieval branch has since passed a TUNE-only ceiling screen above.
+- **Boundary / next step:** P0/P1 are complete; later retrieval/text screens
+  above are not full-union matcher scores. HOLDOUT-2 is **reserved and
+  unopened**: **50,000** S1s, seed **20260929**, sorted-ID SHA256
+  `7c98dcaef35d5a392a051e0525f854a2a6ceb55c366616ff2184abd98aa4ae63`.
+  Use [`reservation.json`](../artifacts/v2_holdout2/reservation.json) and its
+  exclusion file: quick, medium, the older sealed 12,000, and HOLDOUT-2 must
+  stay outside new TRAIN/TUNE. No HOLDOUT-2 or medium-eval labels were used
+  for P0/P1 selection; France remains unmeasured. Freeze a complete v2
+  candidate before its single full-pool holdout check.
+
 ## Verified first-submission holdout
 
 The frozen model scored **F0.5 0.968292**, macro **F1 0.953967**, precision
@@ -87,9 +164,9 @@ and the aligned tree scores at `base_probabilities.npy`, ordered by
 `scored_pairs.parquet`. All three files were confirmed present on the pod. The
 blend array stores zero for off-gate or provably rejected pairs (not a computed
 CE score); only 7,068,690 pairs received CE calls. The optional
-`cross_probabilities.npy` was not saved. These large arrays/pairs were not copied
-to `/workspace/az-ml-new/releases/submission_v1` or the local release package;
-scratch is ephemeral, so preserve them separately before shutting down the pod.
+`cross_probabilities.npy` was not saved. On 26 Sep the three arrays were copied
+and hash-verified to `/workspace/az-ml-new/releases/submission_v1_scores/` and
+locally to `artifacts/v1_test_scores/`.
 
 ## Existing artifacts — inspect before relaunching
 
@@ -112,8 +189,10 @@ Original ZIP, statement files and raw dataset are unchanged, with all ten resour
 files verified against original ZIP byte counts/CRC32 in
 [source_integrity.json](../docs/source_integrity.json). Keep `/workspace/amlc` unchanged.
 
-The local ledger records **107** scored configurations (including weights and
-hyperparameters, not 107 independent approaches). See
+The ledger retains **107** historical model configurations, adds **one**
+dense-only P3 compatibility model and **4** P1 TUNE-only decision variants:
+**112 rows**, not 112 independent models. Retrieval/denoiser screens are not
+model rows. See
 [EXPERIMENT_DECISIONS.md](EXPERIMENT_DECISIONS.md) for what each established.
 
 ## Repository handoff audit
@@ -138,4 +217,4 @@ registry are in `docs/`. The failed attempt and a separate user-reported **0.956
 scored attempt are recorded in `submissions.json`; uploaded-file identity and
 the earlier portal failure reason remain unconfirmed.
 For future experiments, consult the SageMaker migration in `docs/RUNBOOK.md` and
-the proposed `docs/PLAN_v2.md`; neither changes the frozen v1 score or release.
+the executable final plan `docs/PLAN_v2.md`; neither changes the frozen v1 score or release.

@@ -1,8 +1,35 @@
-# Completed model comparisons
+# Completed model and decision comparisons
 
-107 scored configurations, including ensembles/blend weights and hyperparameter variants. Repeated baseline evaluations and failed runs are not counted. These are not independent model families.
+107 historical scored model configurations, including ensembles/blend weights and hyperparameter variants; 1 dense-only CatBoost compatibility screen; 4 P1 decision-layer comparisons on saved v1 scores. Decision variants are not new models. Repeated baselines and failed runs are not counted.
 
-**Development scores do not establish submission readiness.** The initial model fell from 0.981500 to 0.832719 on the same 1,000 businesses when evaluated against 9,290,818 possible targets. Subsequent hard-pool experiments use all 10,320,219 original training targets. A fresh final holdout takes priority over additional tuning gains.
+**Development scores do not establish submission readiness.** The initial model fell from 0.981500 to 0.832719 on the same 1,000 businesses when evaluated against 9,290,818 possible targets. Subsequent hard-pool experiments use all 10,320,219 original training targets. HOLDOUT-2 is reserved and unopened for v2 selection.
+
+## V2 P1 decision layer — reused TUNE only
+
+Same 12,000 medium TUNE references and 600,000 dense candidates retrieved against the full 10,320,219-target pool. The saved v1 threshold baseline is 0.968992 / 494 false links; calibrated variants use entity-disjoint cross-fitting within TUNE and choose a per-entity prefix (null scalar threshold in CSV/JSON). No fresh holdout or new model training.
+
+| Decision variant | Macro F0.5 | Precision | Recall | False links | Singleton accuracy |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| assignment_delta_0.00 | 0.969029 | 0.987522 | 0.938760 | 492 | 0.952654 |
+| calibrated_expected_f05_no_source_oof | 0.970062 | 0.988488 | 0.935722 | 452 | 0.959828 |
+| calibrated_expected_f05_no_source_plus_assignment_0 | 0.970099 | 0.988538 | 0.935722 | 450 | 0.959828 |
+| calibrated_expected_f05_nested_source_plus_assignment_0 | 0.970222 | 0.988251 | 0.936903 | 462 | 0.959828 |
+
+No-source rule + pure assignment improves paired TUNE macro F0.5 by 0.001107 (95% entity-bootstrap interval [0.000378, 0.001860]); the nested source bonus adds only 0.000122 ([-0.000118, 0.000337]) and 12 more false links. Keep the higher-precision no-source candidate for a fresh holdout. The retrieved composite-key override adds zero accepted links and is not a duplicate scored row.
+
+## V2 P3 dense-only tree compatibility screen
+
+This is a scored CatBoost model fitted on only 1,200 medium TRAIN S1s; it is not a full-scale P3 tree or a union-candidate matcher. The 12,000 TUNE S1s were retrieved from all 10,320,219 targets.
+
+| Setup | Matcher | Macro F0.5 | Precision | Recall | False links | Scope |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| v2_tree_dense_compat | catboost_1200_train_dense_only_screen | 0.937623 | 0.976618 | 0.878146 | 872 | full pool; 12000 reused medium TUNE references; 1200 sampled medium TRAIN; dense-only compatibility screen |
+
+## P0 runtime and compatibility checks (not model scores)
+
+Scratch had 15.09 GiB free after cleanup; the bounded GPU-kind supervisor and workstation CatBoost/parquet compatibility smokes passed. Selective BF16 with FP32 rescoring within ±0.04 of the fixed threshold preserves the fresh FP32 accept set on 2,000 probe pairs and all 12,000 TUNE references (43,511 CE pairs; 1,065 rescored), taking 34.11s versus 106.53s. This fresh FP32 run differs by one accepted link from the original saved v1 score; the runtime comparison is not a model gain. Batch256 reaches 1,414–1,474 pairs/s on the fixed benchmark, below the 1,700 adoption gate; retain batch128. GPU reports: `/workspace/az-ml-new/v2/amp_selective/report.json`; local runner/CatBoost smoke: `artifacts/v2_p0_runner/`.
+
+Historical report paths in CSV/JSON resolve under `--artifacts` (`/home/sidvish/Documents/Work/Personal/az-ml-new/artifacts` for this regeneration).
 
 ## Full-pool development
 
@@ -126,6 +153,6 @@ Small-pool rows use 2,400 tuning businesses and 201,536 targets. Full-pool rows 
 
 Keep for independent validation: full-pool E5 plus lexical/phonetic retrieval, numeric-conflict features, and tree/BGE cross-encoder blends. Negative class weights depend on the candidate set: weight 1 won the initial lexical tree, while weight 4 won the quick-reference union tree. Prefer measured blends over the pure reranker in paired tests; heuristic-only matching and simple tree averaging remain weak leading options.
 
-BGE600 on the lexical hard pool improved on MiniLM300 by 0.006166 at matched 19,200 pair presentations; paired 95% tune interval [0.002883, 0.009499]. Union candidates plus 50% BGE reached 0.969812 versus the union tree 0.956008. These are tuning results; larger-data and frozen holdout comparisons remain necessary. The earlier residual-tree 25% CE near-tie had 31 fewer false links than its 50% blend. Original-tree 50%-minus-25% CE has a tune-only paired 95% interval of [-0.002536, 0.002939]. Retrieval-only ablations, the frozen full-pool stress test, and anchor-threshold checks are documented in EXPERIMENT_DECISIONS.md rather than counted as new model configurations.
+BGE600 on the lexical hard pool improved on MiniLM300 by 0.006166 at matched 19,200 pair presentations; paired 95% tune interval [0.002883, 0.009499]. Union candidates plus 50% BGE reached 0.969812 versus the union tree 0.956008. These are tuning results; larger-data and fresh v2 holdout comparisons remain necessary. The earlier residual-tree 25% CE near-tie had 31 fewer false links than its 50% blend. Original-tree 50%-minus-25% CE has a tune-only paired 95% interval of [-0.002536, 0.002939]. P2 retrieval oracles, P4 cluster/ByT5 text probes, the frozen full-pool stress test, and anchor checks are documented in EXPERIMENT_DECISIONS.md rather than counted as new model configurations.
 
 The first E5 fine-tuning attempt failed on non-tensor tokenizer metadata. Tensor-only device transfer fixed it, and the successful retry is recorded above. No result is attributed to the failed run.
