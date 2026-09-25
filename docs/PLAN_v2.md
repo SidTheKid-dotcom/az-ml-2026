@@ -293,7 +293,7 @@ Idle-GPU bets (§8) plug in as extra scores into the C4 resolver.
     at 11 (train maximum).
   - *Grid (minutes each):* blend weights, gate 0.01 vs 0.003, λ, calibration
     grouping.
-- **Leads to:** U6 on v1 scores; the final decision layer; expected +0.001 to
+- **Leads to:** an upload on v1 scores; the final decision layer; expected +0.001 to
   +0.004 beyond C0.
 
 ### C5 — France track
