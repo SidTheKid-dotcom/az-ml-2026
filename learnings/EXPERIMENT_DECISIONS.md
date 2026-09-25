@@ -1,0 +1,59 @@
+# Experiment decisions
+
+This is the evidence snapshot from completed local artifacts. “Established” means observed on the stated development population, not proved on unseen countries or a final holdout. The official objective is macro F0.5 per Source 1; false merges and singleton errors matter substantially.
+
+## Scopes that must remain separate
+
+- **Quick:** 2,400 tuning S1s, 201,536 sampled targets, 7,199 training S1s. The initially inspected 2,401-S1 eval split is now development data.
+- **Scale stress:** the same 1,000 tuning S1s scored in both the quick pool and a 9,290,818-target controller pool, with model and threshold frozen.
+- **Hard pool:** the original quick TRAIN/TUNE references, but candidates mined against all **10,320,219** original training targets. Retained records are compact; candidate edges retain the actual full-pool retrieval result. All true links remain in scoring, including misses.
+- **Country transfer:** train and choose threshold using one country's TRAIN/TUNE references, then inspect the other country's TUNE references. This is development stress, not France validation.
+- The fresh medium eval labels remain untouched. No official test score is available. Retrieval oracle F0.5 assumes perfect candidate classification and is not a model score.
+
+## Completed approach comparisons
+
+| Approach and source artifact | Measured scope / outcome | What the evidence established | Decision |
+| --- | --- | --- | --- |
+| Heuristic / logistic / CatBoost, `quick_v1` | Quick F0.5 0.931796 / 0.977753 / 0.982352 (best depth 8). | Supervised nonlinear pair features beat the heuristic and logistic baseline on this sample. | Keep tree baseline; discard heuristic/logistic as leaders. |
+| Simple tree averaging, `quick_v1`, `phonetic_v1` | Quick ensemble 0.981867 versus best single 0.982352; phonetic ensemble 0.983526 versus 0.984147. | The tested averaging did not improve the best tree. | Discard these blends as leaders, retain reports. |
+| Name/address lexical union and larger K, `retrieval_ablation` | Quick link recall about 0.9852 at K20, 0.991588 at K50; about 37 versus 97 pairs/S1. | Both fields are complementary; larger K buys recall at greater pair cost. | Keep union; choose K under full-pool cost/recall constraints. |
+| Native-script phonetics, `phonetic_ablation`, `phonetic_v1` | Quick native-only branch adds 33 true links at 0.96 extra pairs/S1; matcher 0.984147. K50 lexical plus phonetics reaches 0.994592 link recall. | A cheap branch recovers transliteration misses. | Keep complementary branch; oracle ceilings are not matcher scores. |
+| Query-term pruning, `pruned_retrieval*` | 1,000 quick tuning S1s: 32 terms ×300 shortlist plus phonetics recalls 0.989655 versus unpruned+phonetics 0.988793. | The tested shortlist preserved most recall with fewer posting visits; it did not establish a general speedup. Aggressive 8-term pruning lost links. | Keep 32×300 candidate for scale; discard aggressive pruning as default. |
+| Frozen E5-small / BGE-M3, `e5_small`, `bge_m3` | Quick F0.5 0.984941 / 0.985402; embedding 74.7s / 177.8s. E5 has higher precision. | Neural plus lexical evidence helps; larger BGE gives a small score gain at higher encoding cost. | Retain BGE report; prioritize E5 for full-pool retrieval screening. |
+| TRAIN-only E5 fine-tuning, `e5_small_ft200` | Quick F0.5 0.986225; lexical+dense link recall 0.998798 after 200 steps. | Task training improved retrieval on the sampled pool; full-pool follow-ups below validate its usefulness, not the isolated effect of fine-tuning. | Keep checkpoint for full-pool retrieval. |
+| MiniLM CE200 blending, `e5_cross200` | Quick best 50% CE 0.986490; CE-only 0.982912. | Reranker scores complement the tree on the sampled pool. | Keep blending idea; discard pure CE as leader. |
+| Numeric features / depths / class weights, `e5_ft_tabular_sweep` | 12 quick variants; best 0.986408, precision 0.993028, 57 false links. | Explicit numeric evidence helps some settings; weighting alone is not reliably beneficial. | Carry numeric features into hard-pool training. |
+| Frozen pool expansion, `full_pool_stress_v1` | Same 1,000 S1s: 0.981500 quick →0.832719 scale stress, precision 0.852155, 542 false links, singleton accuracy 0.298507. | Quick precision concealed many high-score near-twin negatives. | Discard initial checkpoint as final; require full-pool negatives and validation. |
+| Hard lexical/phonetic retrieval, `hard_pool_retrieval.json` | Hard tune link recall 0.950607 lexical →0.952289 with phonetics; 14 extra native-script true links; oracle F0.5 0.982442. | Scale makes retrieval harder; native-target recall is only 0.788333. | Keep complementary phonetics; prioritize dense retrieval for remaining misses. |
+| Hard tree sweep, `hard_tabular_sweep` | 12 variants; best depth 8 + numeric, negative weight 1: F0.5 0.944533, 153 false links. Same depth/weight without numeric: 0.942533. | Numeric conflicts improve this full-pool candidate task; stronger negative weighting did not win. | Keep numeric tree; do not impose stronger class weights by default. |
+| Distinctive-name residual features, `hard_residual_sweep` | Three weights; best weight 1: F0.5 0.947112, 139 false links. | Name-difference evidence adds value beyond numeric/string features on fixed candidates. | Keep residual tree. |
+| Reference anchor thresholds, `hard_decision_sweep` | Best remains ungated tree 0.944533; anchor 0.7 gives 0.944140 and 126 false links; stricter gates lose more recall. | Abstaining more can protect singletons but did not improve the official objective in this sweep. | Discard anchor policy as metric leader; retain precision tradeoff evidence. |
+| Hard MiniLM CE300, `hard_ce_v1` | 50% blend 0.948804, 124 false links; 25% blend 0.948617, 110 false links; pure CE 0.927328. | Hard-trained CE adds complementary evidence, especially in India. | Keep tree+CE; discard pure CE as leader. |
+| Residual tree + saved CE, `hard_ce_residual_comparison` | 50% blend 0.950115 at threshold 0.60 (159 false links); 25% blend 0.950051 at 0.65 (128 false links). | No new training; aligned saved scores improve the residual baseline. | Keep 50% as highest F0.5; retain 25% as higher-precision near-tie. |
+| Country transfer, `hard_country_transfer` | India-trained →US: 0.932335 on 1,431 tune S1s; US-trained →India: 0.826255 on 969. | Cross-country behavior is asymmetric and materially weaker than mixed-country training. | Keep as warning; do not infer French accuracy or transfer robustness. |
+| Full-pool E5 dense retrieval and tree, `full_dense_quick`, `hard_dense_sweep` | Same 2,400 tune S1s / 10.32M targets: dense link recall 0.982334, oracle F0.5 0.993129; best of 12 trees F0.5 0.954765, 121 false links. | Neural retrieval recovers many links missed by full-pool lexical retrieval. | Keep dense branch; dense-only candidates do not validate a union model. |
+| Full-pool lexical/phonetic/dense union, `hard_union_sweep` | Union link recall 0.991227, oracle F0.5 0.997160; best of 12 trees F0.5 0.956008, precision 0.988752, 85 false links. | Retrieval branches remain complementary at full scale. Weight 4 wins this union, unlike the initial lexical tree. | Keep union and selected numeric tree; preserve candidate feature semantics. |
+| BGE reranker versus MiniLM, `hard_bge_ce600` | Same lexical hard candidates and 19,200 pair presentations: BGE75% blend 0.954969 versus MiniLM50% 0.948804, both 124 false links; 238.85s versus 74.20s total. | Larger BGE adds 109 true links at equal false-link count; measured gain costs more runtime. | Keep BGE for stronger candidate sets; preserve MiniLM as cheaper comparison. |
+| Pretrained BGE on union candidates, `hard_union_bge_ce600` | Same 600×32 budget, original pretrained start: 50% BGE at threshold 0.55 gives F0.5 0.969812, precision 0.987683, recall 0.934743, 97 false links; 278.23s total. | Relative to union tree, +0.013805 F0.5 and +306 true links for +12 false links. India 0.963600 / US 0.974019. | Promote for independent validation; preserve gate tree, BGE checkpoint and E5 dependency. |
+| Fresh-medium dense tree, `medium_dense_sweep` | 35,999 TRAIN / 12,000 TUNE S1s, disjoint from quick; full target pool. Best of 12 trees: F0.5 0.957134, precision 0.988471, 437 false links. | Dense candidates support a strong tree on a larger, fresh development population. | Freeze this exact completed tree as the controlled medium CE base; no eval use. |
+| Fresh-medium name residuals, `medium_dense_residual_sweep` | Same medium dense candidates: best of three weights F0.5 0.958655, precision 0.985494, 558 false links. | Name features improve macro score here through more recall, with more false links. | Retain as alternative; do not silently swap the tree in running controlled CE experiments. |
+
+## Near-ties and remaining uncertainty
+
+The original-tree 50%-minus-25% CE difference is only **0.000187**, with a paired 95% tune-bootstrap interval **[-0.002536, 0.002939]** over 10,000 resamples of complete S1 entities. The 50% blend adds 27 true links and 14 false links; 88 S1s improve, 81 worsen, and 2,231 tie. This does not establish a clear global winner.
+
+The residual-tree blends are even closer: 50% CE wins by **0.000064** while 25% CE produces **31 fewer false links**. Preserve the metric winner and the near-tie; choose the final procedure before touching fresh eval labels. Country-specific threshold tuning has not been justified for unseen France.
+
+The saved CE comparison reused the original tree's probability ≥0.01 inference gate. Every residual-tree accepted tune pair had a CE score, and the gated baseline reproduced the unrestricted baseline exactly. Future inference must preserve that gate or score the additional pairs explicitly.
+
+BGE75%-minus-MiniLM50% on the same lexical candidates has a paired 95% tune interval **[0.002883, 0.009499]** for its **+0.006166** gain. Reference/pool/pair/base-score digests, pair order and inference gate match exactly. India improves +0.011505 (interval [0.005454, 0.018192]); US +0.002550 has an interval crossing zero. This supports retaining BGE while remaining conditional on reused tuning choices.
+
+TRAIN-only fitting and entity-disjoint splits prevent several obvious leakage modes, but repeated TUNE selection can still overfit development choices. Tune-bootstrap intervals condition on the chosen models, gates and thresholds; they do not account for that search. No claim of absence of overfitting is supported.
+
+## Unfinished evidence and registry boundaries
+
+Full-pool dense retrieval, quick-reference unions, and BGE comparisons now have completed local reports. The 600-step and 1,800-step BGE screens on fresh medium dense TRAIN/TUNE are queued serially; no medium eval labels are used. Larger-data comparisons and untouched holdout evidence remain separate from the quick-reference results. Check the root runbook for live job state.
+
+The generated scoreboard reports the current count of completed model configurations, including hyperparameters and blend weights rather than independent model families. Residual+CE and BGE blend rows are included; their repeated tree/gated baselines are excluded. Retrieval-only ablations, scale stress, and anchor checks above are kept outside that model count. Failed launches contribute no score.
+
+Sources: the named `artifacts/` reports, [scoreboard.md](scoreboard.md), [full-pool diagnostics](full_pool_stress_diagnostics.md), [hard CE details](hard_pool_cross_encoder.md), and [saved-score comparison](hard_pool_saved_ce_comparison.md). No external business data or official test labels were used by these experiments.
