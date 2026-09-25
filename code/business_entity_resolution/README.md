@@ -152,6 +152,8 @@ Every archived file is reread and verified before the ZIP becomes final; a ZIP
 SHA256 sidecar is saved. Large binaries/ZIPs remain outside Git. Upload only
 `matching_results.tsv` to the live leaderboard; preserve the same bytes in the
 final ZIP. Record the actual platform result; no script uploads automatically.
+On the GPU, export this committed checkout with `git archive`, without credentials
+or `.git`, and pass its full revision with `--source-commit` when building there.
 
 ## Source map
 

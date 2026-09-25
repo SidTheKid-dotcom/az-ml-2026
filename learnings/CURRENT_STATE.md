@@ -96,8 +96,10 @@ builder verifies complete release reports, exact checkpoint/source/output hashes
 required structure and every archived byte. Team name is `techquilla-shots`;
 member names are unspecified. It requires a validated release; no production ZIP exists while inference is incomplete.
 The expanded suite passes 47 tests, including rejection of incomplete coverage,
-modified predictions/weights and archive overwrite. New replay was dry-run checked;
-a full clean-machine replay/retraining has not been performed.
+modified predictions/weights and archive overwrite. All 47 also pass in a fresh
+Git checkout using the existing CPU environment, with no data/weights/credentials
+copied. Portable replay CLI dry run passed; full clean-machine GPU replay/retraining
+has not been performed.
 
 Git excludes binaries/data by design. A new agent needs the supplied data and
 authorized GPU/key access; its working credential path, runtime and durable model

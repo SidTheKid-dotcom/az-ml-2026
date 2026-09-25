@@ -93,7 +93,12 @@ def build(args) -> Path:
     if args.team_members:
         header += f'**Team Members:** {args.team_members}\n'
     methodology = header + '\n' + methodology.lstrip()
-    commit = subprocess.run(['git', '-C', str(repo), 'rev-parse', 'HEAD'], text=True, capture_output=True, check=True).stdout.strip()
+    commit = getattr(args, 'source_commit', None)
+    if commit is not None:
+        if not re.fullmatch(r'[0-9a-f]{40}', commit):
+            raise ValueError('--source-commit must be the full Git SHA used to export this checkout')
+    else:
+        commit = subprocess.run(['git', '-C', str(repo), 'rev-parse', 'HEAD'], text=True, capture_output=True, check=True).stdout.strip()
     manifest = {'git_commit': commit, 'pipeline_sha256': ready['pipeline_sha256'],
                 'official_test_score': None, 'files': {}}
     try:
@@ -132,6 +137,7 @@ def main() -> None:
     parser.add_argument('--destination', type=Path, required=True)
     parser.add_argument('--team-name', required=True)
     parser.add_argument('--team-members', default='', help='Optional real member names; omitted when unspecified')
+    parser.add_argument('--source-commit', help='Full Git SHA when building from a git archive export without .git')
     print(build(parser.parse_args()))
 
 
