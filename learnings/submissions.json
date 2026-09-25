@@ -1,3 +1,18 @@
 {
-  "submissions": []
+  "submissions": [
+    {
+      "release_id": "submission_v1",
+      "date_reported": "2026-09-25",
+      "platform_status": "FAILED (user-reported)",
+      "platform_submission_performed": true,
+      "local_matching_file": "output/submission_v1/matching_results.tsv",
+      "local_matching_sha256": "5df9ddbf42137d4e403f0072fe85169aaabc0167a0b431f675f926754371e1ed",
+      "uploaded_file_sha256_confirmed_by_platform": null,
+      "platform_submission_id": null,
+      "failure_reason": null,
+      "public_score": null,
+      "daily_quota_consumed": null,
+      "note": "User reports uploading the original 09:56 v1 matching TSV and seeing FAILED. Exact portal error, upload-time bytes, and quota accounting remain unconfirmed."
+    }
+  ]
 }

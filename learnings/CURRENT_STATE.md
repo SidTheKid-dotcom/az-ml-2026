@@ -66,9 +66,17 @@ same `matching_results.tsv` separately to the leaderboard.
 SHA256 hashes, sizes and validation. Model weights and raw data are external to
 the ZIP so it fits the 500 MB code-upload field; exact replay needs those weights.
 
-Platform submission and platform F0.5 are still pending. Once uploaded, record
-the result and exact file hash in `submissions.json`. Keep subsequent experiments
-separate from this frozen release; v1 holdout labels are no longer untouched.
+The user reports uploading the original v1 matching TSV and seeing **FAILED**
+on the platform; its error reason and whether the attempt consumed a daily slot
+are unknown. No platform F0.5 exists. The frozen release files still match the
+recorded hashes. Train ground truth and test Source 1 use LF endings, while the
+original v1 outputs use CRLF; portal incompatibility is unproven. An independently
+generated LF-only matching TSV is available at
+`output/submission_v1_lf_diagnostic/matching_results.tsv` and passed the official
+validator with the original candidate file; it is a diagnostic variant, not a
+scored release. See `submissions.json` for the reported attempt. Keep subsequent
+experiments separate from this frozen release; v1 holdout labels are no longer
+untouched.
 
 ## Existing artifacts — inspect before relaunching
 
@@ -113,4 +121,7 @@ has not been performed.
 
 Git excludes binaries/data by design. A new agent needs the supplied data and
 authorized GPU/key access; its working credential path, runtime and durable model
-registry are in `docs/`. No official submission is recorded yet.
+registry are in `docs/`. One user-reported platform attempt is recorded as FAILED
+in `submissions.json`, with no reported public score or confirmed portal reason.
+For future experiments, consult the SageMaker migration in `docs/RUNBOOK.md` and
+the proposed `docs/PLAN_v2.md`; neither changes the frozen v1 score or release.

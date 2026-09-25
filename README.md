@@ -11,6 +11,8 @@ a rank or guarantees the hidden-test result.
 3. [GPU, data and scoring runbook](docs/RUNBOOK.md).
 4. [What each experiment established](learnings/EXPERIMENT_DECISIONS.md).
 5. [Full score ledger](learnings/scoreboard.md), with machine-readable CSV/JSON.
+6. [Proposed v2 experiments](docs/PLAN_v2.md) and the [SageMaker migration
+   workflow](docs/RUNBOOK.md#v2-compute-migration-sagemaker-ai) for work after v1.
 
 The official [statement](problem-statement/statement.md),
 [evaluation PDF](problem-statement/ps.pdf), and
@@ -40,6 +42,9 @@ unchanged official validator plus strict coverage/subset checks. Exact release
 hashes and local paths are in
 [submission_v1_release.json](docs/submission_v1_release.json). The platform score
 is still unknown; development TSVs must not be uploaded as test predictions.
+The user reported a **FAILED** first platform upload, with no reason or score
+confirmed; see [submission attempts](learnings/submissions.json). The frozen
+release hashes remain the reference for investigating that failure.
 
 The frozen first matcher uses **35,999 labeled training businesses**, with 12,000
 separate tuning businesses and a 12,001-business holdout. Its verified holdout

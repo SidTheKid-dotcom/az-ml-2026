@@ -3,6 +3,8 @@ __pycache__/
 *.pyc
 *.zip
 data/
+# Alternate extraction of the supplied raw archive; keep its records out of Git.
+6ab10eb3b23ba_student_resource/
 artifacts/
 output/
 catboost_info/

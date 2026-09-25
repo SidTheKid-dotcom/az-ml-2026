@@ -207,3 +207,62 @@ Record each platform attempt in `learnings/submissions.json`: release ID, file
 SHA256, public score, platform status and whether the submission was actually
 performed. A validator PASS is not a leaderboard score. Historical artifacts
 retain their paths and hashes even when a newer model wins.
+
+The first v1 upload is user-reported FAILED, with no error reason or platform
+score yet. The release manifest is the historical as-built snapshot; the mutable
+attempt record is `learnings/submissions.json`. See `learnings/CURRENT_STATE.md`
+before choosing any diagnostic variant or submitting again.
+
+## V2 compute migration: SageMaker AI
+
+The user has $10,000 in AWS credits and wants to move **new experiments** to
+SageMaker instead of paying for RunPod GPU time. This is a compute/storage move,
+not a change to the matching objective or the frozen v1 release. The workstation's
+AWS CLI currently reports an expired session (`aws login` is required); account
+region, credit eligibility/expiry, SageMaker GPU training quota, and actual
+regional price have not yet been verified. Do not submit a billable job until
+these are checked in that account.
+
+`docs/PLAN_v2.md` is a hypothesis backlog; this migration and the experiment
+loop in `AGENTS.md` govern execution. The v1 production commands above describe
+historical RunPod use, not a mandate to rerun them for v2.
+
+1. Use short-lived **SageMaker training jobs** for GPU experiments and large
+   offline prediction, not a continuously running inference endpoint. Start with
+   one `ml.g6e.2xlarge` (one 48-GB L40S, 4 vCPUs, 64 GiB host RAM) for a
+   bounded CE/TUNE parity and throughput pilot; move to `ml.g6e.4xlarge` if
+   CPU or memory is the bottleneck. A 24-GB G5/G6 GPU is not a drop-in
+   replacement for the A40's roughly 46 GiB usable VRAM. Confirm actual memory
+   and availability on the job.
+2. Stage only the supplied dataset, selected checkpoints, saved splits, and
+   needed complete embeddings/candidate artifacts into a private S3 bucket in
+   the job's region. The verified training pool embedding alone is 7.93 GB.
+   Record object/file hashes; copy to the job's fast local storage and retain
+   selected checkpoints and finished reports in S3. Do not re-encode the full
+   pool or copy `/workspace/amlc`; install the pinned Python/CUDA dependencies in
+   a separate image/environment and fetch only licensed models as needed.
+3. The embedding manifests bind **absolute raw-input paths and mtimes** as well
+   as checkpoint hashes (`ber.full_embeddings`, `ber.full_dense_candidates`).
+   Plain S3 relocation will fail identity checks. In separate v2 code, verify
+   the copied raw bytes/checkpoint, preserve their input mtimes or record a
+   verified relocation, and rewrite only the relocated manifest/cache paths;
+   never modify the historical v1 manifests or frozen source hashes.
+4. Run a bounded pilot on existing TUNE IDs against the **full** training target
+   pool, compare candidate identity, retrieval recall, macro F0.5, false links,
+   singleton accuracy, runtime and memory against saved RunPod results. Hardware
+   floating-point differences require a decision-level parity check. The v1
+   holdout is already consumed and must not be reused for selection. Only after
+   the pilot passes should larger v2 mining/training move; reserve a fresh
+   entity-disjoint holdout first.
+5. For long jobs, use checkpoint-to-S3 and test interruption/resume before using
+   Managed Spot Training. Meter job duration, S3 storage/requests and data transfer
+   against the credits; choose a per-job runtime limit and budget. Preserve and
+   validate full-test TSVs through the existing official/strict validator before
+   packaging. The v2 plan's BF16 **inference** item is already implemented in
+   `ber.rerank_inference` on supported CUDA GPUs; benchmark any further change.
+
+For scale only, [public third-party listings](https://cloudprice.net/aws/sagemaker/instances/ml.g6e.2xlarge)
+put `ml.g6e.2xlarge` near **$2.80 per hour in us-east-1** (~$280 per 100 running hours), before storage and
+transfer. This is not an account-specific SageMaker training quote or a guarantee
+that these credits cover it: confirm both in the account's pricing and billing
+views before estimating the usable GPU-hour budget.
