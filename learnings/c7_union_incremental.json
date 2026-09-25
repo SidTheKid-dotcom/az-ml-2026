@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "evaluated_at": "2026-09-26",
+  "scope": "Reused 12,000-S1 medium TUNE; retrieval oracle only; full 10,320,219-target training pool",
+  "hypothesis": "The CPU India phonetic/address branch recovers true links not already present in the P2 full-key union.",
+  "bootstrap": {
+    "unit": "S1 entity",
+    "replicates": 10000,
+    "seed": 20260926,
+    "interval": "percentile 95%"
+  },
+  "baseline": {
+    "name": "p2_full_key_union",
+    "pairs": 1437538,
+    "retrieved_true_links": 41175,
+    "true_links": 41476,
+    "link_recall": 0.9927427910116694,
+    "oracle_macro_f05": 0.9977073505399151
+  },
+  "variants": [
+    {
+      "name": "address_all_k1",
+      "candidate_sha256": "1590bc7fffcb035ca59c74917bcd067d3a85a3824f58dfc6ed8e5d1d8c6b5935",
+      "candidate_pairs": 4343,
+      "new_pairs_beyond_union": 255,
+      "new_true_links_beyond_union": 1,
+      "new_true_links_per_1000_extra_pairs": 3.9215686274509802,
+      "union_link_recall": 0.9927669013405342,
+      "union_india_link_recall": 0.9878217881473443,
+      "oracle_macro_f05": 0.9977113187938833,
+      "oracle_delta": 0.000003968253968253972,
+      "entity_bootstrap_95pct": [0.0, 0.000011904761904761919]
+    },
+    {
+      "name": "address_all_k5",
+      "candidate_sha256": "63753fcd9060aad35d04dc667c71520024d56346646d5e51c18e908df579a137",
+      "candidate_pairs": 21070,
+      "new_pairs_beyond_union": 5146,
+      "new_true_links_beyond_union": 6,
+      "new_true_links_per_1000_extra_pairs": 1.165954139137194,
+      "union_link_recall": 0.9928874529848587,
+      "union_india_link_recall": 0.9881232290347863,
+      "oracle_macro_f05": 0.9977482331564027,
+      "oracle_delta": 0.0000408826164874552,
+      "entity_bootstrap_95pct": [0.000005208333333333333, 0.00009995559715821807]
+    },
+    {
+      "name": "phonetic_all5_address_all5",
+      "candidate_sha256": "cb4276135895c5e098ff609788704306299e67b520f8e3ec66d5528233a38a92",
+      "candidate_pairs": 37576,
+      "new_pairs_beyond_union": 13103,
+      "new_true_links_beyond_union": 30,
+      "new_true_links_per_1000_extra_pairs": 2.2895520109898495,
+      "union_link_recall": 0.993466100877616,
+      "union_india_link_recall": 0.9895701452945077,
+      "oracle_macro_f05": 0.9979553985385758,
+      "oracle_delta": 0.0002480479986607438,
+      "entity_bootstrap_95pct": [0.0001245919728990175, 0.0004156481176182906]
+    },
+    {
+      "name": "phonetic_native5_address_all5",
+      "candidate_sha256": "ac1b1148c3c9600d1c3db6b1b2046fe3e50fdc23bf2be28a3ff205159d3f9b8e",
+      "candidate_pairs": 37598,
+      "new_pairs_beyond_union": 19820,
+      "new_true_links_beyond_union": 37,
+      "new_true_links_per_1000_extra_pairs": 1.8668012108980827,
+      "union_link_recall": 0.9936348731796701,
+      "union_india_link_recall": 0.9899921625369265,
+      "oracle_macro_f05": 0.9980838893288314,
+      "oracle_delta": 0.00037653878891623994,
+      "entity_bootstrap_95pct": [0.00018367423156199055, 0.0006209664481646713]
+    },
+    {
+      "name": "phonetic_native10_address_native10",
+      "candidate_sha256": "0b2b70acd794477cb8e7ddf50bcbc7299baf88bc59f45a1ead39c6a149e5a426",
+      "candidate_pairs": 68287,
+      "new_pairs_beyond_union": 58911,
+      "new_true_links_beyond_union": 43,
+      "new_true_links_per_1000_extra_pairs": 0.7299146169645737,
+      "union_link_recall": 0.9937795351528594,
+      "union_india_link_recall": 0.9903538916018568,
+      "oracle_macro_f05": 0.9982028218570085,
+      "oracle_delta": 0.0004954713170933127,
+      "entity_bootstrap_95pct": [0.00024965139594428814, 0.0008102276168875136]
+    }
+  ],
+  "decision": "discard_full_test_branch",
+  "reason": "The largest tested incremental oracle gain is +0.000495, just below the +0.0005 promotion rule, and adds only 43 true links (0.104 percentage points of link recall) beyond P2, below the C7 +0.2-point recall gate.",
+  "limitations": [
+    "Retrieval-only result on repeatedly used development TUNE, not a learned matcher score.",
+    "Entity bootstrap does not account for repeated variant selection.",
+    "No test labels or HOLDOUT-2 labels were read."
+  ],
+  "inputs": {
+    "p2_union_complete_sha256": "6449fe6b3ce2e6a04a701dd612c8ebd6b851619dd9db7a62b5638e112b41846e",
+    "p2_union_candidate_sha256": "643d8efe080590d344d78fe8555db45a8d27e01fee7c160781c3db5fb3ea9789",
+    "tune_reference_id_sha256": "5bb5759fa52ac19df8839520c7ccf147bae01a5499a2900af5d1b4ebeb1dbaa2",
+    "cursor_artifact_root": "/home/sidvish/Documents/Work/Personal/ext-experiments/A/native_recall",
+    "p2_local_copy": "/home/sidvish/Documents/Work/Personal/ext-experiments/A/native_recall/p2_medium_tune_union"
+  }
+}

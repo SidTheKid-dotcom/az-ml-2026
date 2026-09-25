@@ -1,5 +1,17 @@
 # Handoff — resume here
 
+## V2 R0 reranker follow-ups — completed 2026-09-26
+
+- Field-tagged BGE at 7,200 steps scored **0.973686** on the same 12,000 medium
+  TUNE S1s: precision 0.989378, recall 0.947705, 422 false links.
+- Plain `name | address` BGE at 14,400 steps scored **0.974288**: precision
+  0.990133, recall 0.948380, 392 false links, singleton accuracy 0.962697,
+  India 0.970812 and US 0.976595. This is **+0.005296** over v1 and +0.000602
+  over field-7,200, making it the current reranker checkpoint leader. The
+  comparison changes both format and training steps, so it does not establish
+  that plain formatting is intrinsically better. Exact artifacts are under
+  `/workspace/az-ml-new/experiments/r0_{fields7200,pipe14400}_20260926b/`.
+
 ## V2 P2–P5 live work — checked 2026-09-25
 
 - **P2 dense complete:** `/workspace/az-ml-new/v2/dense/dense_complete.json`
@@ -18,9 +30,11 @@
   713,524 raw → 434,328 retained pairs (max 40 negatives/S1); union recall
   **0.988226** / oracle **0.996393**, versus dense **0.984368 / 0.995029**.
   `/workspace/az-ml-new/v2/train_union/screen/ready.json` is complete. The
-  **full union is running** (`ber.v2_train_union full --follow`); at inspection
-  `full/raw_progress.json` was merging at 490,000/2,122,821 S1s, with no truth
-  read or final union marker. Recompute candidate-dependent features before fitting.
+  **full union is complete** at
+  `/workspace/az-ml-new/v2/train_union/full/ready.json`: **89,995,555** retained
+  pairs for 2,072,821 eligible S1s, **0.987347** link recall and **0.995965**
+  oracle F0.5, with no truth-edge injection. Recompute candidate-dependent
+  features before fitting.
 - **P3:** a *dense-only compatibility* CatBoost fit on **1,200 medium TRAIN S1s**
   scored **0.937623 / 872 false links** on reused 12,000 medium TUNE; its
   600,000 candidates came from the full target pool, but it is neither a full
@@ -37,6 +51,13 @@
   test, not as a matcher score (`/workspace/az-ml-new/v2/denoiser/screen1000/report.json`).
   P5 self-training has no completed result; a 128-row French text probe used
   no labels and measures no French accuracy. HOLDOUT-2 remains unopened.
+- **C7 stopped after the incremental gate:** Cursor's best CPU India
+  phonetic/address branch looked like +0.0023 oracle F0.5 versus dense K50, but
+  against the already-complete P2 full-key union it adds only **43 true links / 58,911
+  pairs**, +0.104 percentage points link recall and **+0.000495** oracle F0.5
+  (entity-bootstrap 95% CI [0.000250, 0.000810]). This misses both predeclared
+  promotion gates, so do not generate the full-test branch. Exact comparison:
+  [`c7_union_incremental.json`](c7_union_incremental.json).
 
 ## V2 P0/P1 completed — 2026-09-25
 

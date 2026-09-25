@@ -71,11 +71,14 @@ classification logit, and Qwen scores yes/no as a language model.
 
 ## Running now
 
-The first 14,400-step run and `keep_gpu_busy.sh` died at 19:55 UTC 25 Sep when
-their session ended (step 11,240, no checkpoint). Relaunched detached at 20:30
-UTC: `r0_fields7200_20260926b` then `r0_pipe14400_20260926b`, outputs under
-`/workspace/az-ml-new/experiments/`, logs `/tmp/az-ml-v2/logs_r0/`. Field-format 7,200 finished: medium TUNE **0.973686** vs
-0.968992 (+0.0047; 422 vs 494 false links). The plain 14,400 run is next. v1 test score arrays are hash-verified at
+The detached R0 follow-ups are complete. Field-format 7,200 scored medium TUNE
+**0.973686** (422 false links); plain-text 14,400 scored **0.974288** (392 false
+links), the current reranker checkpoint leader and +0.005296 over v1. Because
+step count and format both changed, this does not isolate a format effect. The
+competitor-complete arena score is running over 2,072,821 eligible S1s; labels
+are complete with zero HOLDOUT-2 rows read, and a detached watcher will preserve
+the completed aligned arrays under `/workspace/az-ml-new/arena/v1/`. v1 test
+score arrays remain hash-verified at
 `/workspace/az-ml-new/releases/submission_v1_scores/`.
 
 ## The plan

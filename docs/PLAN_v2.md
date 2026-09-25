@@ -630,7 +630,7 @@ Owners: `ctl` controller, `D` agent-D, `F` agent-F, `R` agent-R, `user`.
 - [ ] F — `forensic_features.py` + tests
 - [ ] F — France P+/P−, audits, pseudo-holdout; diagnostics on v1 and #3
 - [x] ctl — R0 field-format 7,200: 0.973686 vs 0.968992 (+0.0047)
-- [ ] ctl — R0 plain 14,400 (running): separates steps from format
+- [x] ctl — R0 plain 14,400: 0.974288, +0.000602 over field-7,200; current checkpoint leader, but steps and format remain confounded
 
 ### On "begin"
 - [x] ctl — Merge `codex/v2-plan-20260925` into the integration branch
@@ -645,7 +645,7 @@ Owners: `ctl` controller, `D` agent-D, `F` agent-F, `R` agent-R, `user`.
 - [ ] ctl — `text_views.py`; Q3 C2 screen
 - [ ] ctl — `claimnet.py`; Q4 C3 screen
 - [ ] ctl — `resolver.py`; C4 on B-rest; apply to v1 test scores; upload if it beats the best
-- [ ] ctl — Q6 C7 native-script probe
+- [x] ctl — Q6 C7 native-script probe: stop; +0.000495 oracle beyond P2 union and +0.104-point link recall, below both gates
 - [ ] ctl — First full stack on test; France-only variant when France changes
 - [ ] ctl — Q8/Q9 finals; Q10 B-rest re-score; resolver refit
 
