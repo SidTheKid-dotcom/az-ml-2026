@@ -74,9 +74,8 @@ classification logit, and Qwen scores yes/no as a language model.
 The first 14,400-step run and `keep_gpu_busy.sh` died at 19:55 UTC 25 Sep when
 their session ended (step 11,240, no checkpoint). Relaunched detached at 20:30
 UTC: `r0_fields7200_20260926b` then `r0_pipe14400_20260926b`, outputs under
-`/workspace/az-ml-new/experiments/`, logs `/tmp/az-ml-v2/logs_r0/`. Keep a
-result only if medium-tune F0.5 beats 0.968992 with a paired interval above
-zero. v1 test score arrays are hash-verified at
+`/workspace/az-ml-new/experiments/`, logs `/tmp/az-ml-v2/logs_r0/`. Field-format 7,200 finished: medium TUNE **0.973686** vs
+0.968992 (+0.0047; 422 vs 494 false links). The plain 14,400 run is next. v1 test score arrays are hash-verified at
 `/workspace/az-ml-new/releases/submission_v1_scores/`.
 
 ## The plan

@@ -109,6 +109,12 @@ raw text and full-train ownership; plus label-free analysis of the test file.
   Conseil / Centre EURL"), repeated house numbers; the street name decides.
 - **Why TUNE misled:** one-owner touched 2 contests on TUNE vs 48,927 on test;
   the P1 count rule gained on TUNE and lost on the board.
+- **R0 field-format result (26 Sep 02:32):** BGE fine-tuned 7,200 steps with
+  field-tagged text on the same 36k medium businesses scores **0.973686** on
+  the same TUNE vs BGE1800's 0.968992 (+0.0047): precision 0.9894, recall
+  0.9477, 422 false links (494), no-match merges 3.6% (4.7%), India 0.9701,
+  US 0.9761. Confounded: 4× steps and the field format; the plain 14,400-step
+  run separates them. Evidence that more training alone still pays.
 
 ---
 
@@ -193,8 +199,8 @@ Idle-GPU bets (§8) plug in as extra scores into the C4 resolver.
   learned from volume of hard examples; v1 saw 57,600 pair presentations
   from 36k businesses.
 - **How (best-guess recipe, screened first):**
-  - *Input:* `S1 name | S1 address` [SEP] `record name | record address`, in
-    the **canonical view**: Latin accents folded (combining marks removed only
+  - *Input:* the **field-tagged** format of the R0 run (unless the plain
+    14,400-step run beats it), in the **canonical view**: Latin accents folded (combining marks removed only
     from Latin letters; Indic scripts untouched), lowercase, junk tokens
     (`<NULL>`, `##`, `>>`, `<<`) removed, whitespace collapsed. Why: France's
     injected accents ("Àmicale", "Çlub") and vendor uppercase then look like
@@ -624,7 +630,8 @@ Owners: `ctl` controller, `D` agent-D, `F` agent-F, `R` agent-R, `user`.
 - [ ] D — `arena_decision.py` + tests (reproduces 0.968992, 0.969029, +0.003962)
 - [ ] F — `forensic_features.py` + tests
 - [ ] F — France P+/P−, audits, pseudo-holdout; diagnostics on v1 and #3
-- [ ] ctl — Read R0 results against 0.968992
+- [x] ctl — R0 field-format 7,200: 0.973686 vs 0.968992 (+0.0047)
+- [ ] ctl — R0 plain 14,400 (running): separates steps from format
 
 ### On "begin"
 - [ ] ctl — Merge `codex/v2-plan-20260925` into the integration branch
