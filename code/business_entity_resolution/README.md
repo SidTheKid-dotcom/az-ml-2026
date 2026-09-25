@@ -23,7 +23,7 @@ python -m unittest discover -s tests -v
 
 `requirements.txt` preserves the measured local CPU environment. Use
 `requirements-gpu.txt` for training/replay; do not combine the two NumPy pins.
-`resources/validate_submission.py` is an unchanged, hash-verified copy of the
+`resources/validate_submission.py` (under `src/resources/` in the portal ZIP) is an unchanged, hash-verified copy of the
 supplied validator, so unit tests also work without downloading the raw data.
 The selected recipe was run on A40 / 48 GB with ~7.65 CPU / 50 GB RAM. Keep active memory
 maps on fast local disk. Replay needs at least 30 GB free; more room is needed for
@@ -32,9 +32,10 @@ installation on a clean machine is not yet independently reproduced.
 
 ## Exact selected-model inference
 
-Use the supplied `dataset/` (containing `train/` and `test/`). The final package
-contains the exact promoted weights under this code folder's `models/`. In the
-working repository they are external at GPU `/workspace/az-ml-new/models`:
+Use the supplied `dataset/` (containing `train/` and `test/`). The portal ZIP
+omits trained weights to stay below 500 MB; exact replay requires the selected
+checkpoints separately. In the working repository they are external at GPU
+`/workspace/az-ml-new/models`:
 
 ```bash
 python src/reproduce.py --dataset /absolute/path/to/dataset \
@@ -63,7 +64,7 @@ The following commands recreate the training procedure, rather than promise
 bit-identical GPU retraining. Run in a separate working directory with the above
 `PYTHONPATH`. Set `competition_data` to the supplied dataset directory and
 `model_inventory` to this repository's `problem-statement/models.yaml` (or the
-final package's `resources/models.yaml`). Keep saved TRAIN/TUNE splits for fair
+portal package's `src/resources/models.yaml`). Keep saved TRAIN/TUNE splits for fair
 comparisons. Never overwrite the selected weights or an active output directory.
 
 ```bash
@@ -124,6 +125,32 @@ single tree/model/negative sampler, retain the full competing target pool, and
 write to a new output directory. Use `--help` for supported adapters. There is no
 requirement to keep E5/BGE: verify licenses and parameter count for other models,
 add an adapter where necessary, and measure a controlled comparison first.
+
+## Portal ZIP for a new validated release
+
+After selecting a new model, freeze its inference code/configuration, produce
+both full-test TSVs, and run `ber.validate_release` with `--check-ids` through the
+supplied validator. The release directory must contain the two TSVs,
+`validation.json`, and a `ready.json` whose output/validation SHA256 hashes match
+the finished files. Update this README, `docs/submission_methodology.md`, the
+pinned GPU requirements and `src/resources` inputs for the new procedure. Then,
+from the repository root, build into a **new** destination:
+
+```bash
+PYTHONPATH=code/business_entity_resolution/src python \
+  code/business_entity_resolution/src/package_portal_submission.py \
+  --release /path/to/new/validated-release \
+  --destination /path/to/new/submission-package \
+  --team-name "Techquilla Shots"
+```
+
+The portal builder checks the ready marker, validator report, output hashes,
+every archived entry and the 500 MB byte limit. It produces exactly the
+organizer's `output/`, `code/business_entity_resolution/{src,README.md,requirements.txt}`
+and filled `Documentation_template.md` tree. The TSVs are unchanged and the ZIP
+must be validated before upload. Keep the preceding release available and do not
+reuse its destination. A new architecture may require changes to
+`src/reproduce.py`; packaging alone does not establish model correctness.
 
 ## Full archival bundle
 

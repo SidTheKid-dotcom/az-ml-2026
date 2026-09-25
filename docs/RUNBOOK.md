@@ -198,9 +198,10 @@ For exact prediction replay, use the three promoted model paths in
 `docs/checkpoints.json`, not a newly trained approximation. For new experiments,
 copy only required code/configs to a separate GPU work directory and reuse the
 data/cache read-only. Never sync `.git`, secrets or the whole cache to the pod.
-The portable recipe, pinned GPU dependencies, final bundle command and module
-map are in `code/business_entity_resolution/README.md`. A final bundle includes
-the exact weights; Git stays small. Build only after the actual TSVs validate.
+The portable recipe, pinned GPU dependencies, portal ZIP and archival bundle
+commands are in `code/business_entity_resolution/README.md`. The under-500 MB
+portal ZIP excludes weights; the larger archival bundle includes them. Git stays
+small. Build only after the actual TSVs validate.
 
 Record each platform attempt in `learnings/submissions.json`: release ID, file
 SHA256, public score, platform status and whether the submission was actually

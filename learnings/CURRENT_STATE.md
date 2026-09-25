@@ -97,15 +97,18 @@ hyperparameters, not 107 independent approaches). See
 
 ## Repository handoff audit
 
-Portable replay and archival packaging commands are in the code README. The
-portal ZIP has the required tree and every archived output byte was checked
-against the validated release. Team name is `Techquilla Shots`; member names are
-unspecified. The validated submission ZIP and matching TSV now exist locally; adding trained weights would
-exceed the portal code-upload limit.
-The expanded suite passes 47 tests, including rejection of incomplete coverage,
-modified predictions/weights and archive overwrite. All 47 also pass in a fresh
-Git checkout using the existing CPU environment, with no data/weights/credentials
-copied. Portable replay CLI dry run passed; full clean-machine GPU replay/retraining
+Portable replay, portal ZIP and archival packaging commands are in the code
+README. `src/package_portal_submission.py` accepts a new validated release,
+checks its ready marker and hashes, and enforces the required tree and 500 MB
+cap. The current portal ZIP has the required tree and every archived output byte
+was checked against the validated release. A full-size rebuild using the portal
+command also passed under the cap. Team name is `Techquilla Shots`;
+member names are unspecified. The validated submission ZIP and matching TSV now
+exist locally; adding trained weights would exceed the portal code-upload limit.
+The pre-portal expanded suite passed 47 tests, including rejection of incomplete
+coverage, modified predictions/weights and archive overwrite; it also passed in
+a fresh Git checkout without data/weights/credentials. Focused portal packaging
+tests pass. Portable replay CLI dry run passed; full clean-machine GPU replay/retraining
 has not been performed.
 
 Git excludes binaries/data by design. A new agent needs the supplied data and
