@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "input_shortlist_sha256": "0d1fc9279e95ad18c6547e3b2222ea6b6452ac8d1417bcbb795806c24e7c15a8",
+  "input_manifest_sha256": "7bc7938a7df6a9a64b76305252901426eedc171e13b89bb22ca77c42a3c1b25f",
+  "checkpoint": "/workspace/az-ml-new/models/medium_dense_bge_ce1800/checkpoint",
+  "checkpoint_weights_sha256": "91153fb62785b59ccd1f7d87be2c2349eac35a6e34c9b6532d9d7b4942c12650",
+  "checkpoint_identity_sha256": "91883cb6c8bfd5477dc98c8697226b8cefad1f5c46dd52579ccb6403eb159a65",
+  "model_id": "BAAI/bge-reranker-v2-m3",
+  "scored_rows": 321,
+  "calibration_rows": 118,
+  "tune_rows": 203,
+  "device": "cuda:0",
+  "autocast_dtype": "torch.bfloat16",
+  "batch_size": 128,
+  "max_length": 256,
+  "length_sorted": true,
+  "pad_to_multiple_of": 8,
+  "labels_read": false,
+  "probabilities_sha256": "8b4cdc806b25d1b099049db35fc8f427538781b7a6d9b657871862747cd9b81b",
+  "seconds": 49.211784824728966
+}

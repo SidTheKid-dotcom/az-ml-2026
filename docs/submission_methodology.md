@@ -2,7 +2,7 @@
 
 **Team Name:** techquilla-shots
 
-**Draft status:** Frozen holdout evaluation and complete test candidate generation are verified. Full-test matching and supplied-validator results are pending. No leaderboard score is claimed.
+**Draft status:** Frozen holdout evaluation, complete official-test matching and both supplied/strict validators are verified. Durable `ready.json` confirms the frozen v1 files. No leaderboard score or platform upload is claimed.
 
 ## 1. Executive Summary
 
@@ -30,7 +30,7 @@ The initial quick sample used seed 20260925. A separate 60,000-S1 medium sample 
 - **Representation:** Original-script `business_name | business_address`, prefixed `query: ` for S1 and `passage: ` for targets; maximum length 128, 384 dimensions, L2 normalization.
 - **Retrieval rule:** Exhaustive top 50 dot-product search, without an approximate-neighbor index. Target vectors are stored as float16; dot products use float32 with float32 queries. This is exact search over the stored representations, not a claim of unquantized encoder equivalence.
 - **Training target scope:** All 10,320,219 original S2/S3 training records. Medium TRAIN+TUNE has 2,399,950 candidate pairs; TUNE has 600,000.
-- **Official-test scope:** All 1,732,544 S1s against 9,969,589 S2/S3 targets. Candidate generation completed with **86,627,200 unique pairs**, exactly 50 for every S1; final matching/TSV validation is running.
+- **Official-test scope:** All 1,732,544 S1s against 9,969,589 S2/S3 targets. Candidate generation produced **86,627,200 unique pairs**, exactly 50 for every S1. Both final TSVs passed the unchanged official `--check-ids` validator without warnings and the stricter complete-coverage/subset gate. The durable release is `/workspace/az-ml-new/releases/submission_v1`; these checks establish format/integrity, not hidden-test accuracy.
 - **Miss accounting:** No positive candidate injection. Ground-truth targets missing from retrieval may be retained as compact records solely for scoring; their missing edges still count as missed links. TUNE link recall is 0.984208; perfect classification of these candidates would yield macro F0.5 of 0.994090.
 
 This selected release uses dense candidates. Earlier lexical/phonetic/dense union experiments are separate procedures and are not silently substituted during inference.
@@ -66,7 +66,7 @@ The matched 600-step comparison scored 0.966067 with 531 false links; the select
 
 ## 6. Conclusion
 
-Full-pool retrieval and difficult negatives substantially changed model selection compared with the easier sampled pool. The frozen dense/tree/BGE procedure retained its development performance on the untouched holdout. Complete official-test prediction and validation are running; release claims will be updated only from verified artifacts.
+Full-pool retrieval and difficult negatives substantially changed model selection compared with the easier sampled pool. The frozen dense/tree/BGE procedure retained its development performance on the untouched holdout. Complete official-test prediction and validation have succeeded; no official-test accuracy is measurable without a platform result. Later TRAIN/TUNE experiments are separate procedures and do not change this release.
 
 ## Appendix
 
@@ -81,4 +81,4 @@ Source, tests and pinned CPU/GPU environments ship under `code/business_entity_r
 
 ### B. Additional Results
 
-Full configurations and rejected approaches are in `learnings/scoreboard.md` and `EXPERIMENT_DECISIONS.md`. The earlier union score 0.969812 used 2,400 different TUNE S1s and a different candidate rule; it is not the selected dense model's score. The complete fixed eval report is `learnings/first_submission_holdout.json`; the official validator report and final file hashes will be appended after verification.
+Full configurations and rejected approaches are in `learnings/scoreboard.md` and `EXPERIMENT_DECISIONS.md`. The earlier union score 0.969812 used 2,400 different TUNE S1s and a different candidate rule; it is not the selected dense model's score. The complete fixed eval report is `learnings/first_submission_holdout.json`; readiness, official-validator report and final file hashes are in `learnings/CURRENT_STATE.md` and the immutable durable release manifests.

@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "seed": 20260925,
+  "threshold_grid": [
+    0.5,
+    0.75,
+    0.9,
+    0.95,
+    0.975,
+    0.99,
+    0.995,
+    0.999,
+    0.9995,
+    0.9999
+  ],
+  "threshold_source": "TRAIN-CAL only; maximize TP-5*FP, abstain if nonpositive",
+  "lexical_gate": 0.75,
+  "v1_blend_weight_ce": 0.75,
+  "v1_threshold": 0.775,
+  "v1_tree_gate": 0.01,
+  "dense_pair_digest": "10fe9d4d5df4bb566b1efd38b191ad395d4bb6a814f05a6ba1701cd58cbc2196",
+  "shortlist_sha256": "0d1fc9279e95ad18c6547e3b2222ea6b6452ac8d1417bcbb795806c24e7c15a8",
+  "reranker_checkpoint_sha256": "91883cb6c8bfd5477dc98c8697226b8cefad1f5c46dd52579ccb6403eb159a65",
+  "reranker_weights_sha256": "91153fb62785b59ccd1f7d87be2c2349eac35a6e34c9b6532d9d7b4942c12650",
+  "train_cal_id_sha256": "89f13ef4f9b41109459b274b7ace05a640216d7f0579fe46b52ccc1d1ad7fe22",
+  "tune_id_sha256": "5bb5759fa52ac19df8839520c7ccf147bae01a5499a2900af5d1b4ebeb1dbaa2",
+  "target_pool_records": 10320219,
+  "holdout_used": false,
+  "no_true_candidate_injection": true,
+  "ce_scores_only_for_shortlisted_pairs": true
+}

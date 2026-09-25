@@ -1,0 +1,181 @@
+{
+  "baseline": {
+    "macro_f05": 0.9689921356332671,
+    "micro_precision": 0.9874714684250571,
+    "micro_recall": 0.9387597646831903,
+    "reference_count": 12000,
+    "predicted_links": 39430,
+    "true_links": 41476,
+    "threshold": 0.775,
+    "f05_India": 0.9633385505244482,
+    "f05_US": 0.972744209931883,
+    "singleton_accuracy": 0.9526542324246772,
+    "false_positive_links": 494,
+    "entities_with_false_positive": 462,
+    "singleton_false_merges": 33,
+    "retrieved_true_links_rejected": 1885
+  },
+  "train_calibration": {
+    "choice": {
+      "threshold": 0.975,
+      "true_links": 14,
+      "false_links": 1,
+      "utility_tp_minus_5fp": 9
+    },
+    "grid": [
+      {
+        "threshold": 0.5,
+        "true_links": 34,
+        "false_links": 11,
+        "utility_tp_minus_5fp": -21
+      },
+      {
+        "threshold": 0.75,
+        "true_links": 32,
+        "false_links": 10,
+        "utility_tp_minus_5fp": -18
+      },
+      {
+        "threshold": 0.9,
+        "true_links": 29,
+        "false_links": 8,
+        "utility_tp_minus_5fp": -11
+      },
+      {
+        "threshold": 0.95,
+        "true_links": 23,
+        "false_links": 5,
+        "utility_tp_minus_5fp": -2
+      },
+      {
+        "threshold": 0.975,
+        "true_links": 14,
+        "false_links": 1,
+        "utility_tp_minus_5fp": 9
+      },
+      {
+        "threshold": 0.99,
+        "true_links": 6,
+        "false_links": 0,
+        "utility_tp_minus_5fp": 6
+      },
+      {
+        "threshold": 0.995,
+        "true_links": 6,
+        "false_links": 0,
+        "utility_tp_minus_5fp": 6
+      },
+      {
+        "threshold": 0.999,
+        "true_links": 4,
+        "false_links": 0,
+        "utility_tp_minus_5fp": 4
+      },
+      {
+        "threshold": 0.9995,
+        "true_links": 3,
+        "false_links": 0,
+        "utility_tp_minus_5fp": 3
+      },
+      {
+        "threshold": 0.9999,
+        "true_links": 3,
+        "false_links": 0,
+        "utility_tp_minus_5fp": 3
+      }
+    ],
+    "reference_count": 7236,
+    "shortlisted_pairs": 118,
+    "positive_shortlisted_pairs": 35
+  },
+  "tune": {
+    "macro_f05": 0.9692452571982424,
+    "macro_f1": 0.9552905330458155,
+    "precision": 0.9874049670552458,
+    "recall": 0.9394107435625422,
+    "predicted_links": 39460,
+    "true_links": 41476,
+    "false_links": 497,
+    "singleton_accuracy": 0.9526542324246772,
+    "singleton_false_merges": 33,
+    "added_true_links": 27,
+    "added_false_links": 3,
+    "f05_India": 0.9639366838233477,
+    "added_true_India": 25,
+    "added_false_India": 3,
+    "f05_US": 0.9727683600327941,
+    "added_true_US": 2,
+    "added_false_US": 0
+  },
+  "tune_shortlisted_pairs": 203,
+  "tune_shortlisted_true_pairs": 56,
+  "accepted_target_name_script": {
+    "Latin_or_other": {
+      "true_links": 18,
+      "false_links": 3
+    },
+    "Kannada": {
+      "true_links": 3,
+      "false_links": 0
+    },
+    "Bengali": {
+      "true_links": 2,
+      "false_links": 0
+    },
+    "Gujarati": {
+      "true_links": 1,
+      "false_links": 0
+    },
+    "Devanagari": {
+      "true_links": 2,
+      "false_links": 0
+    },
+    "Telugu": {
+      "true_links": 1,
+      "false_links": 0
+    }
+  },
+  "paired_tune": {
+    "reference_count": 12000,
+    "n_bootstrap": 2000,
+    "confidence": 0.95,
+    "seed": 20260925,
+    "sampling_unit": "source1_entity",
+    "paired": true,
+    "stratum_sizes": null,
+    "method": "percentile bootstrap",
+    "estimates": {
+      "left_mean": 0.9692452571982424,
+      "right_mean": 0.9689921356332674,
+      "left_minus_right": 0.00025312156497522
+    },
+    "confidence_intervals": {
+      "left_mean": [
+        0.9672952363756562,
+        0.9710828162359028
+      ],
+      "right_mean": [
+        0.9670247456649476,
+        0.9708142194103283
+      ],
+      "left_minus_right": [
+        9.259722924891412e-05,
+        0.000478527175878779
+      ]
+    },
+    "bootstrap_standard_errors": {
+      "left_mean": 0.0009861967614932172,
+      "right_mean": 0.0009867391474773766,
+      "left_minus_right": 0.00010021828098083842
+    },
+    "limitation": "Conditional on fixed models, retrieval and thresholds; tuning-set intervals do not establish held-out generalization."
+  },
+  "entities_improved": 27,
+  "entities_worsened": 3,
+  "entities_unchanged": 11970,
+  "probabilities_sha256": "8b4cdc806b25d1b099049db35fc8f427538781b7a6d9b657871862747cd9b81b",
+  "decisions_sha256": "5670884b9596c9d9fd6483a9b20b86264a99f98ac486ef1ea2cbff1eda22d121",
+  "gpu_score_report_sha256": "83fd2f2533ecbb797ae7a7d05532e0c9bc301c763c1bdcb9655c2cb2e3e10eea",
+  "local_evaluation_seconds": 12.571629330006544,
+  "limitations": "TUNE was reused for earlier architecture choices; this CAL-selected rule is a development comparison, not held-out or French/test accuracy. No v1 holdout labels guide this choice; the newly reserved holdout remains sealed."
+}

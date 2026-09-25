@@ -301,11 +301,17 @@ def prepare_ce_shortlist(args):
     if os.environ.get("CUDA_VISIBLE_DEVICES") != "":
         raise ValueError("Set CUDA_VISIBLE_DEVICES=\"\" before local preparation")
     output = Path(args.output)
+    destination = Path(args.shortlist_output) if args.shortlist_output else output
+    if args.ce_gate not in (.5, .75):
+        raise ValueError("This bounded shortlist comparison supports only gates 0.50 and 0.75")
+    if destination != output and destination.exists() and any(destination.iterdir()):
+        raise FileExistsError("Use a new empty output directory for the expanded shortlist")
     report = json.loads((output / "results.json").read_text())
     config = json.loads((output / "experiment_config.json").read_text())
-    gate = .75  # CAL: 35 true / 83 false, before CE; no TUNE labels select this gate.
+    gate = args.ce_gate  # Chosen from TRAIN-CAL diagnostics; no TUNE labels select a pair.
     cal_result = next(row for row in report["calibration"]["grid"] if row["threshold"] == gate)
-    if (cal_result["true_links"], cal_result["false_links"]) != (35, 83):
+    expected_counts = {0.75: (35, 83), 0.5: (52, 300)}
+    if (cal_result["true_links"], cal_result["false_links"]) != expected_counts[gate]:
         raise ValueError("The TRAIN-CAL lexical gate is not the screened artifact")
     for filename, expected in (("new_pairs.parquet", report["new_pair_sha256"]),
                                ("features.parquet", report["features_sha256"]),
@@ -333,7 +339,7 @@ def prepare_ce_shortlist(args):
     cal_probs = predict_proba(bundle["model"], features.iloc[cal_rows])
     selected_cal = cal_rows[cal_probs >= gate]
     selected_tune = tune_rows[tune_probs >= gate]
-    if len(selected_cal) != 118:
+    if len(selected_cal) != sum(expected_counts[gate]):
         raise ValueError("TRAIN-CAL CE shortlist changed")
     positions = np.r_[selected_cal, selected_tune]
     selected = edges.iloc[positions]
@@ -348,11 +354,13 @@ def prepare_ce_shortlist(args):
         "left_text": left_text, "right_text": right_text})
     if frame.duplicated(["source1_entity_id", "target_entity_id"]).any():
         raise ValueError("CE shortlist has duplicate links")
-    path = output / "ce_shortlist.parquet"
+    destination.mkdir(parents=True, exist_ok=True)
+    path = destination / "ce_shortlist.parquet"
     frame.to_parquet(path, index=False)
-    manifest = {"schema": 1, "gate": gate, "rule": "lexical-only tree probability >= 0.75",
+    manifest = {"schema": 1, "gate": gate, "rule": f"lexical-only tree probability >= {gate:.2f}",
                 "calibration_pairs": len(selected_cal), "tune_pairs": len(selected_tune),
-                "gate_chosen_from": "TRAIN-CAL diagnostics (35 true, 83 false); not TUNE labels",
+                "gate_chosen_from": f"TRAIN-CAL diagnostics ({cal_result['true_links']} true, "
+                                    f"{cal_result['false_links']} false); not TUNE labels",
                 "labels_used_to_select_individual_pairs": False, "holdout_used": False,
                 "candidate_source_sha256": report["new_pair_sha256"],
                 "lexical_checkpoint_sha256": report["checkpoint_sha256"],
@@ -362,7 +370,7 @@ def prepare_ce_shortlist(args):
                 "shortlist_sha256": file_sha256(path),
                 "usage": "After v1 release, score every row with frozen BGE; choose the CE rule on "
                          "TRAIN-CAL, then compare official macro F0.5 on complete medium TUNE."}
-    json_write(output / "ce_shortlist_manifest.json", manifest)
+    json_write(destination / "ce_shortlist_manifest.json", manifest)
     print(json.dumps(manifest, allow_nan=False), flush=True)
     return manifest
 
@@ -378,6 +386,8 @@ def main():
     parser.add_argument("--output", required=True)
     parser.add_argument("--prepare-ce-shortlist", action="store_true",
                         help="Reuse saved CPU scores to freeze a label-free BGE queue; no retraining")
+    parser.add_argument("--ce-gate", type=float, default=.75)
+    parser.add_argument("--shortlist-output", help="New output for a different CAL-chosen shortlist gate")
     args = parser.parse_args()
     prepare_ce_shortlist(args) if args.prepare_ce_shortlist else run(args)
 

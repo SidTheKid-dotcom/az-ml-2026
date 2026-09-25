@@ -1,5 +1,23 @@
 # Handoff — resume here
 
+## First validated submission is ready
+
+`/workspace/az-ml-new/releases/submission_v1/ready.json` now confirms the frozen
+v1 files are complete and durably copied. The unchanged official validator
+(`--check-ids`) passed without warnings; the strict gate passed all **1,732,544**
+test S1s and **86,627,200** actual candidate links. `matching_results.tsv`
+SHA256: `5df9ddbf42137d4e403f0072fe85169aaabc0167a0b431f675f926754371e1ed`;
+`candidate_pairs.tsv` SHA256:
+`fc0ec7a43888208b25fef4deecea352a98dcce75797ea9288c0f7fb9e6ebca34`.
+Pipeline SHA256 remains `9ac4050a72c64b05c032a17ec26f2a13b339c1b8c135791bf07b737534371f5e`.
+[Ready](../artifacts/submission_v1_readiness_20260925/ready.json) and
+[validation](../artifacts/submission_v1_readiness_20260925/validation.json)
+manifests are copied locally; the release is preserved unchanged. The prior supervisor
+**46635** exited and the A40 was free at the last check. **No platform upload,
+public score or final ZIP is recorded yet**; format validation is not an accuracy
+measurement. Upload only the matching TSV for a leaderboard measurement and
+record the actual result in [submissions.json](submissions.json).
+
 ## Verified first-submission holdout
 
 The frozen model scored **F0.5 0.968292**, macro **F1 0.953967**, precision
@@ -48,12 +66,13 @@ change models, gate, blend, threshold or source after inspecting the holdout.
 - Repeated tuning can overfit. France has no training labels; US/India results
   do not measure French accuracy. **No official score is available.**
 
-## Local CPU experiments while v1 inference runs
+## Separate TRAIN/TUNE experiments
 
 In isolated worktree `/home/sidvish/Documents/Work/Personal/az-ml-cpu-decision`
 on `codex/cpu-tune-decision-20260925`, completed TRAIN/TUNE inputs were copied
 selectively and used locally with CUDA hidden and two CPU threads. The frozen v1
-source, weights, inference job and threshold were not changed.
+source, weights and threshold were not changed. After release readiness, the
+shortlisted-pair reranker ran in separate GPU scratch/durable directories.
 
 - [Saved-score decision report](../artifacts/cpu_decision_v1_tune_20260925/results.json):
   independently reproduced the **0.968992** medium TUNE baseline, 494 false links,
@@ -78,10 +97,26 @@ source, weights, inference job and threshold were not changed.
   100s. [Configuration](../artifacts/cpu_lexical_rescue_20260925/experiment_config.json).
 - A 0.75 lexical-only CatBoost-probability gate chosen from TRAIN-CAL has frozen
   **118 CAL + 203 TUNE** candidate/text pairs for a small BGE experiment after
-  v1 release. Individual shortlist pairs were selected without TUNE labels; all
-  their CE scores are still missing. The text/pairs remain outside Git; the
+  v1 release. Individual shortlist pairs were selected without TUNE labels and
+  their CE scores were computed separately as described below. Text/pairs stay
+  outside Git; the
   [identity/count manifest](../artifacts/cpu_lexical_rescue_20260925/ce_shortlist_manifest.json)
   preserves the exact queue and checkpoint identities.
+- [BGE shortlist gate 0.75](../artifacts/ce_shortlist_bge_v1_20260925/results.json):
+  118 CAL + 203 TUNE extra pairs received valid frozen-BGE scores. TRAIN-CAL
+  selected CE ≥**0.975** (14 true / 1 false there). Adding 27 true and 3 false
+  links on all 12,000 medium TUNE S1s gives **F0.5 0.969245**, precision 0.987405,
+  recall 0.939411, 497 false links; singleton accuracy remains 0.952654.
+  Paired difference from v1 **+0.000253** [0.000093, 0.000479], conditional on
+  reused TUNE choices. GPU scoring took 49s, including checkpoint verification.
+- [BGE shortlist gate 0.50](../artifacts/ce_shortlist_bge_gate050_20260925/results.json):
+  same records/checkpoint/runtime, only a wider lexical gate (352 CAL + 607 TUNE
+  pairs). The **same frozen CE threshold 0.975** adds 37 true and 5 false links:
+  **F0.5 0.969317**, precision 0.987358, recall 0.939652, 499 false links;
+  singleton accuracy 0.952654. Versus the 0.75 gate, +0.000072 F0.5 has a paired
+  interval **[-0.000003, 0.000151]**; the narrower gate is a higher-precision
+  near-tie. GPU scoring took 46s. Both probability vectors and complete shortlist
+  pairs are preserved durably under `/workspace/az-ml-new/artifacts/lexical_ce_shortlist_gate{075,050}_20260925`.
 - A new **sealed confirmation holdout** was reserved by ID only from unused
   training S1s: 12,000 references, seed **20260928**, 4,787 India / 7,213 US,
   sorted-ID SHA256 `ec057370b8dc8b3dbef24e277a6920f905a08481ca2b35a5245dcdf9d22f5187`.
@@ -89,29 +124,25 @@ source, weights, inference job and threshold were not changed.
   truth nor the v1 eval errors were opened. [Reservation recipe/provenance](../artifacts/holdout_reserve_20260928/reservation.json);
   the ID list stays outside Git in that worktree's ignored `artifacts/` directory.
 
-Strongest next bounded comparison after v1 release: score all 321 shortlisted
-CAL/TUNE pairs with the **frozen BGE checkpoint**, choose an add-link decision
-on TRAIN-CAL only, then measure the fixed rule's real macro F0.5/false links on
-all 12,000 medium TUNE S1s. If promising, recompute candidate-dependent features
-and train/score the fuller medium union matcher; only then freeze a finalist for
-the reserved confirmation holdout. France remains unmeasured.
+Next bounded hypothesis: the complementary lexical links beyond rank 20 may
+recover more of the **315** dense-missed truths. Extend one rank cap while keeping
+the full 10.32M competing target pool, regenerate all candidate-dependent
+features, score all newly eligible pairs (no surrogate CE scores), and compare
+complete medium TUNE F0.5, false links, country/script breakdown and cost against
+the same v1 baseline. Preserve both 0.50 and higher-precision 0.75 near-ties;
+freeze finalists before opening the reserved confirmation holdout. France remains
+unmeasured; these small TUNE gains are not an official-test improvement.
 
 ## Remaining release work
 
-1. Holdout is complete and must not be rerun for model selection. Test candidates
-   are also complete: **86,627,200 edges**, every S1 has its actual 50 candidates.
-2. Full test scoring is running: supervisor **46635**,
-   `logs/first_submission_v1.log`, `output/submission_v1`. Do not duplicate it.
-   Last read-only check: supervisor still active; durable `ready.json` absent.
-3. Its wrapper automatically runs both file validators and preserves verified
-   release copies. Download final TSVs only after `ready.json` confirms success.
-
-Reproduction uses `run_frozen_holdout.sh` then `run_first_submission.sh`, each
-with the explicit finalized pipeline SHA256; both have already been launched. No further model search is scheduled before v1 release. After recording the first
-platform result, resume bounded TRAIN/TUNE comparisons in separate outputs; the
-evaluated v1 holdout must not steer new thresholds or training choices.
-No official-test prediction files have been validated yet. Development TSVs are
-not submission files. Notify the user when the first complete validated pair is ready.
+1. Both official test TSVs and durable hashes are ready; the first platform upload
+   and public score remain to be recorded. The leaderboard accepts only the
+   matching TSV; its score covers a subset of hidden test labels.
+2. Build the verified final ZIP from the ready release and exact promoted weights
+   using the package command in the code README; no ZIP has been built yet.
+3. Keep v1's source, weights, gate and threshold frozen. Its holdout has already
+   been consumed; the new 12,000-S1 confirmation holdout remains sealed for a
+   later frozen procedure. Do not rerun v1 inference or change its validated TSVs.
 
 ## Existing artifacts — inspect before relaunching
 
@@ -126,6 +157,8 @@ Paths are relative to GPU `/tmp/az-ml-new` unless absolute. Live state can chang
 | `logs/test_candidates.log`, `artifacts/full_test_e5_ft200` | Complete: all test inputs searched, 86,627,200 candidate pairs. |
 | `data/medium_hard` | Complete: 2,987,950 edges; extra union queue 39793 stopped. Do not resume training before first submission. |
 | `artifacts/final_holdout_dense_v1`, `output/holdout_v1` | Complete: fixed F0.5 0.968292; labels now evaluated, no further tuning here. |
+| `output/submission_v1`, `/workspace/az-ml-new/releases/submission_v1` | Complete and `ready.json` verified; official/strict validators PASS, no platform score. |
+| `/tmp/az-ml-new/experiments/lexical_ce_shortlist*`, `/workspace/az-ml-new/artifacts/lexical_ce_shortlist_gate{075,050}_20260925` | Both label-free shortlist GPU scores complete, source/weights/probability hashes preserved; full TUNE reports local. |
 
 Medium seed **20260926** excludes all 12,000 quick references (seed 20260925).
 Verified quick/medium ID overlap is zero. Split counts and exact ID fingerprints
@@ -134,8 +167,8 @@ Original ZIP, statement files and raw dataset are unchanged, with all ten resour
 files verified against original ZIP byte counts/CRC32 in
 [source_integrity.json](../docs/source_integrity.json). Keep `/workspace/amlc` unchanged.
 
-The local ledger records **107** scored configurations (including weights and
-hyperparameters, not 107 independent approaches). See
+The complete ledger records **109** scored configurations (including weights and
+hyperparameters, not 109 independent approaches). See
 [EXPERIMENT_DECISIONS.md](EXPERIMENT_DECISIONS.md) for what each established.
 
 ## Repository handoff audit
@@ -143,12 +176,11 @@ hyperparameters, not 107 independent approaches). See
 Portable replay and final ZIP packaging commands are in the code README. The ZIP
 builder verifies complete release reports, exact checkpoint/source/output hashes,
 required structure and every archived byte. Team name is `techquilla-shots`;
-member names are unspecified. It requires a validated release; no production ZIP exists while inference is incomplete.
-The expanded suite passes 47 tests, including rejection of incomplete coverage,
-modified predictions/weights and archive overwrite. All 47 also pass in a fresh
-Git checkout using the existing CPU environment, with no data/weights/credentials
-copied. Portable replay CLI dry run passed; full clean-machine GPU replay/retraining
-has not been performed.
+member names are unspecified. A production ZIP has not yet been built from the
+now-ready release. The expanded suite passes 50 tests in this development worktree;
+the earlier 47 release tests also passed in a fresh Git checkout using the
+existing CPU environment. Portable replay CLI dry run passed; full clean-machine
+GPU replay/retraining has not been performed.
 
 Git excludes binaries/data by design. A new agent needs the supplied data and
 authorized GPU/key access; its working credential path, runtime and durable model

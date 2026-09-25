@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "gate": 0.5,
+  "rule": "lexical-only tree probability >= 0.50",
+  "calibration_pairs": 352,
+  "tune_pairs": 607,
+  "gate_chosen_from": "TRAIN-CAL diagnostics (52 true, 300 false); not TUNE labels",
+  "labels_used_to_select_individual_pairs": false,
+  "holdout_used": false,
+  "candidate_source_sha256": "4af8a0d17ff4573213872040ea4682940f3490495af7ccaf4c77d987136b3a16",
+  "lexical_checkpoint_sha256": "69433a397389c474caa06ec26bcbc42ed83c3afa53183242e40f05f580144d8b",
+  "v1_reranker_checkpoint_sha256": "91883cb6c8bfd5477dc98c8697226b8cefad1f5c46dd52579ccb6403eb159a65",
+  "cal_reference_id_sha256": "89f13ef4f9b41109459b274b7ace05a640216d7f0579fe46b52ccc1d1ad7fe22",
+  "tune_reference_id_sha256": "5bb5759fa52ac19df8839520c7ccf147bae01a5499a2900af5d1b4ebeb1dbaa2",
+  "shortlist_sha256": "8be4d263b56a10bf509e9fc77de6caac9f854c268adf402b9d06362d612a36ee",
+  "usage": "After v1 release, score every row with frozen BGE; choose the CE rule on TRAIN-CAL, then compare official macro F0.5 on complete medium TUNE."
+}

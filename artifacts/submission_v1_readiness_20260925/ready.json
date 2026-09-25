@@ -1,0 +1,18 @@
+{
+  "ready_for_submission": true,
+  "pipeline_sha256": "9ac4050a72c64b05c032a17ec26f2a13b339c1b8c135791bf07b737534371f5e",
+  "source1_rows": 1732544,
+  "file_sha256": {
+    "matching_results.tsv": "5df9ddbf42137d4e403f0072fe85169aaabc0167a0b431f675f926754371e1ed",
+    "candidate_pairs.tsv": "fc0ec7a43888208b25fef4deecea352a98dcce75797ea9288c0f7fb9e6ebca34",
+    "validation.json": "32f704dcda2938e7b662cb0722073564460d19abb5d6d55315623901b9540b79",
+    "validation.validator.log": "78b24dac3a27a6f9ea553101bacd9a4f36adab39b6e8582b9ab73293d957f113",
+    "frozen_pipeline.json": "9ac4050a72c64b05c032a17ec26f2a13b339c1b8c135791bf07b737534371f5e",
+    "report.json": "41457ce0fa723c245dd5dbbbcede15f57a7eab09312319558536d5438a374f0a",
+    "complete.json": "e3181fd18d62d9cf22dd114fb184476119d4e0f0b92a943d4a2d5c92a8d94e4b"
+  },
+  "leaderboard_file": "matching_results.tsv",
+  "validation_kind": "format_and_integrity_only",
+  "official_test_score": null,
+  "platform_submission_performed": false
+}

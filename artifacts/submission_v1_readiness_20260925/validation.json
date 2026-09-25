@@ -1,0 +1,41 @@
+{
+  "passed": true,
+  "validation_kind": "format_and_integrity_only",
+  "metric_score_computed": false,
+  "expected_source1_rows": 1732544,
+  "counts": {
+    "rows_checked": 1732544,
+    "matched_links": 5753111,
+    "candidate_links": 86627200,
+    "empty_match_rows": 98273
+  },
+  "stream_complete": true,
+  "file_sha256": {
+    "/tmp/az-ml-new/output/submission_v1/matching_results.tsv": "5df9ddbf42137d4e403f0072fe85169aaabc0167a0b431f675f926754371e1ed",
+    "/tmp/az-ml-new/output/submission_v1/candidate_pairs.tsv": "fc0ec7a43888208b25fef4deecea352a98dcce75797ea9288c0f7fb9e6ebca34",
+    "/tmp/az-ml-new/data/raw/dataset/test/test_source1.tsv": "3d4a32c54c2ca9c53fd7c2be105bf26f708f94c4d2f88eb370972a195665c2f5",
+    "/tmp/az-ml-new/data/raw/dataset/test/test_source2.tsv": "79d906c7497af2ace70aa277f6e334a652094909de99bd6c57b53420b6a7b2dd",
+    "/tmp/az-ml-new/data/raw/dataset/test/test_source3.tsv": "850942b11d2a4343486ed0834e28bce9f3b385f3fd497fd60ccf4ea3b8bda035",
+    "/tmp/az-ml-new/data/raw/utils/validate_submission.py": "f96f59934383a15095914f507620c078c474e8f9c60e864b2d051ed173a22dfc"
+  },
+  "errors": [],
+  "original_validator": {
+    "path": "/tmp/az-ml-new/data/raw/utils/validate_submission.py",
+    "sha256": "f96f59934383a15095914f507620c078c474e8f9c60e864b2d051ed173a22dfc",
+    "exit_code": 0,
+    "warnings": [],
+    "passed_without_warnings": true,
+    "stdout_path": "/tmp/az-ml-new/output/submission_v1/validation.validator.log",
+    "command": [
+      "/opt/amlc-venv/bin/python",
+      "data/raw/utils/validate_submission.py",
+      "--matching",
+      "output/submission_v1/matching_results.tsv",
+      "--candidate",
+      "output/submission_v1/candidate_pairs.tsv",
+      "--test-dir",
+      "data/raw/dataset/test",
+      "--check-ids"
+    ]
+  }
+}

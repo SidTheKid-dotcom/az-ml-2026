@@ -1,6 +1,6 @@
 # Completed model comparisons
 
-107 scored configurations, including ensembles/blend weights and hyperparameter variants. Repeated baseline evaluations and failed runs are not counted. These are not independent model families.
+109 scored configurations, including ensembles/blend weights and hyperparameter variants. Repeated baseline evaluations and failed runs are not counted. These are not independent model families.
 
 **Development scores do not establish submission readiness.** The initial model fell from 0.981500 to 0.832719 on the same 1,000 businesses when evaluated against 9,290,818 possible targets. Subsequent hard-pool experiments use all 10,320,219 original training targets. A fresh final holdout takes priority over additional tuning gains.
 
@@ -9,7 +9,9 @@
 | Setup | Matcher | Macro F0.5 | Precision | Recall | False links | Scope |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | hard_union_bge_ce600 | blend_0.5 | 0.969812 | 0.987683 | 0.934743 | 97 | full pool; 2400 tuning references |
+| ce_shortlist_bge_gate050_20260925 | ce_shortlist_bge_gate050_20260925 | 0.969317 | 0.987358 | 0.939652 | 499 | full pool; 12000 tuning references |
 | hard_union_bge_ce600 | blend_0.75 | 0.969290 | 0.986712 | 0.937027 | 105 | full pool; 2400 tuning references |
+| ce_shortlist_bge_v1_20260925 | ce_shortlist_bge_v1_20260925 | 0.969245 | 0.987405 | 0.939411 | 497 | full pool; 12000 tuning references |
 | medium_dense_bge_ce1800 | blend_0.75 | 0.968992 | 0.987471 | 0.938760 | 494 | full pool; 12000 tuning references |
 | medium_dense_bge_ce1800 | blend_0.5 | 0.968374 | 0.986135 | 0.939700 | 548 | full pool; 12000 tuning references |
 | medium_dense_bge_ce1800 | blend_1 | 0.967452 | 0.985953 | 0.935818 | 553 | full pool; 12000 tuning references |
@@ -122,7 +124,7 @@
 | quick_v1 | heuristic | 0.931796 | 0.986575 | 0.847855 | 96 | sampled pool; 2400 tuning references |
 
 
-Small-pool rows use 2,400 tuning businesses and 201,536 targets. Full-pool rows indicate their reference population; different populations and transfer checks are not direct model comparisons. Thresholds use tuning labels only. The official test set has hidden labels; no entire-test F0.5 or F1 is available.
+Small-pool rows use 2,400 tuning businesses and 201,536 targets. Full-pool rows indicate their reference population; different populations and transfer checks are not direct model comparisons. Thresholds use only TRAIN calibration or TUNE labels as stated in each report. The official test set has hidden labels; no entire-test F0.5 or F1 is available.
 
 Keep for independent validation: full-pool E5 plus lexical/phonetic retrieval, numeric-conflict features, and tree/BGE cross-encoder blends. Negative class weights depend on the candidate set: weight 1 won the initial lexical tree, while weight 4 won the quick-reference union tree. Prefer measured blends over the pure reranker in paired tests; heuristic-only matching and simple tree averaging remain weak leading options.
 

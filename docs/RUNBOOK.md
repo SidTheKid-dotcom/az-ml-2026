@@ -157,10 +157,11 @@ TSVs, and verifies durable copies under
 `/workspace/az-ml-new/releases/submission_v1`. Only its successful `ready.json`
 marks the files ready for the user to upload. It does not upload to the platform.
 No benchmark prefix is allowed in release outputs. Runtime benchmarks are complete;
-no further model search is queued before v1 release. Holdout finished; full test
-scoring is supervisor 46635, `logs/first_submission_v1.log`. Check live status
-before any restart. The frozen config flags describe selection time; later
-evaluation/readiness is recorded separately and must not rewrite its digest.
+the v1 holdout and full test scoring have finished, and supervisor 46635 exited.
+The durable `ready.json` is present with format/integrity PASS for all 1,732,544
+S1s and 86,627,200 candidates. Do not restart or alter that release. Develop
+subsequent models in separate scratch/durable experiment directories. The frozen
+config flags describe selection time; readiness must not rewrite its digest.
 
 Official outputs: `output/matching_results.tsv` (`source1_entity_id`,
 `matched_entity_ids`) and `output/candidate_pairs.tsv` (`source1_entity_id`,
@@ -169,15 +170,23 @@ Include all 1,732,544 test S1 exactly once; every predicted ID must be in the
 actual candidate set. Use `data/raw/utils/validate_submission.py --help`, then
 validate with **`--check-ids`**, both files, and the supplied test sources. Independently
 assert candidate subset/coverage: the supplied validator emits warnings for some
-violations. No submission file is ready yet. At most five public submissions/day;
-save hashes, configuration, reported score and exact file for each. Final packaging
-also needs reproducible code and the supplied methodology template.
+violations. The first validated files are ready under
+`/workspace/az-ml-new/releases/submission_v1`: `matching_results.tsv` SHA256
+`5df9ddbf42137d4e403f0072fe85169aaabc0167a0b431f675f926754371e1ed`
+and `candidate_pairs.tsv` SHA256
+`fc0ec7a43888208b25fef4deecea352a98dcce75797ea9288c0f7fb9e6ebca34`.
+Only `matching_results.tsv` goes to the live leaderboard. No platform upload
+has been performed. At most five public submissions/day; save hashes, configuration,
+reported score and exact file for each. Final packaging also needs reproducible
+code and the supplied methodology template.
 
 `ber.validate_release --matching output/matching_results.tsv --candidate
 output/candidate_pairs.tsv --test-dir data/raw/dataset/test --report
 artifacts/release_validation.json` runs the unchanged official script with ID
 checks and applies the stricter streaming gate. Its report includes output/input
-hashes; it validates format and integrity, **not score**. Run on actual final files.
+hashes; it validates format and integrity, **not score**. The first release passed
+both unchanged official `--check-ids` validation without warnings and the strict
+streaming gate. The exact reports are preserved beside its `ready.json`.
 
 `docs/source_integrity.json` verifies all ten extracted resource files against the
 original ZIP's byte counts and CRC32, and inventories the six original statement
