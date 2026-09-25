@@ -66,7 +66,7 @@ The matched 600-step comparison scored 0.966067 with 531 false links; the select
 
 ## 6. Conclusion
 
-Full-pool retrieval and difficult negatives substantially changed model selection compared with the easier sampled pool. The frozen dense/tree/BGE procedure retained its development performance on the untouched holdout. Complete official-test prediction and validation passed. The platform score remains unknown.
+Full-pool retrieval and difficult negatives substantially changed model selection compared with the easier sampled pool. The frozen dense/tree/BGE procedure retained its development performance on the untouched holdout. Complete official-test prediction and validation passed. At packaging time, the platform score was unknown. Subsequently the user reported a public F0.5 of **0.95639** on the first scored submission; the exact uploaded TSV has not yet been identified (`learnings/submissions.json`).
 
 ## Appendix
 

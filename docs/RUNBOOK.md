@@ -79,7 +79,8 @@ is `docs/frozen_dense_pipeline.json`, preserved as
 CE batch 128, length 256, reference batches 1,000, length sorting and pad8. Verified
 holdout F0.5 is 0.968292 on all 12,001 eval S1s against the full training pool.
 That holdout is now consumed for evaluation, not available for future tuning.
-No official test score exists.
+A first scored public submission returned user-reported F0.5 0.95639; its exact
+uploaded file/hash is still unconfirmed. This is not a full private-test score.
 
 ## Data and exact score
 
@@ -208,10 +209,13 @@ SHA256, public score, platform status and whether the submission was actually
 performed. A validator PASS is not a leaderboard score. Historical artifacts
 retain their paths and hashes even when a newer model wins.
 
-The first v1 upload is user-reported FAILED, with no error reason or platform
-score yet. The release manifest is the historical as-built snapshot; the mutable
-attempt record is `learnings/submissions.json`. See `learnings/CURRENT_STATE.md`
-before choosing any diagnostic variant or submitting again.
+The original v1 upload is user-reported FAILED, with no error reason; a later
+scored attempt returned 0.95639, with uploaded-file identity unconfirmed. The
+release manifest is the historical as-built snapshot; the mutable attempt record
+is `learnings/submissions.json`. See `learnings/CURRENT_STATE.md` before choosing
+any diagnostic variant or submitting again. The scratch v1 inference directory
+has aligned 86,627,200-row blended/tree score arrays and `scored_pairs.parquet`;
+these are not in the durable release or Git (see CURRENT_STATE for exact paths).
 
 ## V2 compute migration: SageMaker AI
 

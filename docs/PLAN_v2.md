@@ -1,6 +1,8 @@
 # V2 master plan — full-scale training, structural hacks, speed fixes
 
-Status: proposed 2026-09-25; no v2 gain or official score measured. Baseline: frozen v1, holdout F0.5 **0.968292**
+Status: proposed 2026-09-25; no v2 gain measured. The first scored public
+submission is user-reported F0.5 **0.95639** (uploaded file unconfirmed).
+Baseline: frozen v1, holdout F0.5 **0.968292**
 (precision 0.987270, recall 0.939456, 506 false links, 2,529 missed links,
 singleton accuracy 0.932650). Goal: a v2 that beats v1 with measured,
 paired evidence at every step. Nothing here touches the frozen v1 release.

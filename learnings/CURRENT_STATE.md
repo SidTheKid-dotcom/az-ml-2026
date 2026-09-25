@@ -46,7 +46,8 @@ change models, gate, blend, threshold or source after inspecting the holdout.
 - Small-pool screening reached 0.986490. The early frozen model fell from 0.981500
   to 0.832719 when its competing pool expanded on the same 1,000 references.
 - Repeated tuning can overfit. France has no training labels; US/India results
-  do not measure French accuracy. **No official score is available.**
+  do not measure French accuracy. The user-reported public leaderboard F0.5 for
+  the first scored submission is **0.95639**; the exact uploaded file is unconfirmed.
 
 ## First submission validated and available
 
@@ -55,7 +56,7 @@ and our strict stream check passed with no warnings: exactly **1,732,544 test S1
 rows**, **5,753,111 predicted links**, and **86,627,200 candidate links**.
 `matching_results.tsv` has exactly the original test S1 IDs in the same order,
 with no missing, extra or duplicate reference. Both local output hashes match the
-verified `ready.json`; no hidden-test metric has been computed.
+verified `ready.json`; no local hidden-test metric has been computed.
 
 Use the exact local files under `output/submission_v1/`; hard links to the two
 TSVs also exist directly under `output/`. The **435,776,769-byte**
@@ -66,17 +67,29 @@ same `matching_results.tsv` separately to the leaderboard.
 SHA256 hashes, sizes and validation. Model weights and raw data are external to
 the ZIP so it fits the 500 MB code-upload field; exact replay needs those weights.
 
-The user reports uploading the original v1 matching TSV and seeing **FAILED**
-on the platform; its error reason and whether the attempt consumed a daily slot
-are unknown. No platform F0.5 exists. The frozen release files still match the
-recorded hashes. Train ground truth and test Source 1 use LF endings, while the
-original v1 outputs use CRLF; portal incompatibility is unproven. An independently
-generated LF-only matching TSV is available at
+The user reports an earlier upload of the original v1 matching TSV as **FAILED**;
+its error reason and whether the attempt consumed a daily slot are unknown. A
+later first scored submission returned **public F0.5 0.95639 (user-reported)**.
+The exact uploaded bytes, file variant and platform submission ID are not yet
+confirmed; do not attach this score to the frozen v1 TSV hash without evidence.
+The frozen release files still match the recorded hashes. Train ground truth and
+test Source 1 use LF endings, while the original v1 outputs use CRLF; portal
+incompatibility is unproven. An independently generated LF-only matching TSV is available at
 `output/submission_v1_lf_diagnostic/matching_results.tsv` and passed the official
 validator with the original candidate file; it is a diagnostic variant, not a
-scored release. See `submissions.json` for the reported attempt. Keep subsequent
+confirmed scored release. See `submissions.json` for both reported attempts. Keep subsequent
 experiments separate from this frozen release; v1 holdout labels are no longer
 untouched.
+
+The v1 test predictor saved float32 blended scores for all **86,627,200**
+candidate pairs at GPU scratch `/tmp/az-ml-new/output/submission_v1/probabilities.npy`
+and the aligned tree scores at `base_probabilities.npy`, ordered by
+`scored_pairs.parquet`. All three files were confirmed present on the pod. The
+blend array stores zero for off-gate or provably rejected pairs (not a computed
+CE score); only 7,068,690 pairs received CE calls. The optional
+`cross_probabilities.npy` was not saved. These large arrays/pairs were not copied
+to `/workspace/az-ml-new/releases/submission_v1` or the local release package;
+scratch is ephemeral, so preserve them separately before shutting down the pod.
 
 ## Existing artifacts — inspect before relaunching
 
@@ -121,7 +134,8 @@ has not been performed.
 
 Git excludes binaries/data by design. A new agent needs the supplied data and
 authorized GPU/key access; its working credential path, runtime and durable model
-registry are in `docs/`. One user-reported platform attempt is recorded as FAILED
-in `submissions.json`, with no reported public score or confirmed portal reason.
+registry are in `docs/`. The failed attempt and a separate user-reported **0.95639**
+scored attempt are recorded in `submissions.json`; uploaded-file identity and
+the earlier portal failure reason remain unconfirmed.
 For future experiments, consult the SageMaker migration in `docs/RUNBOOK.md` and
 the proposed `docs/PLAN_v2.md`; neither changes the frozen v1 score or release.

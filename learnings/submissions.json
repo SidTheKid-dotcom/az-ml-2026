@@ -12,7 +12,21 @@
       "failure_reason": null,
       "public_score": null,
       "daily_quota_consumed": null,
-      "note": "User reports uploading the original 09:56 v1 matching TSV and seeing FAILED. Exact portal error, upload-time bytes, and quota accounting remain unconfirmed."
+      "note": "User reports uploading the original 09:56 v1 matching TSV and seeing FAILED. Exact portal error, upload-time bytes, and quota accounting remain unconfirmed. Kept as a separate failed attempt from the later scored submission."
+    },
+    {
+      "release_id": "submission_v1",
+      "date_reported": "2026-09-25",
+      "platform_status": "SCORED (user-reported)",
+      "platform_submission_performed": true,
+      "local_matching_file": null,
+      "local_matching_sha256": null,
+      "uploaded_file_sha256_confirmed_by_platform": null,
+      "platform_submission_id": null,
+      "failure_reason": null,
+      "public_score": 0.95639,
+      "daily_quota_consumed": null,
+      "note": "User reports 0.95639 on the first scored submission this evening. The exact uploaded file (original v1 TSV versus LF-only diagnostic), its hash, platform submission ID and screenshot have not been confirmed. Do not attribute this score to a particular file hash yet."
     }
   ]
 }

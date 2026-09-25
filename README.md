@@ -40,11 +40,12 @@ Small-pool scores around 0.986 were optimistic. Full-pool hard-negative training
 is now the decision basis. The first full-test matching and candidate TSVs are complete and passed the
 unchanged official validator plus strict coverage/subset checks. Exact release
 hashes and local paths are in
-[submission_v1_release.json](docs/submission_v1_release.json). The platform score
-is still unknown; development TSVs must not be uploaded as test predictions.
-The user reported a **FAILED** first platform upload, with no reason or score
-confirmed; see [submission attempts](learnings/submissions.json). The frozen
-release hashes remain the reference for investigating that failure.
+[submission_v1_release.json](docs/submission_v1_release.json). A user-reported
+first scored submission received public F0.5 **0.95639**; the exact uploaded
+file has not been identified. An earlier upload was reported **FAILED**. See
+[submission attempts](learnings/submissions.json); the frozen release hashes
+remain the reference for investigating the upload identity and failure.
+Development TSVs must not be uploaded as test predictions.
 
 The frozen first matcher uses **35,999 labeled training businesses**, with 12,000
 separate tuning businesses and a 12,001-business holdout. Its verified holdout
