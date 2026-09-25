@@ -15,7 +15,8 @@
     "path": "output/submission_v1/matching_results.tsv",
     "bytes": 98313151,
     "sha256": "5df9ddbf42137d4e403f0072fe85169aaabc0167a0b431f675f926754371e1ed",
-    "also_at": "output/matching_results.tsv"
+    "also_at": "output/matching_results.tsv",
+    "github_asset": "https://github.com/SidTheKid-dotcom/az-ml-2026/releases/download/submission-v1-files/matching_results.tsv"
   },
   "candidate_pairs": {
     "path": "output/submission_v1/candidate_pairs.tsv",
@@ -40,6 +41,8 @@
       "code/business_entity_resolution/README.md",
       "code/business_entity_resolution/requirements.txt",
       "Documentation_template.md"
-    ]
-  }
+    ],
+    "github_asset": "https://github.com/SidTheKid-dotcom/az-ml-2026/releases/download/submission-v1-files/techquilla-shots_submission.zip"
+  },
+  "release": "submission-v1-files"
 }
