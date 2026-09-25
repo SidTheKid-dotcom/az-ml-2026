@@ -23,6 +23,8 @@ python -m unittest discover -s tests -v
 
 `requirements.txt` preserves the measured local CPU environment. Use
 `requirements-gpu.txt` for training/replay; do not combine the two NumPy pins.
+`resources/validate_submission.py` is an unchanged, hash-verified copy of the
+supplied validator, so unit tests also work without downloading the raw data.
 The selected recipe was run on A40 / 48 GB with ~7.65 CPU / 50 GB RAM. Keep active memory
 maps on fast local disk. Replay needs at least 30 GB free; more room is needed for
 training, multiple caches and the final ZIP. Dependencies must be available;

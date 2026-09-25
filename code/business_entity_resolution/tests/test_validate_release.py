@@ -6,7 +6,7 @@ from pathlib import Path
 
 from ber.validate_release import file_sha256, validate_release
 
-OFFICIAL = Path(__file__).resolve().parents[3] / "data/raw/utils/validate_submission.py"
+OFFICIAL = Path(__file__).resolve().parents[1] / "resources/validate_submission.py"
 
 
 class ReleaseGateTests(unittest.TestCase):

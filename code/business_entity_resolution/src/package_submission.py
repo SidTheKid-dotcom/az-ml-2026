@@ -45,7 +45,9 @@ def build(args) -> Path:
     verify_sources(config, code)
     encoder, tree, cross = verify_models(config, models)
     integrity = json.loads((repo / 'docs/source_integrity.json').read_text())
-    validator = repo / 'data/raw/utils/validate_submission.py'
+    validator = code / 'resources/validate_submission.py'
+    if not validator.is_file():
+        validator = repo / 'data/raw/utils/validate_submission.py'
     expected = next(r['sha256'] for r in integrity['files'] if r['path'].endswith('/validate_submission.py'))
     if file_digest(validator) != expected:
         raise ValueError('Official validator identity differs from the supplied archive')
