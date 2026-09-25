@@ -71,15 +71,24 @@ classification logit, and Qwen scores yes/no as a language model.
 
 ## Running now
 
-The A40 is training BGE for 14,400 steps on the medium dense set, then a
-7,200-step field-format run. Both reuse the 36k training businesses. Keep a
-result only if medium-tune F0.5 beats 0.968992 and the paired interval does
-not cross zero. When that queue exits, `keep_gpu_busy.sh` starts
-`experiments/queue.json`: the same setup with conflict negatives only
-(the false links are same-name, same-digits, different unit). Output is on
-`/workspace`, so it does not fill the 30 GB overlay.
+The first 14,400-step run and `keep_gpu_busy.sh` died at 19:55 UTC 25 Sep when
+their session ended (step 11,240, no checkpoint). Relaunched detached at 20:30
+UTC: `r0_fields7200_20260926b` then `r0_pipe14400_20260926b`, outputs under
+`/workspace/az-ml-new/experiments/`, logs `/tmp/az-ml-v2/logs_r0/`. Keep a
+result only if medium-tune F0.5 beats 0.968992 with a paired interval above
+zero. v1 test score arrays are hash-verified at
+`/workspace/az-ml-new/releases/submission_v1_scores/`.
 
-## Next code, in this order
+## The plan
+
+**[docs/PLAN_v2.md](docs/PLAN_v2.md) is the executable final plan** (arena,
+ownership decision layer, matcher v2, France, GPU schedule, uploads). Its §1
+records the 26 Sep measurements: empty-address records are ~98% owned and v1
+accepts only 25% of their true links; the name-only rule gains +0.0040 on
+TUNE; France holds 74.5% of test contests. The list below is the earlier order,
+kept for its manual references.
+
+## Earlier next-code order
 
 The manual’s priced headroom on the current files, if every contest winner
 were right, is 3,944 entity-points (about 0.0023 of the full test). The
