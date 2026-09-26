@@ -130,3 +130,32 @@ Qwen train and score → ensemble assembly on 27 Sep morning.
   `~/Downloads/probe-france-blank/matching_results.tsv`, SHA `3d125673…`, validator
   PASS. With B = probe public score and French singleton rate s ≈ 0.0558:
   US/India = (B − 0.1498·s)/0.8502 and France = (0.978287 − 0.8502·US/India)/0.1498.
+
+## Track R retrieval branches (26 Sep, `ber.retrieval_eureka`)
+
+- **Arena B_REST link recall** (US/India, SLICE/HOLDOUT-2 not queried):
+  - dense top-50: 0.98369, oracle F0.5 0.99460
+  - plus union k3: 0.98546, oracle 0.99522
+  - plus the address branch (word uni/bigram TF-IDF on normalized addresses,
+    top-10, cosine ≥ 0.25): +5,979 true links, recall 0.98876
+  - plus the empty-address branch (char 3-gram names vs empty-address
+    records, top-5): +2,233, recall **0.99000**, oracle **0.99675**
+  - native-script branch (anyascii + consonant skeleton): +3. Discarded; the
+    address branch already reaches those records.
+- **New pairs are nearly all distractors.** Address pairs at cosine ≥ 0.7
+  are 1.6% true. Empty-address pairs at ≥ 0.95 are only 0.5% true: exact
+  names on empty-address records mostly belong to other entities.
+- **Kept for scoring:** address ≥ 0.6, plus empty ≥ 0.8 at rank ≤ 2. On B_REST
+  that is 689,474 new pairs with 4,897 true, recall 0.98817, oracle 0.99614
+  (+0.0009 over dense ∪ union). The matcher will realize only part of it.
+- **Test:** 3,677,525 new pairs (France 2,098,656, India 1,087,571, US 491,298).
+  France gets about 8 per S1 because its addresses are short and generic; cap
+  it by rank (rank ≤ 2 leaves 647,926). `test/score.npy`, `rank.npy` and
+  `branch.npy` are aligned for filtering.
+- **The dense test pool is compact.** 183,173 raw test records (India 108,742,
+  France 59,340 = 4.1% of French records, US 15,091) are in no S1's top-50,
+  so they are unreachable in every current file. 143,193 of the new pairs
+  reach such records.
+- Paths: `/workspace/az-ml-new/eureka/retrieval/{b_rest,test,report.json}`.
+- **Verdict:** keep as a scoring input; not a standalone gain. It passes the
+  +5k-true bar only at full size (+8,212).
