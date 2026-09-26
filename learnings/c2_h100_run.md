@@ -159,3 +159,33 @@ Qwen train and score → ensemble assembly on 27 Sep morning.
 - Paths: `/workspace/az-ml-new/eureka/retrieval/{b_rest,test,report.json}`.
 - **Verdict:** keep as a scoring input; not a standalone gain. It passes the
   +5k-true bar only at full size (+8,212).
+
+## Track C — collective (name-sibling / alias / bridge) features, 26 Sep ~21:40 IST
+
+- **Code:** `ber/collective_features.py` (pool-wide tables: core-name siblings,
+  digit address keys, orphan keys, alias recurrence, dba/née bridges) and
+  `ber/collective_pair_tree.py` (pair_tree_c2 features + collective, same B_REST
+  component cross-fit, paired against the saved S1 baseline OOF). Work dirs:
+  `/opt/az-ml-new/agents/pair_tree_c2/eureka_collective{,_ext}/` (`signals.json`,
+  `report.json`).
+- **Signals on B_REST candidate rows:**
+  - Empty-address records, 680k rows, 9.6% true.
+    - With a unique core (no other S1 has it), 93–99% are true and already
+      accepted; only ~1.3k rejected rows at 50–89% true.
+    - With a core shared by other S1s, 475k rows are 4.3–4.6% true, and the
+      rejected ones are 3.6–3.9% true (~17.8k true links). They are
+      intrinsically ambiguous by name.
+  - Name-disjoint records at the S1's digit key: 141k rows, baseline precision
+    99.76%, rejected 3.4% true.
+  - dba/née bridge records: 99.95% true and already accepted. No standalone alias
+    is bridged.
+- **Cross-fit "model": 0.985971 vs 0.985511, +0.000460, CI [+0.000398, +0.000519].**
+  False links 3,674 → 3,256, recall 0.96096 → 0.96174, false merges 121 → 107.
+  US +0.00054, India +0.00034. Full-OOF threshold 0.75. With C2 extras:
+  0.985962 (no gain).
+- **Verdict:** below the +0.0005 bar, a higher-precision near-tie with CI > 0.
+  Keep the module (stackable with new retrieval pairs); no test file built. To
+  build one:
+  `python -m ber.collective_pair_tree test --work /opt/az-ml-new/agents/pair_tree_c2/eureka_collective --out /opt/az-ml-new/runs/eureka_collective`.
+  The matcher-side "generator logic" is nearly exhausted. The remaining US/India
+  loss is retrieval (~50%) plus shared-name empty-address ambiguity.
