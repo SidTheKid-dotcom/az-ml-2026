@@ -1,9 +1,11 @@
 """Merge C2-scored union pairs (beyond the dense top-50) into an existing dense decision.
 
-Rule (both modes): the dense decision is fixed. A new pair is accepted when its
-C2 probability ≥ t, its record is not already accepted by any dense link, it
-wins its record among new claimants (highest C2; ties lower S1), and the S1's
-list stays ≤ 11 (dense links first, then new links by C2). Optional ``--k``
+Rule (both modes): the dense decision is fixed. A new pair's decision score is
+w·C2 + (1−w)·ranker (the A-fitted union ranker probability saved in the set's
+pairs.parquet; w = 1 is C2 alone, w = 0 needs no GPU). It is accepted when the
+score ≥ t, its record is not already accepted by any dense link, it wins its
+record among new claimants (highest score; ties lower S1), and the S1's list
+stays ≤ 11 (dense links first, then new links by score). Optional ``--k``
 keeps only new pairs with union rank < k.
 
 `arena`: B_REST only (SLICE and HOLDOUT-2 unread). The dense decision is the
@@ -121,7 +123,8 @@ def arena_cmd(args) -> dict:
 
     setdir = Path(args.set)
     ref = pd.read_parquet(setdir / "reference.parquet", columns=["arena_idx", "country"])
-    pairs = pd.read_parquet(setdir / "pairs.parquet", columns=["s1", "raw", "rank"])
+    pairs = pd.read_parquet(setdir / "pairs.parquet", columns=["s1", "raw", "rank", "score"])
+    ranker = pairs.score.to_numpy().astype(np.float32)  # A-fitted union ranker probability
     new_label = np.load(setdir / "eval_label.npy")
     c2 = np.load(Path(args.new_scores) / "scores.npy").astype(np.float32)
     if not (len(c2) == len(pairs) == len(new_label)):
@@ -133,8 +136,10 @@ def arena_cmd(args) -> dict:
     owned = np.isin(nraw, owned_records)
     half = (components % 2).astype(np.int8)
 
-    def merged(threshold, k):
-        acc = add_new(s1, nraw, c2, pairs["rank"].to_numpy() < k, owned, k_dense, threshold)
+    def merged(key, k):
+        w, threshold = key
+        prob = w * c2 + (1 - w) * ranker
+        acc = add_new(s1, nraw, prob, pairs["rank"].to_numpy() < k, owned, k_dense, threshold)
         kk = k_dense + np.bincount(s1[acc], minlength=n_s1)
         tp = tp_dense + np.bincount(s1[acc & new_label], minlength=n_s1)
         return acc, entity_f05(tp, kk, true_count)
@@ -147,10 +152,11 @@ def arena_cmd(args) -> dict:
               "new_pairs_owned_by_dense": int(owned.sum()), "by_k": {}}
     for k in ks:
         grid = {}
-        for t in THRESHOLDS:
-            _, per = merged(t, k)
-            grid[float(t)] = [float(per[population & (half == h)].mean()) for h in (0, 1)]
-        picks = [max(grid, key=lambda t: (grid[t][h], t)) for h in (0, 1)]
+        for w in args.weights:
+            for t in THRESHOLDS:
+                _, per = merged((w, float(t)), k)
+                grid[(w, float(t))] = [float(per[population & (half == h)].mean()) for h in (0, 1)]
+        picks = [max(grid, key=lambda key: (grid[key][h], key[1])) for h in (0, 1)]
         per_cross = per_dense.copy()
         for h, t in zip((0, 1), picks):
             _, per = merged(t, k)
@@ -158,7 +164,7 @@ def arena_cmd(args) -> dict:
             per_cross[other] = per[other]
         boot = component_bootstrap(per_dense, per_cross, components, n=args.bootstrap, population=population,
                                    seed=20260926)
-        full_t = max(grid, key=lambda t: (sum(grid[t]), t))
+        full_t = max(grid, key=lambda key: (sum(grid[key]), key[1]))
         acc, per_full = merged(full_t, k)
         by_country = {}
         for c in np.unique(ref_country[s1]):
@@ -172,7 +178,7 @@ def arena_cmd(args) -> dict:
             "full_threshold_new_precision": float((acc & new_label).sum() / max(1, acc.sum())),
             "new_links_to_singletons": int((acc & (true_count[s1] == 0)).sum()),
             "by_country": by_country,
-            "grid": {str(t): v for t, v in grid.items()}}
+            "grid": {f"{w}:{t}": v for (w, t), v in grid.items()}}
         log(f"k={k} picks {picks} crossfit {per_cross[population].mean():.6f} delta {boot['delta']:+.6f} "
             f"CI [{boot['ci_low']:+.6f}, {boot['ci_high']:+.6f}]; full t={full_t} new {int(acc.sum())} "
             f"true {int((acc & new_label).sum())}")
@@ -227,12 +233,17 @@ def test_cmd(args) -> dict:
                               .column("entity_id").to_pylist(), dtype=object)
     left = np.load(setdir / "left.npy").astype(np.int64)
     right = np.load(setdir / "right.npy").astype(np.int64)
-    rank = pd.read_parquet(setdir / "pairs.parquet", columns=["rank"])["rank"].to_numpy()
+    set_pairs = pd.read_parquet(setdir / "pairs.parquet", columns=["rank", "score"])
+    rank = set_pairs["rank"].to_numpy()
+    ranker = set_pairs["score"].to_numpy().astype(np.float32)
     c2 = np.load(Path(args.new_scores) / "scores.npy").astype(np.float32)
     if not (len(left) == len(right) == len(rank) == len(c2)):
         raise SystemExit("new-pair arrays are not aligned")
     eligible = rank < args.k
+    if args.countries:  # e.g. US India: France has no labels to validate new links
+        eligible &= np.isin(country[left], args.countries)
     owned = pd.Index(new_pool_ids).isin(owned_ids)[right]
+    c2 = args.weight * c2 + (1 - args.weight) * ranker  # decision score (weight 1 = C2 only)
     acc = add_new(left, right, c2, eligible, owned, dense_count, args.threshold)
     log(f"new links accepted: {int(acc.sum()):,} of {int(eligible.sum()):,} eligible new pairs")
 
@@ -297,7 +308,8 @@ def test_cmd(args) -> dict:
                            "empty_rows": int(((country == c) & (lengths == 0)).sum())}
                   for c in np.unique(country)}
     import hashlib
-    report = {"threshold": args.threshold, "k": args.k, "dense_matching": str(args.dense_matching),
+    report = {"threshold": args.threshold, "weight": args.weight, "k": args.k, "countries": args.countries,
+              "dense_matching": str(args.dense_matching),
               "new_scores": str(args.new_scores), "rows": n, "dense_links": int(dense_count.sum()),
               "new_links": int(acc.sum()), "links": int(lengths.sum()), "longest_list": int(lengths.max()),
               "candidate_pairs": int(len(cand_s1)), "new_candidate_pairs": int(eligible.sum()),
@@ -326,6 +338,8 @@ def main():
     a.add_argument("--dense-prob", help="float .npy dense probability (e.g. pair-tree OOF); uses --threshold")
     a.add_argument("--dense-rows", help="arena pair row indices of --dense-accept/--dense-prob")
     a.add_argument("--ks", type=int, nargs="+", default=[1, 2, 3, 5, 10])
+    a.add_argument("--weights", type=float, nargs="+", default=[1.0],
+                   help="Decision score w*new_scores + (1-w)*ranker probability; grid over w and t")
     a.add_argument("--bootstrap", type=int, default=2000)
     a.add_argument("--output", required=True)
     t = sub.add_parser("test")
@@ -334,7 +348,9 @@ def main():
     t.add_argument("--set", required=True, help="union_mine export dir for test")
     t.add_argument("--new-scores", required=True)
     t.add_argument("--threshold", type=float, required=True)
+    t.add_argument("--weight", type=float, default=1.0, help="w*new_scores + (1-w)*ranker probability")
     t.add_argument("--k", type=int, default=10 ** 6)
+    t.add_argument("--countries", nargs="+", help="Add new links only for these S1 countries (default all)")
     t.add_argument("--output", required=True)
     args = parser.parse_args()
     (arena_cmd if args.command == "arena" else test_cmd)(args)
