@@ -19,3 +19,16 @@ releases/
 id_ed25519*
 id_rsa*
 .claude/
+# Large arrays/tables, weights and checkpoints stay outside Git.
+*.npy
+*.npz
+*.parquet
+*.feather
+*.arrow
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.ckpt
+*.onnx
+checkpoint*/
