@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 from concurrent.futures import Future, ThreadPoolExecutor
+import os
 from dataclasses import asdict, dataclass, replace
 from enum import IntFlag
 import hashlib
@@ -335,8 +336,13 @@ class TokenBatch:
 def tokenize_batch(tokenizer, left_text: list[str], right_text: list[str], pair_ids,
                    labels, weights, left_idx, right_idx, *, max_length: int,
                    microbatch: int, pin_memory: bool = False,
-                   sampler_state: dict | None = None) -> TokenBatch:
-    """Tokenize once without padding, then stable-bucket and pad each microbatch."""
+                   sampler_state: dict | None = None,
+                   length_buckets: tuple[int, ...] | None = None) -> TokenBatch:
+    """Tokenize once without padding, then stable-bucket and pad each microbatch.
+
+    With ``length_buckets`` every microbatch is padded to the smallest listed
+    width that holds it, so ``torch.compile`` sees a few static shapes.
+    """
     ids = np.asarray(pair_ids, dtype=np.int64)
     left = np.asarray(left_idx, dtype=np.int64)
     right = np.asarray(right_idx, dtype=np.int64)
@@ -348,7 +354,12 @@ def tokenize_batch(tokenizer, left_text: list[str], right_text: list[str], pair_
     batches, positions_out = [], []
     for positions in minibatch_order(lengths, microbatch, True):
         rows = [{name: encoded[name][int(i)] for name in columns} for i in positions]
-        tokens = tokenizer.pad(rows, padding=True, pad_to_multiple_of=8, return_tensors="pt")
+        if length_buckets:
+            longest = int(lengths[positions].max())
+            width = next(size for size in length_buckets if size >= longest)
+            tokens = tokenizer.pad(rows, padding="max_length", max_length=width, return_tensors="pt")
+        else:
+            tokens = tokenizer.pad(rows, padding=True, pad_to_multiple_of=8, return_tensors="pt")
         if pin_memory:
             tokens = {name: value.pin_memory() for name, value in tokens.items()}
         batches.append(tokens)
@@ -366,7 +377,10 @@ class TokenizationPrefetcher:
         self.batches, self.tokenize, self.depth = iter(batches), tokenize, depth
 
     def __iter__(self) -> Iterator[TokenBatch]:
-        with ThreadPoolExecutor(max_workers=1, thread_name_prefix="c2-tokenizer") as executor:
+        workers = int(os.environ.get("BER_TOKENIZER_WORKERS", "1"))
+        if workers < 1:
+            raise ValueError("BER_TOKENIZER_WORKERS must be positive")
+        with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="c2-tokenizer") as executor:
             pending: list[Future] = []
             for _ in range(self.depth):
                 try:
@@ -425,19 +439,29 @@ def learning_rate(step: int, *, base: float, warmup_steps: int,
     raise ValueError(f"Unknown learning-rate schedule: {schedule}")
 
 
+_DEFERRED_HASH_MIN_BYTES = 64 * 1024 * 1024
+
+
 def _checkpoint_marker(directory: Path) -> dict:
     marker = json.loads((directory / "complete.json").read_text(encoding="utf-8"))
     files = marker.get("files_sha256", {})
+    sizes = marker.get("files_bytes", {})
     actual = {path.name for path in directory.iterdir() if path.name != "complete.json"}
-    if marker.get("state") != "complete" or set(files) != actual or any(
-            file_sha256(directory / name) != digest for name, digest in files.items()):
+    if (marker.get("state") != "complete" or set(files) & set(sizes) or set(files) | set(sizes) != actual
+            or any(file_sha256(directory / name) != digest for name, digest in files.items())
+            or any((directory / name).stat().st_size != size for name, size in sizes.items())):
         raise ValueError("Checkpoint is incomplete or changed")
     return marker
 
 
 def save_checkpoint(model, tokenizer, optimizer, sampler,
-                    *, step: int, config: dict, config_sha256: str, root: Path, torch) -> Path:
-    """Atomically commit model, optimizer, and all RNG/sampling state."""
+                    *, step: int, config: dict, config_sha256: str, root: Path, torch,
+                    defer_hash: bool = False) -> Path:
+    """Atomically commit model, optimizer, and all RNG/sampling state.
+
+    ``defer_hash`` records large weight/optimizer files by byte size only; a
+    network volume otherwise stalls training for minutes re-reading them.
+    """
     destination = Path(root) / f"step_{step:06d}"
     stage = Path(root) / f".step_{step:06d}.incomplete"
     Path(root).mkdir(parents=True, exist_ok=True)
@@ -455,9 +479,14 @@ def save_checkpoint(model, tokenizer, optimizer, sampler,
         raise ValueError("Checkpoint sampler state must end at the committed optimizer step")
     json_write(stage / "state.json", {"step": step, "config_sha256": config_sha256,
                                        "sampler": sampler_state})
-    files = {path.name: file_sha256(path) for path in stage.iterdir() if path.is_file()}
-    json_write(stage / "complete.json", {"state": "complete", "step": step,
-                                          "config_sha256": config_sha256, "files_sha256": files})
+    written = [path for path in stage.iterdir() if path.is_file()]
+    deferred = {path.name: path.stat().st_size for path in written
+                if defer_hash and path.stat().st_size >= _DEFERRED_HASH_MIN_BYTES}
+    files = {path.name: file_sha256(path) for path in written if path.name not in deferred}
+    marker = {"state": "complete", "step": step, "config_sha256": config_sha256, "files_sha256": files}
+    if deferred:
+        marker["files_bytes"] = deferred
+    json_write(stage / "complete.json", marker)
     stage.replace(destination)
     return destination
 
@@ -515,9 +544,13 @@ def _partition_values(path: Path | None, count: int) -> np.ndarray:
     if partition.dtype.kind == "b":
         partition = np.where(partition, "A", "B")
     elif partition.dtype.kind in "iu":
-        names = np.asarray(["A", "B", "SLICE", "B_REST"])
-        if len(partition) and (partition.min() < 0 or partition.max() >= len(names)):
+        # finalize_v1 stores 0=A, 1=B_REST, 2=SLICE (arena_build.PARTITION_NAMES).
+        # A file that also uses code 3 keeps the older 0=A, 1=B, 2=SLICE, 3=B_REST order.
+        if len(partition) and (int(partition.min()) < 0 or int(partition.max()) > 3):
             raise ValueError("Integer arena partition codes must be in 0..3")
+        names = (np.asarray(["A", "B_REST", "SLICE"])
+                 if not len(partition) or int(partition.max()) <= 2
+                 else np.asarray(["A", "B", "SLICE", "B_REST"]))
         partition = names[partition]
     elif partition.dtype.kind == "S":
         partition = partition.astype("U")
@@ -663,6 +696,9 @@ def verified_checkpoint(path: Path) -> tuple[dict, dict]:
     identity = {"path": str(path.resolve()), "marker_sha256": file_sha256(path / "complete.json"),
                 "step": marker["step"], "config_sha256": marker["config_sha256"],
                 "model_files_sha256": marker["files_sha256"]}
+    if marker.get("files_bytes"):
+        identity["deferred_files_sha256_at_verify"] = {name: file_sha256(path / name)
+                                                       for name in marker["files_bytes"]}
     return config, identity
 
 
@@ -929,6 +965,11 @@ def train(args) -> dict:
         if profile.mode != "c2":
             raise ValueError("Only C2 may override its screen schedule")
         profile = replace(profile, schedule=args.schedule)
+    text_view = getattr(args, "text_view", None)
+    if text_view == "plain":
+        if profile.mode != "c2":
+            raise ValueError("Only C2 may switch to the plain 'name | address' view")
+        profile = replace(profile, canonical_text=False, field_tagged=False)
     if profile.mode in {"c2", "g0"} and getattr(args, "sealed_reservation", None) is None:
         raise ValueError("C2/G0 training requires the sealed ID reservation")
     data = load_arena(args.arena, args.labels, partition_file=args.partition,
@@ -967,7 +1008,9 @@ def train(args) -> dict:
     left_text = record_texts(data.reference, canonical=profile.canonical_text, field_tagged=profile.field_tagged)
     right_text = record_texts(data.pool, canonical=profile.canonical_text, field_tagged=profile.field_tagged)
     initial_model = model_identity(args.model, args.allowlist, args.model_id)
-    model, tokenizer = load_reranker(args.model, args.device)
+    attn = getattr(args, "attn_implementation", None)
+    buckets = getattr(args, "length_buckets", None)
+    model, tokenizer = load_reranker(args.model, args.device, attn)
     frozen_names = freeze_word_embeddings(model, args.freeze_embeddings)
     optimizer = build_adamw(torch, model, learning_rate=args.learning_rate,
                             weight_decay=args.weight_decay, fused=args.fused, device=args.device)
@@ -979,6 +1022,8 @@ def train(args) -> dict:
               "learning_rate": args.learning_rate, "weight_decay": args.weight_decay,
               "warmup_fraction": args.warmup_fraction, "fused": args.fused,
               "frozen_parameters": frozen_names, "amp": args.amp}
+    if buckets:
+        config["length_buckets"] = list(buckets)
     digest = _config_digest(config)
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
@@ -999,7 +1044,7 @@ def train(args) -> dict:
         if (pointer.get("step") != _checkpoint_marker(checkpoint)["step"]
                 or pointer.get("marker_sha256") != file_sha256(checkpoint / "complete.json")):
             raise ValueError("Latest checkpoint pointer no longer matches its committed marker")
-        model, tokenizer = load_reranker(str(checkpoint), args.device)
+        model, tokenizer = load_reranker(str(checkpoint), args.device, attn)
         frozen_names = freeze_word_embeddings(model, args.freeze_embeddings)
         optimizer = build_adamw(torch, model, learning_rate=args.learning_rate,
                                 weight_decay=args.weight_decay, fused=args.fused, device=args.device)
@@ -1008,6 +1053,11 @@ def train(args) -> dict:
                                             gated_negative=gated, batch_size=profile.batch_size,
                                             positive_fraction=profile.positive_fraction,
                                             seed=args.seed, torch=torch)
+    attn_used = getattr(model.config, "_attn_implementation", None)
+    print(json.dumps({"attn_implementation": attn_used, "compile": bool(getattr(args, "compile", False)),
+                      "length_buckets": list(buckets) if buckets else None,
+                      "text_view": "plain" if not profile.field_tagged else "tagged"}), flush=True)
+    forward = torch.compile(model) if getattr(args, "compile", False) else model
     warmup = round(profile.steps * args.warmup_fraction)
     pair_digest = hashlib.sha256()
     losses: list[dict] = []
@@ -1026,7 +1076,7 @@ def train(args) -> dict:
                               data.left, data.right, max_length=args.max_length,
                               microbatch=args.microbatch,
                               pin_memory=args.pin_memory and args.device.startswith("cuda"),
-                              sampler_state=sampler_state)
+                              sampler_state=sampler_state, length_buckets=buckets)
 
     started = time.perf_counter()
     for step, batch in enumerate(TokenizationPrefetcher(descriptors(), tokenized, depth=args.prefetch), start + 1):
@@ -1039,7 +1089,7 @@ def train(args) -> dict:
             target = torch.as_tensor(batch.labels[positions], dtype=torch.float32, device=args.device)
             weight = torch.as_tensor(batch.weights[positions], dtype=torch.float32, device=args.device)
             with _amp_context(torch, args.device, args.amp):
-                logits = model(**tokens).logits
+                logits = forward(**tokens).logits
             if logits.shape != (len(positions), 1):
                 raise ValueError("Fast trainer requires one match logit per pair")
             loss = (F.binary_cross_entropy_with_logits(logits[:, 0].float(), target, reduction="none")
@@ -1053,13 +1103,16 @@ def train(args) -> dict:
             group["lr"] = lr
         optimizer.step()
         if step == 1 or step % args.log_every == 0:
-            losses.append({"step": step, "bce": loss_value, "lr": lr})
+            losses.append({"step": step, "bce": loss_value, "lr": lr,
+                            "elapsed_s": round(time.perf_counter() - started, 1)})
             print(json.dumps(losses[-1]), flush=True)
         if step % args.save_every == 0 or step == profile.steps:
             checkpoint = save_checkpoint(model, tokenizer, optimizer, batch.sampler_state, step=step,
                                          config=config,
                                          config_sha256=digest, root=args.checkpoint_root or output / "checkpoints",
-                                         torch=torch)
+                                         torch=torch,
+                                         defer_hash=(getattr(args, "defer_checkpoint_hash", False)
+                                                     and step != profile.steps))
             json_write(output / "latest_checkpoint.json", {"checkpoint": str(checkpoint.resolve()),
                                                              "step": step,
                                                              "marker_sha256": file_sha256(checkpoint / "complete.json")})
@@ -1071,6 +1124,7 @@ def train(args) -> dict:
                                                         if elapsed else None),
               "invocation_sampled_pair_sha256": pair_digest.hexdigest(), "trace": losses,
               "fused": args.fused, "freeze_embeddings": args.freeze_embeddings,
+              "attn_implementation": attn_used, "compile": bool(getattr(args, "compile", False)),
               "scope": "arena partition A only; HOLDOUT-2 excluded"}
     if args.device.startswith("cuda"):
         report["peak_allocated_gib"] = torch.cuda.max_memory_allocated() / 1024**3
@@ -1123,6 +1177,14 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--tree-gate", type=float, default=.01)
     parser.add_argument("--accept-threshold", type=float, default=.775)
     parser.add_argument("--lookalike-threshold", type=float, default=.3)
+    parser.add_argument("--text-view", choices=("tagged", "plain"),
+                        help="C2 record text: canonical field-tagged (default) or raw 'name | address'")
+    parser.add_argument("--length-buckets", help="Comma-separated static pad widths, e.g. 64,128,256")
+    parser.add_argument("--attn-implementation", choices=("sdpa", "flash_attention_2", "eager"),
+                        help="Override the transformers attention kernel; default is the library's choice")
+    parser.add_argument("--compile", action="store_true", help="torch.compile the training forward pass")
+    parser.add_argument("--defer-checkpoint-hash", action="store_true",
+                        help="Record large intermediate checkpoint files by size; the final step is fully hashed")
     parser.add_argument("--save-every", type=int, default=2_000)
     parser.add_argument("--log-every", type=int, default=100)
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
@@ -1159,6 +1221,16 @@ def main(argv: list[str] | None = None) -> None:
             or args.threads < 1 or args.learning_rate <= 0 or args.weight_decay < 0
             or not 0 <= args.warmup_fraction < 1):
         parser.error("Batch/runtime sizes and learning rate must be positive; schedule values are invalid")
+    if args.length_buckets:
+        try:
+            buckets = tuple(int(value) for value in args.length_buckets.split(","))
+        except ValueError:
+            parser.error("--length-buckets must be comma-separated integers")
+        if list(buckets) != sorted(set(buckets)) or buckets[0] < 8 or buckets[-1] < args.max_length:
+            parser.error("--length-buckets must be increasing and end at or above --max-length")
+        args.length_buckets = buckets
+    if args.text_view == "plain" and args.mode != "c2":
+        parser.error("--text-view plain is only available for C2")
     profile = mode_config(args.mode, batch_size=args.batch_size, steps=args.steps)
     if args.fused is None:
         args.fused = args.mode != "g0b"

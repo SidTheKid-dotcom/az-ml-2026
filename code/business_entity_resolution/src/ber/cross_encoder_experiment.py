@@ -231,12 +231,13 @@ class _ShuffledCycle:
         return np.concatenate(chunks)
 
 
-def load_reranker(path: str, device: str):
+def load_reranker(path: str, device: str, attn_implementation: str | None = None):
     from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
     tokenizer = AutoTokenizer.from_pretrained(path, local_files_only=True, trust_remote_code=False)
+    extra = {"attn_implementation": attn_implementation} if attn_implementation else {}
     model = AutoModelForSequenceClassification.from_pretrained(
-        path, local_files_only=True, trust_remote_code=False,
+        path, local_files_only=True, trust_remote_code=False, **extra,
     )
     if model.config.num_labels != 1:
         raise ValueError(f"Expected one positive-match logit; checkpoint has {model.config.num_labels} labels")

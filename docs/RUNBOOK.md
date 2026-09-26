@@ -1,8 +1,82 @@
 # Operating runbook
 
-## GPU connection and runtime
+## AWS CPU machine (current, since 2026-09-26)
 
-Verified connection from this workstation:
+The only live compute. The RunPod pod further down is terminated.
+
+| Item | Value |
+| --- | --- |
+| Instance | `i-06fc1a94349dcd6de`, name `az-ml-core-cpu-20260926` |
+| Type / place | `r7i.8xlarge` (32 vCPU, 247 GiB usable), `us-east-1a`, Ubuntu 24.04 |
+| Addresses | public `18.233.153.184`, private `172.31.13.186` |
+| Cost | $2.1168/hour on demand, plus the 500 GiB gp3 root volume |
+| Shutdown behavior | `stop` (not terminate); root volume deletes on termination |
+| Security group | `sg-083e20fcbdca35e22`, TCP 22 from one CIDR (`42.104.217.82/32` on 26 Sep afternoon) |
+| IAM | role `az-ml-new-ec2-role-20260926`, instance profile `az-ml-new-ec2-profile-20260926`, plus `AmazonSSMManagedInstanceCore` |
+| S3 | `s3://az-ml-new-20260926-533267274451`, `us-east-1`; the role can list/get/put in this bucket only |
+| Account | `533267274451`; the workstation CLI identity is root |
+
+```bash
+ssh -F /dev/null -o BatchMode=yes -o IdentitiesOnly=yes \
+  -i /home/sidvish/.ssh/az-ml-new-ec2 ubuntu@18.233.153.184
+# usage at a glance
+ssh ... 'nproc; uptime; free -h; df -h /; ps -eo pid,pcpu,pmem,rss,cmd --sort=-pcpu | head -15'
+```
+
+- The private key stays in `~/.ssh/`, outside Git. Never copy key material here.
+- A Wi-Fi or public-IP change blocks SSH until the port-22 rule is updated:
+  `aws ec2 authorize-security-group-ingress --group-id sg-083e20fcbdca35e22 --protocol tcp --port 22 --cidr $(curl -s https://checkip.amazonaws.com)/32 --region us-east-1`,
+  then revoke the old CIDR. `aws ssm send-command` works without SSH.
+  `aws ssm start-session` fails until the session-manager plugin is installed on
+  the workstation (it is not).
+- The public IP changes if the instance is stopped and started. Read it with
+  `aws ec2 describe-instances --instance-ids i-06fc1a94349dcd6de --region us-east-1 --query 'Reservations[0].Instances[0].PublicIpAddress'`.
+- The full arena is staged in S3 at `inputs/artifacts/arena/`.
+
+Quotas and limits (read 26 Sep afternoon):
+
+- The standard-instance quota (`L-1216C47A`) is 32 vCPU, so only this one
+  `r7i.8xlarge` fits. Do not launch a second one. Do not start the unrelated
+  stopped `t2` instances in Mumbai (`ap-south-1`).
+- GPU quotas are 0 in `us-east-1`: EC2 G/VT on-demand `L-DB2E81BA`, G/VT spot
+  `L-3819A6DF`, P on-demand `L-417A185B`. SageMaker `ml.g6e.2xlarge` training
+  `L-D1AFBF6F` is 0 in `us-east-1`, `us-west-2` and `ap-south-1`. All increase
+  requests are `CASE_OPENED`. Do not submit more requests. Do not create a GPU
+  instance while the value is 0.
+
+AWS CLI from this workstation: use the normal credential chain with
+`AWS_MAX_ATTEMPTS=10 AWS_RETRY_MODE=adaptive`. Do not set `AWS_CONFIG_FILE` to
+`/tmp/aws-azml/config`; that hid the credentials. Run one `aws s3 sync` at a
+time; five parallel syncs failed. There is no `python` on the workstation PATH;
+use `python3` or the repo `.venv/bin/python`.
+
+On the box:
+
+- Python is `/opt/az-ml-new/venv/bin/python` (CPU requirements), with
+  `PYTHONPATH=/opt/az-ml-new/repo/code/business_entity_resolution/src`. Repo copy
+  `/opt/az-ml-new/repo` is a `git archive` plus files copied by `scp`; copy new
+  modules to `/tmp` and `sudo cp` them into
+  `/opt/az-ml-new/repo/code/business_entity_resolution/src/ber/`.
+- Arena `/opt/az-ml-new/artifacts/arena`. Cached pair indices
+  `/opt/az-ml-new/runs/cpu_wave/{left,right}.npy` (103,641,050 rows) save
+  re-reading `pairs.parquet`.
+- Run jobs detached as root with a pid file and a log:
+  `sudo bash -c "nohup env PYTHONPATH=/opt/az-ml-new/repo/code/business_entity_resolution/src OMP_NUM_THREADS=16 /opt/az-ml-new/venv/bin/python -m ber.<module> > /var/log/az-ml-new/<name>.log 2>&1 & echo \$! > /opt/az-ml-new/<name>.pid"`.
+  Outputs go to `/opt/az-ml-new/runs/<name>/`.
+- Every arena script must refuse labels unless `labels_summary.json` has
+  `holdout2_rows_read == 0`, choose on partition A (or B_REST when stated), and
+  not select on SLICE.
+- Logs go to `/var/log/az-ml-new/`.
+
+## DEAD: RunPod GPU pod (historical)
+
+Pod `spl4sjzfwibvz3` was terminated on 26 Sep with no network volume. Its
+disk, `/tmp/az-ml-*`, `/workspace/az-ml-new`, and the C2 step-5000 checkpoint
+are gone. Do not SSH to it, wait on RunPod support, or follow the paths below as
+live. They record how v1 was built. The GPU restart recipe is in
+`learnings/CURRENT_STATE.md`.
+
+Former connection (no longer works):
 
 ```bash
 ssh -F /dev/null -o BatchMode=yes -o IdentitiesOnly=yes \
@@ -10,8 +84,7 @@ ssh -F /dev/null -o BatchMode=yes -o IdentitiesOnly=yes \
   -p 22141 root@69.30.85.107
 ```
 
-`~/.ssh/id_ed25519` was a different key and was rejected. The existing key above
-works; do not make key regeneration a blocker. `-F /dev/null` avoids a malformed
+`~/.ssh/id_ed25519` was a different key and was rejected; the key above worked. `-F /dev/null` avoids a malformed
 system SSH config. SCP uses the same options with uppercase `-P 22141`.
 RunPod pod: `spl4sjzfwibvz3` (`pleased_amber_armadillo`); MCP was reauthorized.
 Never print pod environment secrets or copy private-key contents into this repo.
@@ -191,9 +264,9 @@ Git contains code, evidence, rules and provenance; it intentionally does not
 contain credentials, raw data, caches, model binaries or generated TSVs. On this
 workstation the ZIP and `data/raw/` are at the repository root. On another machine
 bring the supplied archive, extract it to `data/raw/`, and verify its identities
-against `docs/source_integrity.json`. GPU access requires an authorized SSH key;
-private GitHub access alone does not grant GPU access. If the endpoint changes,
-read the existing RunPod pod's Connect details; do not recreate or delete it.
+against `docs/source_integrity.json`. Machine access requires an authorized SSH
+key; private GitHub access alone does not grant it. The RunPod pod is gone; the
+live machine is the AWS CPU box at the top of this file.
 
 For exact prediction replay, use the three promoted model paths in
 `docs/checkpoints.json`, not a newly trained approximation. For new experiments,
@@ -221,11 +294,9 @@ these are not in the durable release or Git (see CURRENT_STATE for exact paths).
 
 The user has $10,000 in AWS credits and wants to move **new experiments** to
 SageMaker instead of paying for RunPod GPU time. This is a compute/storage move,
-not a change to the matching objective or the frozen v1 release. The workstation's
-AWS CLI currently reports an expired session (`aws login` is required); account
-region, credit eligibility/expiry, SageMaker GPU training quota, and actual
-regional price have not yet been verified. Do not submit a billable job until
-these are checked in that account.
+not a change to the matching objective or the frozen v1 release. As of 26 Sep
+the AWS CLI works, but every SageMaker/EC2 GPU quota checked is 0 (see "AWS CPU
+machine" above). This section applies only once a quota is approved.
 
 `docs/PLAN_v2.md` is a hypothesis backlog; this migration and the experiment
 loop in `AGENTS.md` govern execution. The v1 production commands above describe

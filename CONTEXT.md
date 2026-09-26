@@ -1,5 +1,21 @@
 # Operating context
 
+**Full factual handoff (26 Sep 14:30 IST):**
+[docs/briefs/HANDOFF_20260926_1430.md](docs/briefs/HANDOFF_20260926_1430.md).
+
+**Live sources, read next:** [learnings/CURRENT_STATE.md](learnings/CURRENT_STATE.md)
+(preferred file, fallbacks, do-not-repeat list),
+[docs/RUNBOOK.md](docs/RUNBOOK.md) (the AWS CPU box; the RunPod pod is dead),
+[learnings/EXPERIMENT_DECISIONS.md](learnings/EXPERIMENT_DECISIONS.md). Dated
+briefs under `docs/briefs/` are historical snapshots.
+
+**Preferred unuploaded file (26 Sep 14:15 IST):**
+`output/pair_tree_us_india/matching_results.tsv`, SHA256
+`b7bc5a3d71d04a69002e4cf5f602fe400dcbf59fa657c2fbcbfc1c4dac3f83f7`. It uses the
+pair model for US/India and keeps name-only rows for France. Its priced public
+score is about 0.970, which is an estimate, not a measured score. Details and
+fallbacks are in CURRENT_STATE.
+
 Public leaderboard leaders are at **0.988**. Our best scored file is **0.964563**.
 Local medium-tune F0.5 for frozen v1 is **0.968992**. Holdout, opened once, is
 **0.968292**. Do not retune on that holdout. HOLDOUT-2 (50,000 S1s, seed
@@ -60,33 +76,24 @@ classification logit, and Qwen scores yes/no as a language model.
 
 - `run_gpu_queue.py` runs one GPU job. A failure does not cancel the next job.
 - A job whose `--output` is under `/tmp` does not start when the overlay has
-  under 4 GiB free. Write checkpoints to `/workspace/az-ml-new`.
+  under 4 GiB free. On any new GPU, write checkpoints to a network volume.
 - Matching TSVs use LF (`lineterminator='\n'`).
 - Do not promote a sampled-pool score. The pool is 10,320,219 rows.
 - CatBoost: 750k pairs fit in memory; 1.5M swapped; the full union fit died.
   Do not launch an unbounded tree fit.
-- Two threads for OpenMP/BLAS. The host CPU count is not the cgroup limit
-  (7.65 cores, 50 GB RAM).
+- Check the real CPU/RAM limit before choosing threads. The dead pod's cgroup
+  was 7.65 cores / 50 GB (two threads); the AWS box is 32 vCPU / 247 GiB.
 - Compare models on the same S1 ids only.
 
-## Running now (26 Sep 11:20 IST)
+## Compute now (26 Sep afternoon IST)
 
-Takeover state: `docs/briefs/HANDOFF_claude_code.md`. Arena scoring is complete
-and durable (`/workspace/az-ml-new/arena/v1/`); partitions A 1,450,975 /
-B_REST 521,846 / SLICE 100,000 (`arena/finalize_v2/`). Arena v1 + one-owner
-0.972382; + name-only 0.975361. Reranker leader on medium TUNE: plain 14,400
-steps **0.974288** (+0.005296 over v1). The HOLDOUT-2 reservation for the
-trainer is `/workspace/az-ml-new/v2/holdout2` (not `/tmp/az-ml-v2/...`).
-
-GPU (detached chains in `/tmp/az-ml-v3/chains/`): fast-trainer G0b parity
-finished training; scoring/evaluation, then the six G0 throughput variants on
-the real arena, then `c2_auto.sh` starts the arena-scale C2 run (plain-14,400
-init, 40k steps, batch 64) unless `chains/C2_MANUAL` exists.
-
-CPU subagents (Opus, own worktrees): resolver on the arena (B_REST out-of-fold,
-then v1 test), final stack assembly with byte-parity to the 0.964563 file,
-French pseudo-label transfer audit + mixed training arena, ClaimNet hardening.
-Local arena copy: `artifacts/arena/`.
+The RunPod A40 pod is terminated and the C2 run died with it. No GPU exists:
+every checked AWS GPU quota is 0. The only machine is the AWS `r7i.8xlarge` CPU
+box in `docs/RUNBOOK.md`. The arena lives there under
+`/opt/az-ml-new/artifacts/arena` (partitions A 1,450,975 / B_REST 521,846 /
+SLICE 100,000). Arena v1 + one-owner is 0.972382 on the full arena. Paths under
+`/workspace/az-ml-new` or `/tmp/az-ml-*` referenced below were on the pod and
+are gone unless a copy is named in CURRENT_STATE.
 
 ## The plan
 

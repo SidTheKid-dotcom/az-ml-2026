@@ -24,7 +24,7 @@
       "uploaded_file_sha256_confirmed_by_platform": null,
       "platform_submission_id": null,
       "failure_reason": null,
-      "public_score": 0.956390,
+      "public_score": 0.95639,
       "daily_quota_consumed": null,
       "note": "Upload #1 in learnings/negative_side_analysis_manual.md. Public F0.5 0.956390. Bytes match the original v1 matching TSV (same sha256 as the earlier FAILED row). Platform submission ID is still unconfirmed."
     },
@@ -69,6 +69,20 @@
       "public_score": 0.964258,
       "daily_quota_consumed": null,
       "note": "Upload #4. France from #3, US/India from #2. Public F0.5 0.964258. France effect vs #2 is +0.000026; US/India effect vs #3 is -0.000305. Platform submission ID is still unconfirmed."
+    },
+    {
+      "release_id": "s1_pair_tree_c2_40k_us_india_c2_blend_france",
+      "date_reported": "2026-09-26",
+      "platform_status": "SCORED (user-reported)",
+      "platform_submission_performed": true,
+      "local_matching_file": "/home/sidvish/Downloads/s1-pair-tree/matching_results.tsv",
+      "local_matching_sha256": "559f37b9b66f4e18fc28c0b25ae60d08543c386e0bdb32c619990b4c9cbd1a78",
+      "uploaded_file_sha256_confirmed_by_platform": null,
+      "platform_submission_id": null,
+      "failure_reason": null,
+      "public_score": 0.978287,
+      "daily_quota_consumed": null,
+      "note": "Upload after #4. US/India: pair_tree_c2 model (C2 step 40k features) at 0.725, arena B_REST cross-fit 0.985511. France: C2 blend 0.9/0.1 >= 0.10 plus empty-address name-only. One owner, cap 11, LF, official validator PASS. Best public score. Implied France ~0.941 if test US/India equals the arena (see c2_h100_run.md)."
     }
   ]
 }

@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 from ber.fast_trainer import (ArenaBatchSampler, LegacyBatchSampler, NegativeType, TokenizationPrefetcher,
-                              _config_digest, adapt_g0b, classify_negative_types,
+                              _config_digest, _partition_values, adapt_g0b, classify_negative_types,
                               evaluate_scores, file_sha256, g0_matrix, learning_rate,
                               load_arena, load_score_data, mode_config, model_identity, stake_weights,
                               _validate_pair_order,
@@ -19,6 +19,14 @@ from ber.cross_encoder_experiment import _ShuffledCycle
 
 
 class FastTrainerTests(unittest.TestCase):
+    def test_integer_partition_codes_match_arena_build(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "s1_partition.npy"
+            np.save(path, np.array([0, 1, 2, 0], dtype=np.uint8))
+            self.assertEqual(_partition_values(path, 4).tolist(), ["A", "B_REST", "SLICE", "A"])
+            np.save(path, np.array([0, 1, 2, 3], dtype=np.uint8))
+            self.assertEqual(_partition_values(path, 4).tolist(), ["A", "B", "SLICE", "B_REST"])
+
     def test_stake_formula_class_normalization_and_validation(self):
         labels = np.array([1, 1, 0, 0, 0], dtype=bool)
         counts = np.array([1, 3, 1, 3, 0])
@@ -173,6 +181,27 @@ class FastTrainerTests(unittest.TestCase):
             self.assertTrue(restored["profile"]["canonical_text"])
             self.assertEqual(checkpoint_identity["step"], 20)
             (checkpoint / "model.safetensors").write_bytes(b"tampered")
+            with self.assertRaisesRegex(ValueError, "changed"):
+                verified_checkpoint(checkpoint)
+
+    def test_deferred_hash_checkpoint_checks_sizes_and_hashes_at_verify(self):
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory)
+            config = {"schema": 2, "profile": {"canonical_text": False, "field_tagged": False},
+                      "max_length": 256, "initial_model": {
+                          "model_id": "BAAI/bge-reranker-v2-m3", "licence": "apache-2.0",
+                          "files_sha256": {"model.safetensors": "initial"}}}
+            (checkpoint / "training_config.json").write_text(json.dumps(config))
+            (checkpoint / "optimizer.pt").write_bytes(b"large-state")
+            files = {"training_config.json": file_sha256(checkpoint / "training_config.json")}
+            (checkpoint / "complete.json").write_text(json.dumps({
+                "state": "complete", "step": 5000, "config_sha256": _config_digest(config),
+                "files_sha256": files, "files_bytes": {"optimizer.pt": len(b"large-state")}}))
+            restored, identity = verified_checkpoint(checkpoint)
+            self.assertFalse(restored["profile"]["field_tagged"])
+            self.assertEqual(identity["deferred_files_sha256_at_verify"]["optimizer.pt"],
+                             file_sha256(checkpoint / "optimizer.pt"))
+            (checkpoint / "optimizer.pt").write_bytes(b"truncated")
             with self.assertRaisesRegex(ValueError, "changed"):
                 verified_checkpoint(checkpoint)
 

@@ -1,5 +1,281 @@
 # Handoff — resume here
 
+## Resume here — 2026-09-26 21:00 IST (best public 0.978287)
+
+**Best public score: 0.978287** (user-reported, 26 Sep). The file is
+`/home/sidvish/Downloads/s1-pair-tree/matching_results.tsv`, SHA256
+`559f37b9b66f4e18fc28c0b25ae60d08543c386e0bdb32c619990b4c9cbd1a78`, the same bytes as pod
+`/opt/az-ml-new/runs/s1_pair_tree_40k/model_us_india_c2_france/matching_results.tsv`.
+- **US/India rows:** `ber.pair_tree_c2` "model" (CatBoost on v1 features plus C2
+  rival/rank features, fit on B_REST halves), threshold 0.725, one owner, cap 11.
+  Arena B_REST cross-fit is **0.985511** (US 0.987438, India 0.982626),
+  precision 0.99789, recall 0.96096.
+- **France rows:** C2 step-40k blend 0.9·C2 + 0.1·tree ≥ 0.10 (tree gate 0.01),
+  plus the empty-address name-only rule.
+- **C2:** bge-reranker-v2-m3 trained on arena A for 40k steps, plain
+  `name | address`, checkpoint `/workspace/az-ml-new/c2_plain/ckpt/step_040000`.
+
+**Where the loss is.** Details are in `learnings/c2_h100_run.md`, "S1 public = 0.978287".
+- Train labels show the generator is country-independent: 3.46 true links per
+  S1 and 5.58% singletons in both US and India.
+- Test US/India borderline score densities match B_REST, and a withheld-S1
+  distractor simulation is null. So test US/India ≈ 0.9848, which implies
+  **France ≈ 0.941**. France is about 40% of all lost points.
+- The French C2 blend is smeared. France has 0.545 pairs per S1 where the tree
+  is ≥ 0.9 and C2 is < 0.05, against 0.016–0.020 in US/India (28×). At
+  threshold 0.10 their acceptance turns on the tree's third decimal.
+- Rescoring confirms stored C2 = fresh C2, so this is not a scoring bug. C2
+  rejects different-street templated-name collisions (correct) and
+  same-address records with an added or changed legal form (truth unknown).
+
+**GPU (H100 pod, `ssh -p 16295 root@216.81.245.34`).**
+- The union k=3 C2 scoring is done: `/workspace/az-ml-new/union/c2_{b_rest,test}_k3_step040000`.
+- Qwen3-Reranker-0.6B training is running: `/workspace/az-ml-new/qwen/train_run1.log`,
+  step ~1,850/3,250 at 20:45 IST, about 220 pairs/s. The chain
+  `qwen_after_france.sh` then scores B_REST/test and builds the ensemble.
+- France fine-tune (S2) is done, file SHA `b9a70d14…`
+  (`/opt/az-ml-new/runs/s2_pair_tree_40k_france/model_us_india_c2france_ft/`). Not uploaded.
+
+**Do not do** (measured, see decisions table):
+- Drop French street-token-disjoint links. They are one-character street typos of true links.
+- Apply a C2 floor on US/India. Accepted pairs with C2 < 0.005 are 73–84% true;
+  B_REST 0.979583 → 0.979547.
+- Re-tune for test distractors by withholding S1s. The effect is null (0.97958 → 0.97910).
+- Loosen the French blend threshold. The [0.05, 0.1) band holds 1.23 pairs per S1,
+  mostly templated look-alikes.
+- Expect S2 to help. Strict pseudo-labels hold only easy positives and French
+  lists get shorter (3.19 per S1 vs S1's 3.26; the prior is about 3.46).
+- Still discarded: street-disjoint drops, key adds/moves, unique-name street adds,
+  digitless name-only, count fill, cluster voting, expected-F0.5 decode, mutual
+  top-1, resolver (all in the decisions table).
+
+**Next (France first):** measure the generator's legal-form rule on the arena
+(`/workspace/az-ml-new/distractor_sim/legal_rule.py`, running). Then build
+France-only variants that change only French rows, so a public upload measures
+the French effect exactly. Then stack the union and Qwen US/India gains if their
+B_REST gates pass.
+
+## Resume here — 2026-09-26 15:45 IST
+
+EC2 is running one new CPU job and nothing else. GPU C2 is separate; do not start a second trainer.
+
+`ber.rival_text_arena` (pid file `/opt/az-ml-new/rival-text.pid`, log `/var/log/az-ml-new/rival_text_arena.log`) fits the pair-tree candidates again with graded digit-edit and street-token features for the pair and for the rival claimant. Same 3M rows, seed 0, 80/20 split of A. Threshold chosen on A-tune. B_REST is read once against the saved pair tree at 0.70. SLICE is not read. It aborts if the reloaded pair tree's A-tune is not 0.976581. Fuzzy admin matching is off.
+
+## Resume here — 2026-09-26 15:30 IST
+
+The slow copy through this machine was stopped. The arena went EC2 → pod
+directly, and `bge-reranker-v2-m3` came from Hugging Face onto the pod.
+Hashes matched: reference `f6096c72…`, pool `a0308d52…`, pairs `16b301bf…`,
+reserved IDs `356931fc…`. Model file is 2,271,071,852 bytes.
+
+C2 is running on the H100, pid in `/opt/az-ml-new/c2_plain/train.pid`, log
+`/opt/az-ml-new/c2_plain/train.log`. At 15:30 IST it was still loading the
+arena (about 7 GB RSS, GPU not in the step loop yet). Command: plain text,
+40,000 steps, batch 128, bf16, compile, prefetch 8, 8 tokenizer workers.
+Checkpoints: `/workspace/az-ml-new/c2_plain/ckpt`. Do not start a second copy
+or a second trainer. `matching_results.tsv` waits on a B_REST score that
+beats v1. Nothing is uploaded.
+
+Integer `s1_partition.npy` codes are 0=A, 1=B_REST, 2=SLICE. Training uses A.
+
+## Resume here — 2026-09-26 14:15 IST
+
+Full 36-hour factual handoff (scores, decisions, hashes, what was not done):
+[`docs/briefs/HANDOFF_20260926_1430.md`](../docs/briefs/HANDOFF_20260926_1430.md).
+
+Nothing is uploaded after 0.964563. No GPU exists. Nothing is running on the
+GPU side and no new job was launched for this handoff.
+
+**Preferred unuploaded file:** `output/pair_tree_us_india/matching_results.tsv`,
+SHA256 `b7bc5a3d71d04a69002e4cf5f602fe400dcbf59fa657c2fbcbfc1c4dac3f83f7`.
+- The partition-A pair CatBoost is used for US/India rows, and name-only rows
+  are kept for France. The model passed the gate on arena B_REST against
+  empty-address name-only: 0.976720 vs 0.975376, delta +0.001345, CI
+  [+0.001240, +0.001469]. It was fit on 3M pairs from 80% of A components, with
+  threshold 0.70 and "model alone" chosen on the other 20% of A. One owner, list
+  cap 11. B_REST was read once; SLICE and HOLDOUT-2 are unread. No-match false
+  merges went 3.38% → 2.53% and singleton accuracy 0.966 → 0.975. The rival-claim
+  score carries most of the importance, and exact-key features are about 1% each.
+- The priced public score is about 0.970 if the US/India gain carries. That is
+  an estimate, not a public score, and it is still far from 0.985. 0.976720 is an
+  arena score; there is no arena TSV.
+- Validation: 1,732,544 rows, 0 contested, lists ≤ 11, LF, subset of the v1
+  candidates, official validator `--check-ids` PASS.
+
+**Do not prefer** `output/pair_tree/matching_results.tsv` (SHA256
+`650bc4052e7006f2cc0576f94e13d98c12a895a8379dad34687ab0bb69cb99f4`). It
+passes the same validation, but it applies the model in France, where it
+removes 11,480 links and adds 8,815. That is untested: France has no labels.
+
+**Fallbacks:**
+1. `output/name_only_brest/matching_results.tsv`, SHA256
+   `bab8ed5e02d32c63db0b012603e7c16b0c90d94dd34bc693eb78dbc283c27e26`. It is
+   built on the 0.964563 file and validated. Its priced public delta is about
+   +0.00420, which is not measured. Its arena rule is B_REST 0.975376
+   (`/opt/az-ml-new/runs/name_only_arena/report.json`, no TSV).
+2. Best public score, 0.964563: `/home/sidvish/Downloads/assignment-only-lf/matching_results.tsv`,
+   SHA256 `3e0c6206c03ba06f8cb6d3d8e5a1e916230dff5c025061af3eab38120750bfbd`.
+   Do not re-upload it. Do not upload the older U5 name-only file.
+
+**Compute:** the only machine is the AWS CPU box (`docs/RUNBOOK.md`, "AWS CPU
+machine"). RunPod pod `spl4sjzfwibvz3` was terminated with no network volume.
+C2 and its step-5000 checkpoint are unrecoverable. Do not wait on RunPod
+support. GPU quotas are 0 with requests `CASE_OPENED`; do not file more.
+
+**If a GPU appears — C2 launch recipe (staged and CPU-smoked 2026-09-26 14:40 IST):**
+public Apache `BAAI/bge-reranker-v2-m3` init, plain `name | address` (the
+recipe behind 0.974288 on the 12k medium TUNE S1s at 14,400 steps; those
+weights are gone), bf16, no gradient checkpointing, one GPU. Batch 128 on an
+80 GB card, else 64. Checkpoint every 5,000 steps to a network volume without
+hashing during the run. Screen at step 15,000; continue to 40,000 only if the
+15k checkpoint beats v1 on arena B_REST (not SLICE). Run 40,000 steps with the
+constant schedule and score the step-15,000 checkpoint while training continues;
+changing `--steps` changes the config digest and blocks `--resume`.
+
+```bash
+cd code/business_entity_resolution && PYTHONPATH=src python -u -m ber.fast_trainer \
+  --command train --mode c2 --text-view plain --steps 40000 \
+  --batch-size 128 --microbatch 128 --fused --no-freeze-embeddings --amp bf16 \
+  --length-buckets 64,128,256 --defer-checkpoint-hash --save-every 5000 [--compile] \
+  --arena ARENA/c2_input --labels ARENA/labels \
+  --partition ARENA/finalize_v1/s1_partition.npy \
+  --sealed-reservation RES/v2_holdout2 --model MODELS/bge-reranker-v2-m3 \
+  --allowlist ../../problem-statement/models.yaml \
+  --output VOL/c2_plain/out --checkpoint-root VOL/c2_plain/ckpt --device cuda --threads 4
+```
+
+- New `fast_trainer` flags (additive, defaults unchanged, 11 unit tests pass):
+  `--text-view plain` (C2 only; stored in the checkpoint profile, so scoring
+  reuses it), `--length-buckets` (static pad widths), `--defer-checkpoint-hash`
+  (large files recorded by size at intermediate saves; the final step is fully
+  hashed; scoring hashes deferred files at verify time), `--attn-implementation`,
+  and `--compile` (wraps only the forward pass; saves use the raw model).
+  Attention is already SDPA by default under transformers 5.17.0; FlashAttention-2
+  needs the `flash-attn` package and `--attn-implementation flash_attention_2`.
+- Staged on the AWS box: `/opt/az-ml-new/artifacts/arena/c2_input` (symlinks
+  to `arena/v1` plus a manifest recomputed from file bytes; reference/pool/pairs
+  SHA256 `f6096c72…` / `a0308d52…` / `16b301bf…` match the original arena build),
+  the ID-only reservation `/opt/az-ml-new/artifacts/v2_holdout2`
+  (`reserved_ids.txt` SHA256 `356931fc…` matches `reservation.json`), and the public model
+  `/opt/az-ml-new/models/bge-reranker-v2-m3` (`model.safetensors` 2,271,071,852
+  bytes). The venv now has CPU torch 2.8.0 and transformers 5.17.0; a GPU box
+  needs the CUDA wheel instead.
+- CPU smoke (4 steps, batch 8, fp32, `/opt/az-ml-new/runs/c2_cpu_smoke/`): full
+  arena load, sealed-ID check, typed negatives, and training took 3 min 10 s wall
+  and 23 GB RSS, so GPU startup is cheap. Resume from the deferred step-2
+  checkpoint reproduced the step-3/4 losses exactly, and the final weights and
+  optimizer state were bitwise identical to the uninterrupted run. A 2-step
+  `--compile` CPU run also finished (`compile.log`, exit 0) and saved a normal,
+  verifiable `XLMRobertaForSequenceClassification` checkpoint. Its step-1 loss
+  differs (1.994 vs 1.792 on the same batch), most likely because compiled
+  dropout draws a different RNG stream (not verified), so compiled and eager
+  runs are not bitwise comparable. Choose one mode
+  for the whole run. This is a code and data check only, not a score.
+- Throughput reference: the A40 did about 190 steps/min at batch 64 with
+  pad-to-8 and hashed saves (~4 min stall per save). A second GPU will not help
+  until the trainer is multi-GPU.
+
+**Evaluation guards:** HOLDOUT-2 stays sealed: 50,000 S1s, seed 20260929, ID
+SHA256 `7c98dcaef35d5a392a051e0525f854a2a6ceb55c366616ff2184abd98aa4ae63`. Do
+not retune on the opened medium holdout (F0.5 0.968292). SLICE is not a tuning
+set. France has no labels.
+
+**Promotion gate:** delta ≥ +0.0005, component-bootstrap 95% CI above 0, and
+no-match false merges no worse by more than 0.2 points. The last upload counts.
+Do not upload an unmeasured file.
+
+## Do not repeat — measured failures (26 Sep)
+
+Reports are under `/opt/az-ml-new/runs/` on the AWS box. Decision rows are in
+`EXPERIMENT_DECISIONS.md`.
+
+- **Exact key as a hard rule.** Moves were 125/8,813 = 0.014 (US 0/3,042).
+  Unowned exact-key adds were 3,576/12,935 = 0.276. Key-by-blend on partition A:
+  no cutoff reached 0.80 precision with n ≥ 500. The best add band was 127/217 =
+  0.585 at blend 0.3–0.5, and moves were ~0 in every band. Do not upload key
+  move/add files. The key may be a model feature, not a rule.
+- **Name-only beyond empty addresses.** The digitless extension scored B_REST
+  delta −0.006952. Unique-name street adds scored −0.019117; identical streets
+  are only 0.037 true. Name-only stays empty-address only.
+- **Decision-layer tweaks on v1 scores.** The best CPU-wave threshold (0.70) gave
+  B_REST +0.000436, below +0.0005. Resolver threshold 0.55 gave +0.000208.
+  Responsibility decode gave −0.019, mutual top-1 −0.242, and small-gap drop
+  −0.802.
+- **France rules.** The strict France pseudo rule has precision 0.999895 on
+  US/India but only fires at blend ≥ 0.9, so it adds no links. A different
+  street + house + city key had unowned-add precision 0.056.
+
+## Live — 2026-09-26 13:10 IST
+
+- RunPod pod `spl4sjzfwibvz3` is terminated. The C2 step-5,000 checkpoint was on pod disk and is gone. GPU quotas in us-east-1, us-west-2, and ap-south-1 are still `CASE_OPENED`. Do not wait on that checkpoint.
+- One EC2 `r7i.8xlarge` is up: `i-06fc1a94349dcd6de`, Virginia, 32 vCPU, 247 GiB. SSH: `ssh -i /home/sidvish/.ssh/az-ml-new-ec2 ubuntu@18.233.153.184`. Arena pairs are on the box. A second 256 GiB machine does not fit the 32-vCPU quota. Full procedure (SSH rule, S3, paths, job launch): `docs/RUNBOOK.md`, section "AWS CPU machine".
+- CPU wave finished 2026-09-26 13:13 IST. B_REST, choice on A, SLICE unread. Baseline **0.972465**. Best screen is threshold 0.70: **0.972902**, delta **+0.000436**, below +0.0005. Responsibility decode **0.953493**, delta **−0.018972**. Claim propagation delta 0. Log: `/var/log/az-ml-new/cpu_wave.log`.
+- Resolver finished. Chosen on B_REST: threshold **0.55** then one-owner. B_REST **0.972673**, delta **+0.000208**, CI [+0.000096, +0.000319]. SLICE was reported, not used to choose: **0.973301**, delta **+0.000353**. Below +0.0005. Do not promote. HOLDOUT-2 unread. Metadata: `/opt/az-ml-new/runs/resolver_blend_base/metadata.json`.
+- Corrected name-only rule on B_REST: **0.975376**, delta **+0.002910**, CI [+0.002815, +0.003018]. Adds 62,649/67,388 = 0.929676. Drops include 7,874 true links of 16,287 (0.483453 still true). No-match false merges 1,082 → 976. Clears +0.0005. SLICE unread. Report: `/opt/az-ml-new/runs/name_only_arena/report.json`.
+- Partition-A pair CatBoost **passes the gate** against empty-address name-only. Features: v1 blend, tree score, blend rank and gap in the S1 list, S1 and record counts of blend ≥ 0.5, best rival blend for the record, exact normalized name, name multiplicity, address kind, exact-key self/other. Fit on 3,000,000 pairs from 80% of A components; threshold 0.70 and variant "model alone" chosen on the other 20% of A (0.976581 vs name-only 0.975056). One B_REST read: **0.976720** vs **0.975376**, delta **+0.001345**, CI [+0.001240, +0.001469]. No-match false merges 976 → 731 (3.38% → 2.53%). Longest list 11, 0 contested. Rival blend carries 31% of importance; key features ~1% each. SLICE unread. Model `/opt/az-ml-new/runs/pair_tree_arena/model.cbm` SHA256 `35dcf133a0694e75be8caaf6cb186b901b52451af165438385119cb174538e26`; report beside it. Refactored features reproduce the saved arena probabilities exactly (`parity.json`, max diff 0.0).
+- Two validated test files, not uploaded. Both: 1,732,544 rows, 0 contested, longest list 11, LF, official validator `--check-ids` PASS, subset of the v1 candidate file.
+  - `output/pair_tree/matching_results.tsv`, SHA256 `650bc4052e7006f2cc0576f94e13d98c12a895a8379dad34687ab0bb69cb99f4`: the model on every country. Against name-only, US +16,775/−3,933 links, India +16,085/−6,224, France **+8,815/−11,480**. France moves opposite to the labeled countries and is unmeasured.
+  - `output/pair_tree_us_india/matching_results.tsv`, SHA256 `b7bc5a3d71d04a69002e4cf5f602fe400dcbf59fa657c2fbcbfc1c4dac3f83f7`: model rows for US/India, name-only rows for France. This is the lower-risk candidate. If the arena gain carries to test US/India (85% of test S1s), about +0.0011 over name-only, i.e. roughly 0.970 public. That is an estimate, not a score.
+  - Test inputs are in `s3://az-ml-new-20260926-533267274451/inputs/artifacts/v1_test_scores/` and `/opt/az-ml-new/artifacts/v1_test_scores/`. Rebuild: `python -m ber.pair_tree_test test --scores /opt/az-ml-new/artifacts/v1_test_scores --out DIR`.
+- Exact-key edits split by v1 blend, cutoff chosen on partition A: no band qualifies. Unowned key adds peak at 127/217 = 0.585 (blend 0.3–0.5) and are 183/350 = 0.523 even at blend ≥ 0.775. Key moves are 0–20% in every band. No B_REST read was made because nothing passed A. The key stays a feature only. Report: `/opt/az-ml-new/runs/key_by_blend/report.json`.
+- Unique-name street adds on top of the empty-address rule lost on B_REST: delta **−0.019117**, CI entirely below 0. Even identical street tokens are only 1,252/33,805 = 0.037036 true among records the name-only rule left unowned. Do not add them. Report: `/opt/az-ml-new/runs/street_name_arena/report.json`.
+- Digitless-address extension of the name-only rule lost on B_REST: delta **−0.006952**, CI entirely below 0. Adds 172/2,889 = 0.059536. Drops removed 118,084 true links of 118,119. Do not extend the rule past empty addresses. Report: `/opt/az-ml-new/runs/name_nodigits_arena/report.json`.
+- Test file built on the 0.964563 submission and not uploaded: `output/name_only_brest/matching_results.tsv`, SHA256 `bab8ed5e02d32c63db0b012603e7c16b0c90d94dd34bc693eb78dbc283c27e26`. 1,732,544 rows, 0 contested, longest list 11 after trimming one 12-ID row, official validator `--check-ids` PASS. Priced public delta about +0.00420 (France +0.000888, US/India +0.003309) before that one trim. Do not upload the older U5 file.
+- Exact-key residual finished. Overall key precision **0.990890** (US 0.995216, India 0.983544), matching the manual's 0.9912. The disagreements do not: moves **125/8,813 = 0.014184** (US 0/3,042, India 125/5,771); unowned adds **3,576/12,935 = 0.276459** (US 168/3,063 = 0.054848, India 3,408/9,872 = 0.345219). Both are below the break-even for a public edit. Do not build or upload the move/add files. Report: `/opt/az-ml-new/runs/key_residual/report.json`.
+- France-rule transfer audit on arena US/India, labels opened only after selection. P+ 1,710,947 pairs, precision **0.999895** (179 false). Rival negatives 13,607,551, precision **1.0**, zero true links rejected. The rule requires blend ≥ 0.9, so it cannot add links the current threshold misses. Safe as high-precision training pairs; not a recall gain and not French accuracy. Report: `/opt/az-ml-new/runs/france_transfer_audit/`.
+
+## Active C2 arena run — checked 2026-09-26 11:51 IST, now dead
+
+- RunPod A40 PID 90833 is training `ber.fast_trainer --mode c2` for 40,000
+  steps, batch/microbatch 64, fused optimizer, trainable embeddings, initialized
+  from the plain-14,400 checkpoint. It was at step **7,500** with 100% GPU use;
+  no second GPU process is competing.
+- Complete checkpoint:
+  `/workspace/az-ml-new/models/c2_arena_v1/step_005000`; log:
+  `/tmp/az-ml-v3/logs/c2_arena_v1.log`. Effective rate is about 190–192
+  steps/minute. Each 6.8 GB checkpoint pauses training about four minutes for
+  object-store write and hash readback; projected finish is around 15:10 IST.
+- `/tmp` has only 3.4 GB free. Do not touch frozen `/tmp/az-ml-new` or write
+  large new outputs under `/tmp`; use `/workspace/az-ml-new`.
+- Current takeover brief:
+  [`HANDOFF_20260926_1151.md`](../docs/briefs/HANDOFF_20260926_1151.md).
+
+## Arena no-match filter — keep recipe, not current probabilities
+
+- Unweighted CatBoost fit on A and applied after one-owner at p ≥ 0.5. On the
+  confirm half of B_REST: **+0.000477**, CI [+0.000368, +0.000586]. On the one
+  SLICE read: **0.972948 → 0.973402**, delta **+0.000454**, component-bootstrap
+  CI **[+0.000292, +0.000632]**.
+- SLICE false merges fell 3.33% → 2.25% (188 → 127 of 5,649 no-match S1s), but
+  17 true lists were destroyed. This is below the +0.0005 promotion gate and
+  specific to v1 scores. Keep its features for the resolver; rebuild and refit
+  on C2 rather than applying saved probabilities.
+- Report:
+  `/home/sidvish/Documents/Work/Personal/ext-experiments/G1/g3/report.md`.
+
+## Arena record-cluster voting — discarded
+
+- Selected on B_REST and read once on SLICE: delta **+0.000032**, component
+  bootstrap CI **[-0.000004, +0.000064]**. Same-name/same-digit true copies are
+  mostly already accepted; precise additions are too rare and the digit veto
+  removes more true than false links.
+- Leave the rule off. Report:
+  `/home/sidvish/Documents/Work/Personal/ext-experiments/G2/report.md`.
+
+## Arena count/source fill — discarded 2026-09-26
+
+- On the full arena, v1 blend ≥ 0.775 plus one owner is **0.972382** (6,784,096 links), matching the published baseline.
+- The selected fill `source_ridge_bias1.0_drop0.90_add0.70` was fit on partition A and chosen on B-rest. One SLICE read (100,000 S1s): **0.973387** versus one-owner **0.972948**, delta **+0.000440**, component-bootstrap 95% interval **[+0.000225, +0.000655]**.
+- It added 2,819 links (2,195 true) and deleted 0. False links rose from 2,798 to 3,422. Singleton accuracy fell from 0.966720 to 0.960347. Prune-only variants stayed within 0.00005 of the baseline.
+- Below the +0.0005 promotion bar and past the 0.2-point singleton allowance. Leave the live decision as blend ≥ 0.775 plus one owner. Report: `/home/sidvish/Documents/Work/Personal/ext-experiments/G1/other_agent_deliverable/report.md`.
+
+## France ownership key — discarded 2026-09-26
+
+- Street + house number + city + distinctive name word. On arena partition A, unique-key hits the matcher already kept are true **460,307 / 464,179 = 0.992**.
+- Edits fail the bars: add an unowned unique key **222 / 3,982 = 0.056** (bar 0.90); drop a street-disjoint accepted link **488 / 79,941 = 0.006** actually wrong (bar 0.40); reassign **0 / 5**; shared-key contest flip unmeasured.
+- SLICE stays **0.972948**, delta **0**, bootstrap CI **[0, 0]**. Full arena baseline still **0.972382**.
+- Priced onto test France with those US/India rates: drop 62,885, add 462, reassign 80, about **−7,135 entity-points (−0.004)**. That is a transfer estimate, not French accuracy. All four switches stay off. No France-only file. Report: `/home/sidvish/Documents/Work/Personal/ext-experiments/G1/report.md`.
+
 ## V2 R0 reranker follow-ups — completed 2026-09-26
 
 - Field-tagged BGE at 7,200 steps scored **0.973686** on the same 12,000 medium

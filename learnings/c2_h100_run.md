@@ -71,3 +71,45 @@ stretch for the next file is ≈ 0.980–0.984, stacking:
 
 GPU order after 40k: final file → French fine-tune → union scoring →
 Qwen train and score → ensemble assembly on 27 Sep morning.
+
+## S1 public = 0.978287 — where the loss is (26 Sep ~20:15 IST)
+
+- **The generator is country-independent (train labels).** US and India have
+  3.459 and 3.465 true links per S1, singleton rates 5.58% and 5.59%, and
+  0.740 true links per pool record in both.
+- **Test US/India look like the arena.** The test pool has 5.8 records per S1
+  (train 4.67). But the borderline C2-blend band densities per S1 match
+  B_REST: US [0.05,0.1) 0.161 vs 0.186, India 0.141 vs 0.115. Withholding
+  20–30% of B_REST S1s, which turns their records into orphans, moves the plain
+  C2 score only 0.97958 → 0.97910 (`/workspace/az-ml-new/distractor_sim/`).
+  Test-shift loss for US/India is small.
+- **So France ≈ 0.941.** Take US/India test ≈ arena cross-fit (US 0.98744,
+  India 0.98263, weighted 0.98480). Test weights are France 0.1498 and
+  US/India 0.8502, giving France = (0.978287 − 0.8502·0.98480)/0.1498 ≈ 0.941.
+  France is about 40% of all lost points.
+- **French scores are smeared.** Per S1, France has 1.23 pairs in blend
+  [0.05,0.1), against 0.14–0.19 for US/India. It has 0.41 in [0.1,0.3)
+  (US/India 0.09–0.12), 0.059 in [0.3,0.7) (0.004–0.008), and only 3.11
+  confident (≥0.7) links (US/India 3.18–3.22). France predicts 3.26 links
+  per S1, against a generator prior of about 3.46 true.
+- **Street-disjoint French drops are refuted by inspection.** The "different
+  street" records are one-character typos of the same street (Beaumarchais →
+  Beauuarchais, Mollien → Molilen). Dropping them would lose true links, as
+  G1's −0.004 pricing said.
+- S2 (strict French pseudo-label fine-tune) shortens French lists further
+  (3.19 per S1), away from the prior. Expect it not to help. Its upload would
+  still measure the French delta exactly.
+- **Tree-yes / C2-no pairs (tree ≥ 0.9, C2 < 0.05).** France has 0.545 per S1
+  (about 141k), US 0.019, India 0.026 (B_REST 0.016/0.020). 39% of the French
+  ones are accepted at 0.10.
+  - B_REST truth: 0% when another S1 claims the record at ≥ 0.7. With no better
+    claimant, 12–25% for C2 < 0.005 and 88–97% for C2 0.005–0.05.
+  - Stored C2 equals a fresh rescore, so this is not a bug.
+  - French examples: different-street templated collisions ("Bordeaux Parents
+    SAS", 54 Rue de Talence vs 54 Rue du Quai Bourgeois) and same-address
+    legal-form additions ("Club du Cours" vs "Club du Cours SARL").
+- **C2 floor on accepted pairs.** B_REST 0.979583 → 0.979547 at 0.005. Accepted
+  C2 < 0.005 is 73–84% true in US/India, so the floor stays off there. France
+  has 19,991 such links; the upside is ≤ +0.002.
+- Diagnostic scripts: `code/business_entity_resolution/diagnostics/20260926_france/`
+  (pod copies in `/workspace/az-ml-new/distractor_sim/`).
