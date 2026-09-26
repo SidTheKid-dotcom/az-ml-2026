@@ -189,3 +189,25 @@ Qwen train and score → ensemble assembly on 27 Sep morning.
   `python -m ber.collective_pair_tree test --work /opt/az-ml-new/agents/pair_tree_c2/eureka_collective --out /opt/az-ml-new/runs/eureka_collective`.
   The matcher-side "generator logic" is nearly exhausted. The remaining US/India
   loss is retrieval (~50%) plus shared-name empty-address ambiguity.
+- **D1: unreached French test records are mostly decoy-like.**
+  - 59,340 French records never reach any dense top-50 list.
+  - The label-free test: an S1 with the same house number, the same city and a
+    fuzzy street match. Unreached records pass it 60.1% of the time, similar to
+    reached-but-rejected French records (63.7%, mostly decoys). Accepted French
+    links pass it 88.9% of the time.
+  - At most 8,494 have exactly one plausible owner. Track R pairs 2,607 of those
+    with that owner (1,798 in the top 3). Those owners' lists are not short
+    (3.19 vs 3.26).
+  - Missing candidates are not France's main loss; recovering them is worth
+    ≤ +0.0005 overall.
+  - Output: `/workspace/az-ml-new/eureka/clarity/d1.json`.
+- **D3: name-only rule vs unclaimed records (B_REST, 0/20/30% of S1s withheld).**
+  - On the submitted pair-tree model it loses at every level: −0.00030, −0.00058,
+    −0.00081. US/India rightly leave it off.
+  - On the plain C2 blend, which is how France is decided, it gains +0.00305,
+    +0.00283, +0.00266. Add precision falls from 92.6% to 86.9% as unclaimed
+    records increase.
+  - An orphan-aware guard holds the gain at +0.00287 but blocks adds that are 70–78% true.
+  - At test-like density (~15–20% withheld) the guard gains ≤ +0.0002 on France.
+    Not worth building.
+  - Outputs: `eureka/clarity/d3.json` and `d3_plain_c2.json`.
