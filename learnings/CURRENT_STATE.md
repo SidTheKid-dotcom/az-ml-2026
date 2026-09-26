@@ -1,5 +1,12 @@
 # Handoff — resume here
 
+## Resume here — 27 Sep
+
+- **Best public score: 0.978287** (file SHA256 `559f37b9…`; details below).
+- **Probes:** France-blank 0.846352, A 0.97826, C′ 0.97297 (see `docs/briefs/PROBES_FRANCE_20260926.md`).
+- **Plan:** `docs/briefs/PLAN_TO_099_20260927.md`. **Fresh context:** `docs/briefs/RESET_20260927.md`.
+- **All compute is idle** (no GPU/CPU jobs running).
+
 ## Resume here — 2026-09-26 21:00 IST (best public 0.978287)
 
 **Best public score: 0.978287** (user-reported, 26 Sep). The file is
