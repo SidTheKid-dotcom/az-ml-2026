@@ -113,3 +113,20 @@ Qwen train and score → ensemble assembly on 27 Sep morning.
   has 19,991 such links; the upside is ≤ +0.002.
 - Diagnostic scripts: `code/business_entity_resolution/diagnostics/20260926_france/`
   (pod copies in `/workspace/az-ml-new/distractor_sim/`).
+- **F1 = S1 + French legal-form rule.** File `~/Downloads/f1-france-legal/matching_results.tsv`,
+  SHA `d1bf7907…`; pod `/workspace/az-ml-new/france_legal/f1/`.
+  - The rule class holds when the core name (minus legal forms and corporate
+    suffix words) and the address digits and text are the same, and no suffix
+    word is added. On B_REST it is 99.85–99.99% true however the legal form
+    changes (216k pairs).
+  - France has 603,075 such pairs; 562,587 were already accepted. The rest
+    mostly lose one-owner to a stronger claimant, so the boost to 0.99 adds only
+    7,856 French links and displaces 2,441.
+  - Parity rebuild reproduces the S1 SHA. The official validator passes.
+    Expected about +0.0003–0.0007, not measured.
+  - Suffix-word additions (group/fils/france…) are 0/33 true on B_REST but
+    17k in France; left untouched.
+- **France-blank probe:** S1 with all 259,452 French rows empty,
+  `~/Downloads/probe-france-blank/matching_results.tsv`, SHA `3d125673…`, validator
+  PASS. With B = probe public score and French singleton rate s ≈ 0.0558:
+  US/India = (B − 0.1498·s)/0.8502 and France = (0.978287 − 0.8502·US/India)/0.1498.
