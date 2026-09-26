@@ -238,3 +238,14 @@ Qwen train and score → ensemble assembly on 27 Sep morning.
   −0.000027, which is break-even.
   - Pricing readout: about 70% of those links are true (~30k true, ~13k wrong).
   - Keep the band. No rule edit there recovers France's loss.
+- **Probe C′ result (public 0.97297, Δ −0.005317).** One random confident non-legal-form French link was dropped
+  per list (139,543 links). Readout: **~95.8% true (±~0.03)**.
+  - Rough French error bill (model-based estimate):
+    - uncertain band ~13k wrong;
+    - confident non-legal band ~10k wrong;
+    - legal-form ~0.6k;
+    - name-only ~1k.
+  - That totals ~25k wrong links, i.e. French precision ≈ 0.97.
+  - Wrong links explain only ~5–6k of France's ~16.4k lost points. The rest is **missed true links**: French recall is
+    ≈ 0.92 (India 0.953) assuming the generator prior of 3.46 links per S1.
+  - France is mainly a recall and scoring problem. A French-adapted reranker is the lever, not rule edits.

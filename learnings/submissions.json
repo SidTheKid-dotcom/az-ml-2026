@@ -111,6 +111,20 @@
       "public_score": 0.97826,
       "daily_quota_consumed": null,
       "note": "France-only probe: 0.978287 file minus 43,517 French links with blend 0.1-0.7 that are not legal-form pairs. Delta -0.000027 (5-decimal score). Pricing readout p = (0.00599 - delta)/0.00862 = 0.698 true, at break-even 0.695: dropping the band gains nothing; keep it."
+    },
+    {
+      "release_id": "probe_Cprime_drop_one_confident_nonlegal_per_list",
+      "date_reported": "2026-09-27",
+      "platform_status": "SCORED (user-reported)",
+      "platform_submission_performed": true,
+      "local_matching_file": "/home/sidvish/Downloads/probe-drop_Cprime/matching_results.tsv",
+      "local_matching_sha256": "e7f9911954ac487e2f3f954131339b881cd48862e77a9d92efa51cf6572c8541",
+      "uploaded_file_sha256_confirmed_by_platform": null,
+      "platform_submission_id": null,
+      "failure_reason": null,
+      "public_score": 0.97297,
+      "daily_quota_consumed": null,
+      "note": "France-only probe: dropped one random confident (blend>=0.7) non-legal-form French link from each of 139,543 French lists with >=2 links (seed 20260926). Delta -0.005317; readout p=(0.01993-delta)/0.02636 = 0.958 true (+/-~0.03). France's confident non-legal band is ~96% true."
     }
   ]
 }
