@@ -1,0 +1,283 @@
+{
+ "test": {
+  "exact": {
+   "France": {
+    "s1": 259452,
+    "in_sibling_groups": 91,
+    "share": 0.0003507392504201162,
+    "groups": 45,
+    "group_size_hist": {
+     "2": 44,
+     "3": 1
+    },
+    "groups_all_distinct_legal": 42,
+    "groups_with_repeated_legal": 3
+   },
+   "India": {
+    "s1": 809986,
+    "in_sibling_groups": 6,
+    "share": 7.4075354388841286e-06,
+    "groups": 3,
+    "group_size_hist": {
+     "2": 3
+    },
+    "groups_all_distinct_legal": 2,
+    "groups_with_repeated_legal": 1
+   },
+   "US": {
+    "s1": 663106,
+    "in_sibling_groups": 4,
+    "share": 6.032218076747911e-06,
+    "groups": 2,
+    "group_size_hist": {
+     "2": 2
+    },
+    "groups_all_distinct_legal": 1,
+    "groups_with_repeated_legal": 1
+   }
+  },
+  "loose": {
+   "France": {
+    "s1": 259452,
+    "in_sibling_groups": 15662,
+    "share": 0.06036569384703143,
+    "groups": 5616,
+    "group_size_hist": {
+     "2": 3584,
+     "3": 1068,
+     "4": 455,
+     "5": 216,
+     "6": 112,
+     "7": 56,
+     "8": 38,
+     "9": 23,
+     "10": 11,
+     "11": 19,
+     "12": 7,
+     "13": 8,
+     "14": 6,
+     "15": 4,
+     "16": 3,
+     "17": 1,
+     "18": 3,
+     "21": 1,
+     "24": 1
+    },
+    "groups_all_distinct_legal": 3342,
+    "groups_with_repeated_legal": 2274
+   },
+   "India": {
+    "s1": 809986,
+    "in_sibling_groups": 40,
+    "share": 4.938356959256086e-05,
+    "groups": 20,
+    "group_size_hist": {
+     "2": 20
+    },
+    "groups_all_distinct_legal": 14,
+    "groups_with_repeated_legal": 6
+   },
+   "US": {
+    "s1": 663106,
+    "in_sibling_groups": 14,
+    "share": 2.1112763268617686e-05,
+    "groups": 7,
+    "group_size_hist": {
+     "2": 7
+    },
+    "groups_all_distinct_legal": 3,
+    "groups_with_repeated_legal": 4
+   }
+  }
+ },
+ "test_france_examples": [
+  "12671: 4l Club EURL | 14 Rue de Wattignies, Lille, Hauts-de-France",
+  "12671: 4l (France) Club | 14 Rue Ducourouble, Lille, Hauts-de-France",
+  "12679: 4l Club SAS | 3 Avenue des Cerfs, L\u00e8ge-Cap-Ferret, Nouvelle-Aquitaine",
+  "12679: 4l Club SAS | 3 Rue des Arbousiers, L\u00e8ge-Cap-Ferret, Nouvelle-Aquitaine",
+  "38505: Accueil Club (France) SARL | 6 Rue Duranteau, Bordeaux, Nouvelle-Aquitaine",
+  "38505: Accueil Club EURL | 6 Rue \u00c9dith Piaf, Nouvelle-Aquitaine, Bordeaux",
+  "47572: Action Groupe EURL | 9 Rue Anatole France, Pays de la Loire, Saint-Herblain",
+  "47572: Action & Fils | 9 Rue des Robiniers, Saint-Herblain, Pays de la Loire",
+  "47764: Action \u00c9l\u00e9mentaire | 12 Rue Andr\u00e9 Amp\u00e8re, Lille, Hauts-de-France",
+  "47764: Action \u00c9l\u00e9mentaire SARL | 12 RUE Viala, Lille, Hauts-de-France",
+  "47938: Action Sportive SASU | 6 Avenue Marcel Cerdan, Nantes, Pays de la Loire",
+  "47938: Action Sportive SAS | 6 RUE joseph caille, Nantes, Pays de la Loire",
+  "77739: Agreee (France) Primaire SARL | 6 Avenue des Louveteaux, Nantes, Pays de la Loire",
+  "77739: Agreee Primaire SARL | 6 Rue de Strasbourg, Nantes, Pays de la Loire",
+  "78392: La Baule-Escoublac Agricole EURL | 12 All\u00e9e du M\u00e9ru, La Baule-Escoublac, Pays de la Loire",
+  "78392: La Baule-Escoublac Agricole SASU | 12 bis Boulevard Joseph Houssais, La Baule-Escoublac, Pays de la Loire",
+  "78407: Bordeaux Agricole SARL | 17 Rue Tillet, Bordeaux, Nouvelle-Aquitaine",
+  "78407: Bordeaux Agricole SAS | 17 Rue de Dijon, Bordeaux, Nouvelle-Aquitaine",
+  "78412: Bordeaux Agricole SARL | 34 Rue Georges Rioux, Bordeaux, Nouvelle-Aquitaine",
+  "78412: Bordeaux Agricole SASU | 34 RUE Pelleport, Bordeaux, Nouvelle-Aquitaine",
+  "78414: Bordeaux Agricole SAS | 40 Rue d'Ormilly, Bordeaux, Nouvelle-Aquitaine",
+  "78414: Bordeaux Agricole SAS | 40 RUE du Sablonat, Bordeaux, Nouvelle-Aquitaine",
+  "78416: Bordeaux Agricole EURL | 5 RUE Carayon-Latour, Bordeaux, Nouvelle-Aquitaine",
+  "78416: Bordeaux Agricole SARL | 5 Rue du Parlement Sainte-Catherine, Bordeaux, Nouvelle-Aquitaine",
+  "78619: Saint-Herblain Agricole | 7 Chemin des Bodini\u00e8res, Saint-Herblain, Pays de la Loire",
+  "78619: Saint-Herblain Agricole SAS | 7 Rue du Docteur Xavier Bichat, Saint-Herblain, Pays de la Loire",
+  "78757: Nantes Agricole SAS | 9 Impasse de Guingamp, Nantes, Pays de la Loire",
+  "78757: Nantes Agricole SASU | 9 Rue de la Cornouaille, Pays de la Loire, Nantes",
+  "78757: Nantes Agricole SARL | Nantes, 9 Rue de la Conardi\u00e8re, Pays de la Loire",
+  "78757: Nantes Agricole SA | 9 Rue H\u00e9l\u00e8ne Boucher, Nantes, Pays de la Loire",
+  "78764: Saint-Nazaire Agricole SAS | 2 Rue des Halles, Saint-Nazaire, Pays de la Loire",
+  "78764: Saint-Nazaire Agricole SARL | 2 All\u00e9e de l'Avel Kreisteil, Saint-Nazaire, Pays de la Loire",
+  "78804: Pessac Agricole SA | 36 Rue Paul Painlev\u00e9, Pessac, Nouvelle-Aquitaine",
+  "78804: Pessac Agricole EI | 36 Rue Larouillat, Pessac, Nouvelle-Aquitaine",
+  "94426: Aide Groupe SARL | 39 Boulevard Victor Hugo, Nantes, Pays de la Loire",
+  "94426: Aide & Cie SAS | 39 Avenue Pr\u00e9sident Joseph Bouyer, Nantes, Pays de la Loire",
+  "94482: Aide Anciens SA | 12 Quai Auguste Delpierre, Calais, Hauts-de-France",
+  "94482: Aide Anciens EURL | 12 Quai de l'Yser, Calais, Hauts-de-France",
+  "94547: Aide Club SARL | 4 Rue de l'H\u00f4pital Saint Roch, Lille, Hauts-de-France",
+  "94547: Aide Club EURL | 4 Cour Demaire, Lille, Hauts-de-France",
+  "94591: Aide Comite SAS | Bordeaux, Nouvelle-Aquitaine, 20 Rue Buchou",
+  "94591: Aide Comite SARL | 20 Rue Cassignard, Bordeaux, Nouvelle-Aquitaine",
+  "101073: AL Groupe SAS | 4 Rue du Parc Menier, Nantes, Pays de la Loire",
+  "101073: Al & Cie SARL | 4 Rue de la Fenaison, Nantes, Pays de la Loire",
+  "101112: AL Amis SAS | Bordeaux, 5 All\u00e9e des Roses, Nouvelle-Aquitaine",
+  "101112: Al Amis | 5 Rue Sansas, Bordeaux, Nouvelle-Aquitaine",
+  "121618: Alliance Maison SAS | 23 Rue d'Haubourdin, Tourcoing, Hauts-de-France",
+  "121618: Maison Alliance | Tourcoing, 23 Rue de Bondues, Hauts-de-France",
+  "121620: Maison Alliance SCI | 7 Avenue des Baies, La Teste-de-Buch, Nouvelle-Aquitaine",
+  "121620: Maison Alliance SASU | 7 Rue Louis David, La Teste-de-Buch, Nouvelle-Aquitaine",
+  "145649: Developpement Amicale EURL | 1 Rue Bense, Bordeaux, Nouvelle-Aquitaine",
+  "145649: Developpement Amicale SARL | 1 Rue La Boub\u00e9e, Bordeaux, Nouvelle-Aquitaine",
+  "145652: The Amicale SARL | 10 Rue Malus, Lille, Hauts-de-France",
+  "145652: The Amicale SAS | 10 Cour Dupont, Lille, Hauts-de-France",
+  "145652: And Amicale (France) SAS | 10 Rue des Sept Agaches, Lille, Hauts-de-France",
+  "145708: Developpement Amicale SAS | 9 Rue Ferdinand de Lesseps, Saint-Herblain, Pays de la Loire",
+  "145708: The Amicale (France) SARL | Pays de la Loire, 9 Rue des Merisiers, Saint-Herblain",
+  "145975: Arts Amicale EURL | 26 Rue du Sablonat, Bordeaux, Nouvelle-Aquitaine",
+  "145975: Arts Amicale SAS | 26 Rue Capdeville, Bordeaux, Nouvelle-Aquitaine",
+  "146356: La Baule-Escoublac Amicale | 1 bis ALL des Dryades, La Baule-Escoublac, Pays de la Loire"
+ ],
+ "test_france_exact_groups_merged_by_full_canon": 7,
+ "test_france_exact_s1_in_groups_merged_by_full_canon": 15,
+ "test_france_loose_groups_merged_by_full_canon": 924,
+ "test_france_loose_s1_in_groups_merged_by_full_canon": 3805,
+ "train_A_BREST": {
+  "exact": {
+   "India": {
+    "s1": 790180,
+    "in_sibling_groups": 4,
+    "share": 5.062137740767926e-06,
+    "groups": 2,
+    "group_size_hist": {
+     "2": 2
+    },
+    "groups_all_distinct_legal": 2,
+    "groups_with_repeated_legal": 0
+   },
+   "US": {
+    "s1": 1182641,
+    "in_sibling_groups": 4,
+    "share": 3.3822605507503967e-06,
+    "groups": 2,
+    "group_size_hist": {
+     "2": 2
+    },
+    "groups_all_distinct_legal": 2,
+    "groups_with_repeated_legal": 0
+   }
+  },
+  "loose": {
+   "India": {
+    "s1": 790180,
+    "in_sibling_groups": 29,
+    "share": 3.670049862056747e-05,
+    "groups": 14,
+    "group_size_hist": {
+     "2": 13,
+     "3": 1
+    },
+    "groups_all_distinct_legal": 9,
+    "groups_with_repeated_legal": 5
+   },
+   "US": {
+    "s1": 1182641,
+    "in_sibling_groups": 8,
+    "share": 6.764521101500793e-06,
+    "groups": 4,
+    "group_size_hist": {
+     "2": 4
+    },
+    "groups_all_distinct_legal": 3,
+    "groups_with_repeated_legal": 1
+   }
+  }
+ },
+ "train_exact_record_ownership": {
+  "US": {
+   "owner_legal_differs": 4,
+   "no_sibling_has_record_legal": 4,
+   "records": 17,
+   "owner_legal_equal": 13,
+   "unique_legal_match_is_owner": 13
+  },
+  "India": {
+   "owner_legal_equal": 12,
+   "unique_legal_match_is_owner": 12,
+   "records": 17,
+   "owner_legal_differs": 5,
+   "no_sibling_has_record_legal": 5
+  }
+ },
+ "train_exact_split": {
+  "US": {
+   "members": 4,
+   "mean_records": 4.25,
+   "members_with_0_records": 0,
+   "all_s1_mean_records": 3.456208604301728
+  },
+  "India": {
+   "members": 4,
+   "mean_records": 4.25,
+   "members_with_0_records": 0,
+   "all_s1_mean_records": 3.4354830544939126
+  }
+ },
+ "train_loose_record_ownership": {
+  "India": {
+   "owner_legal_equal": 55,
+   "unique_legal_match_is_owner": 31,
+   "records": 98,
+   "owner_legal_differs": 43,
+   "no_sibling_has_record_legal": 36,
+   "several_siblings_share_record_legal": 24,
+   "unique_legal_match_is_other_sibling": 7
+  },
+  "US": {
+   "owner_legal_differs": 11,
+   "no_sibling_has_record_legal": 11,
+   "records": 32,
+   "owner_legal_equal": 21,
+   "several_siblings_share_record_legal": 7,
+   "unique_legal_match_is_owner": 14
+  }
+ },
+ "train_loose_split": {
+  "US": {
+   "members": 8,
+   "mean_records": 4.0,
+   "members_with_0_records": 1,
+   "all_s1_mean_records": 3.456208604301728
+  },
+  "India": {
+   "members": 29,
+   "mean_records": 3.3793103448275863,
+   "members_with_0_records": 1,
+   "all_s1_mean_records": 3.4354830544939126
+  }
+ },
+ "train_examples": [
+  "3812: Chennai 17 International Private Limited | Park View No.6, 4Th Floor, No85, G.N.Chetty Road T.Nagar, Chennai 17, Tamil Nadu | India",
+  "3812: Chennai 17 India Co | Park View No.6, 4Th Floor, No85, G.N.Chetty Road T.Nagar, Chennai 17, Tamil Nadu | India",
+  "137264: Bobinette Becerril All Physical LLC | 2920 Max Loop, Badger, AK | US",
+  "137264: Bobinette Becerril All Physical LP | 2920 Max Loop, Badger, AK | US",
+  "371389: Bangalore Services Private Limited | Karnataka, 239 No 16 I Floor Sns Chambers Sankey Road Sadashivanagar, Bangalore | India",
+  "371389: Bangalore Services LLP | 239 No 16 I Floor Sns Chambers Sankey Road Sadashivanagar, Bangalore, Karnataka | India",
+  "1630206: Lloyd and Poore P.C. | 498 Olde Mill Drive, Westerville, OH | US",
+  "1630206: Lloyd and Poore LP | 498 Olde Mill Drive, Westerville, OH | US"
+ ]
+}
