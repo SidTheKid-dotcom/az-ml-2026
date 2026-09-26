@@ -386,24 +386,57 @@ def test_cmd(args) -> dict:
         files[name] = {"path": str(path), "sha256": sha256(path), "validation": check,
                        "by_country": by_country(country, lengths)}
         log(f"{name}: links {check['links']} passed {check['passed']} {check['problems']}")
+    if args.france_file:
+        # France rows (whole S1 lines) from an existing validated file, e.g. the French fine-tune S2 file;
+        # US/India rows from the Qwen-tree model. Re-validated below like every other output.
+        french = {}
+        for line in Path(args.france_file).read_text(encoding="utf-8").split("\n")[1:]:
+            if line:
+                s1, ids = line.split("\t")
+                french[s1] = ids
+        path = out / "model_us_india_file_france" / "matching_results.tsv"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        model_lines = (out / "matching_results.tsv").read_text(encoding="utf-8").split("\n")
+        tmp = path.with_suffix(".tsv.tmp")
+        with open(tmp, "w", encoding="utf-8", newline="\n") as handle:
+            handle.write(model_lines[0] + "\n")
+            for i, line in enumerate(model_lines[1:len(s1_ids) + 1]):
+                if country[i] == "France":
+                    if s1_ids[i] not in french:
+                        raise SystemExit(f"--france-file lacks French S1 {s1_ids[i]}")
+                    line = f"{s1_ids[i]}\t{french[s1_ids[i]]}"
+                handle.write(line + "\n")
+        tmp.replace(path)
+        check = validate_tsv(path, s1_ids, rec_index, pair_keys, n_rec)
+        lengths = np.asarray([len([v for v in line.split("\t")[1].split(",") if v])
+                              for line in path.read_text(encoding="utf-8").split("\n")[1:len(s1_ids) + 1]])
+        files["model_us_india_file_france"] = {"path": str(path), "sha256": sha256(path), "validation": check,
+                                               "france_source": str(Path(args.france_file).resolve()),
+                                               "france_source_sha256": sha256(args.france_file),
+                                               "by_country": by_country(country, lengths)}
+        log(f"model_us_india_file_france: links {check['links']} passed {check['passed']} {check['problems']}")
     compare = {}
-    if args.compare_file:
-        other = {}
+    if args.compare_file and not Path(args.compare_file).is_file():
+        log(f"--compare-file {args.compare_file} does not exist; skipping the comparison")
+    elif args.compare_file:
+        s1_index = {v: i for i, v in enumerate(s1_ids)}
+        other_s1, other_rec = [], []
         for line in Path(args.compare_file).read_text(encoding="utf-8").split("\n")[1:]:
             if line:
                 s1, ids = line.split("\t")
-                other[s1] = set(filter(None, ids.split(",")))
+                for rec in filter(None, ids.split(",")):
+                    other_s1.append(s1_index[s1])
+                    other_rec.append(rec_index.get(rec, -1))
+        other_s1 = np.asarray(other_s1, dtype=np.int64)
+        other_keys = other_s1 * n_rec + np.asarray(other_rec, dtype=np.int64)
         for name, acc, _ in outputs:
-            mine = {}
-            for row in np.flatnonzero(acc):
-                mine.setdefault(s1_ids[left[row]], set()).add(rec_ids[right[row]])
-            diff = {}
-            for code in np.unique(country):
-                keys = s1_ids[country == code]
-                added = sum(len(mine.get(k, set()) - other.get(k, set())) for k in keys)
-                removed = sum(len(other.get(k, set()) - mine.get(k, set())) for k in keys)
-                diff[str(code)] = {"links_only_here": added, "links_only_in_compare": removed}
-            compare[name] = diff
+            rows = np.flatnonzero(acc)
+            mine_keys = left[rows] * n_rec + right[rows]
+            only_here = ~np.isin(mine_keys, other_keys)
+            only_other = ~np.isin(other_keys, mine_keys)
+            compare[name] = {str(code): {"links_only_here": int((only_here & (country[left[rows]] == code)).sum()),
+                                         "links_only_in_compare": int((only_other & (country[other_s1] == code)).sum())}
+                             for code in np.unique(country)}
     result = {"variant": variant, "threshold": threshold, "model": str(model_path), "model_sha256": sha256(model_path),
               "final_fit_rows": fit_rows, "plain_c2_france": pick, "blend3_pick": b3,
               "arena_report": str(work / "report.json"),
@@ -445,6 +478,8 @@ def main() -> None:
             p.add_argument("--variant", choices=VARIANTS)
             p.add_argument("--threshold", type=float)
             p.add_argument("--compare-file", help="Existing matching_results.tsv to diff against, by country")
+            p.add_argument("--france-file", help="Validated matching_results.tsv whose France rows replace the "
+                           "model's (e.g. the French fine-tune S2 file); written as model_us_india_file_france")
             p.add_argument("--out", required=True)
     args = parser.parse_args()
     (evaluate_cmd if args.command == "evaluate" else test_cmd)(args)
