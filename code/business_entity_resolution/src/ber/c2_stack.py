@@ -25,8 +25,8 @@ from ber.pair_tree_arena import build_pairs, decide, false_merge, load_scores
 
 COLUMNS = ["business_name", "business_address", "country"]
 HEADER = "source1_entity_id\tmatched_entity_ids"
-WEIGHTS = (0.5, 0.65, 0.75, 0.85, 1.0)
-THRESHOLDS = tuple(np.round(np.arange(0.40, 0.96, 0.025), 3))
+WEIGHTS = (0.3, 0.5, 0.6, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0)
+THRESHOLDS = tuple(np.round(np.r_[np.arange(0.02, 0.10, 0.01), np.arange(0.10, 0.96, 0.025)], 3))
 
 
 def log(message):
