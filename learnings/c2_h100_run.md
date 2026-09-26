@@ -221,3 +221,16 @@ Qwen train and score → ensemble assembly on 27 Sep morning.
     It changes 15,375 French rows and empties 915; US/India are byte-identical.
 - **Recall bundle is too small to upload alone**: +5,418 legal-form adds and +2,026 unclaimed new-pair adds.
   Files: pod `/workspace/az-ml-new/eureka/recall_bundle_{s1,s2}/`.
+- **France probe sets on the S1 file** (`diagnostics/20260926_france/france_probe_sets.py`; pod `eureka/probes/`).
+  - French accepted links: 846,833. By blend band: <0.1 (name-only) 12,074; 0.1–0.3 65,920; 0.3–0.7 6,262;
+    0.7–0.9 18,124; ≥0.9 744,453.
+  - Legal-form pairs are 562,587 of them (≈99.9% true on US/India).
+  - T1 "tree ≥ 0.9, C2 < 0.05": 39,217 links, of which **22,614 are legal-form pairs**. So colleague U1/U2 as
+    proposed are diluted toward break-even.
+  - T2r (band 0.1–0.7 minus legal-form pairs): 43,517 links, break-even truth rate 0.695;
+    Δpublic ≈ 0.00599 − 0.00863·p.
+  - Confident word swaps (blend ≥ 0.7): 9,033 links, disjoint from T2r; Δpublic ≈ 0.00123 − 0.00186·p.
+  - French records with ≥ 2 claimants at blend ≥ 0.1: 32,022.
+  - Tonight's uploads (both validator PASS, LF, French rows only):
+    - `~/Downloads/probe-drop_T2r` (SHA `41993a2f…`, −43,517 links);
+    - `~/Downloads/probe-drop_T3conf` (SHA `d6add04e…`, −9,033 links).
