@@ -52,3 +52,22 @@ record and a cap of 11 per list. (w, t) was cross-fitted on component halves.
   It would need test union mining (the pod now has 128 cores) plus tree features
   for the new pairs.
 - **Recall is the remaining loss:** 0.946 vs a 0.9835 retrieval ceiling.
+
+## Next-submission stage (set up 26 Sep ~17:10 IST, in parallel with the live run)
+
+Expected public score of the step-40k C2 + name-only file: about 0.975–0.979.
+This assumes B_REST ≈ 0.982–0.984 and a public score ~0.008 below it, as
+v1's was. That is an estimate. 0.99 is not realistic by the deadline: the
+leaders are at 0.988 and the dense retrieval ceiling is ≈ 0.994. A realistic
+stretch for the next file is ≈ 0.980–0.984, stacking:
+
+| Lever | Owner | Expected | Gate |
+| --- | --- | --- | --- |
+| Decision layer with C2 rival scores (pair CatBoost, B_REST halves) | agent P (pod CPU) | +0.001–0.002 | B_REST cross-fit CI > 0 |
+| French fine-tune (strict pseudo-labels, rival negatives, US/India replay) | chained after the 40k test scoring | France-dependent | Monitor US/India no regression; France-only upload |
+| Union retrieval (lexical/phonetic/key, top-k new pairs scored by C2) | agent U (pod CPU) + GPU scoring | +0.001 | B_REST oracle and matcher gain CI > 0 |
+| Checkpoint averaging 30k/35k/40k | controller | 0 to +0.001 | One B_REST scoring |
+| Qwen3-Reranker-0.6B second family, ensembled with C2 | agent Q prepares; GPU overnight | +0.001–0.003 | B_REST ensemble cross-fit CI > 0 |
+
+GPU order after 40k: final file → French fine-tune → union scoring →
+Qwen train and score → ensemble assembly on 27 Sep morning.
