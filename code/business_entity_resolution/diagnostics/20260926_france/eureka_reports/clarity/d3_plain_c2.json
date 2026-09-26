@@ -1,0 +1,79 @@
+{
+ "base_decision": "plain_c2",
+ "multiplicity_parity": true,
+ "0.0": {
+  "withheld_frac": 0.0,
+  "population_s1": 521846,
+  "base_macro_f05": 0.9795834280288139,
+  "name_only_macro_f05": 0.9826300875490827,
+  "guarded_macro_f05": 0.9824574060826119,
+  "name_only_delta": 0.003046659520268724,
+  "guarded_delta": 0.0028739780537979653,
+  "adds": 16566,
+  "add_precision": 0.9256911746951587,
+  "drops": 5078,
+  "drops_true": 2257,
+  "owner_removed": 82,
+  "owner_removed_true": 8,
+  "guard_fired_on_add_candidates": 5849,
+  "guarded_adds": 12160,
+  "guarded_add_precision": 0.9796052631578948,
+  "guard_blocked_adds": 4406,
+  "guard_blocked_true": 3423,
+  "false_links": {
+   "base": 9050,
+   "name_only": 7386,
+   "guarded": 6437
+  }
+ },
+ "0.2": {
+  "withheld_frac": 0.2,
+  "population_s1": 417757,
+  "base_macro_f05": 0.9792785184542887,
+  "name_only_macro_f05": 0.9821114011063162,
+  "guarded_macro_f05": 0.9821485065065759,
+  "name_only_delta": 0.002832882652027524,
+  "guarded_delta": 0.00286998805228722,
+  "adds": 14139,
+  "add_precision": 0.8911521323997453,
+  "drops": 4075,
+  "drops_true": 1770,
+  "owner_removed": 61,
+  "owner_removed_true": 7,
+  "guard_fired_on_add_candidates": 5767,
+  "guarded_adds": 9759,
+  "guarded_add_precision": 0.9750999077774362,
+  "guard_blocked_adds": 4380,
+  "guard_blocked_true": 3084,
+  "false_links": {
+   "base": 7870,
+   "name_only": 7050,
+   "guarded": 5779
+  }
+ },
+ "0.3": {
+  "withheld_frac": 0.3,
+  "population_s1": 365462,
+  "base_macro_f05": 0.979099324870332,
+  "name_only_macro_f05": 0.9817563732222033,
+  "guarded_macro_f05": 0.9819654624592515,
+  "name_only_delta": 0.002657048351871305,
+  "guarded_delta": 0.002866137588919515,
+  "adds": 12937,
+  "add_precision": 0.869212336708665,
+  "drops": 3557,
+  "drops_true": 1527,
+  "owner_removed": 43,
+  "owner_removed_true": 6,
+  "guard_fired_on_add_candidates": 5672,
+  "guarded_adds": 8590,
+  "guarded_add_precision": 0.9726426076833528,
+  "guard_blocked_adds": 4347,
+  "guard_blocked_true": 2890,
+  "false_links": {
+   "base": 7166,
+   "name_only": 6791,
+   "guarded": 5349
+  }
+ }
+}

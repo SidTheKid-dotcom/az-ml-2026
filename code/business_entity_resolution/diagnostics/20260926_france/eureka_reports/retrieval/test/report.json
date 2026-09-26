@@ -1,0 +1,81 @@
+{
+  "scope": "test (no labels exist)",
+  "raw_pool": 9969589,
+  "dense_pairs": 86627200,
+  "base_pairs": 89874751,
+  "branches_config": {
+    "address": [
+      5000,
+      10,
+      0.25
+    ],
+    "empty": [
+      5000,
+      5,
+      0.3
+    ]
+  },
+  "address": {
+    "pairs": 8617561,
+    "new_pairs": 2922396,
+    "new_by_country": {
+      "France": 1921237,
+      "India": 636450,
+      "US": 364709
+    },
+    "new_pairs_to_records_outside_dense_pool": 104412
+  },
+  "empty": {
+    "pairs": 2155957,
+    "new_pairs": 755129,
+    "new_by_country": {
+      "France": 177419,
+      "India": 451121,
+      "US": 126589
+    },
+    "new_pairs_to_records_outside_dense_pool": 38781
+  },
+  "union_new_pairs": 3677525,
+  "union_new_by_country": {
+    "France": 2098656,
+    "India": 1087571,
+    "US": 491298
+  },
+  "union_new_records_outside_dense_pool": 143193,
+  "set_dir": {
+    "reference": "reference.parquet (test order)",
+    "pool": "pool.parquet (raw_row_idx kept)",
+    "left": "left.npy -> reference row",
+    "right": "right.npy -> pool.parquet row",
+    "tree": "tree.npy all ones (gate bypass)"
+  },
+  "runtime_seconds": 346.7,
+  "aligned_filters": {
+    "score.npy": "best branch cosine",
+    "rank.npy": "best rank within S1 for its branch",
+    "branch.npy": "1 address, 2 empty"
+  },
+  "by_country_filters": {
+    "France": {
+      "pairs": 2098656,
+      "rank<=2": 647926,
+      "rank0": 206496,
+      "address": 1921237,
+      "empty": 177419
+    },
+    "India": {
+      "pairs": 1087571,
+      "rank<=2": 599047,
+      "rank0": 180987,
+      "address": 636450,
+      "empty": 451121
+    },
+    "US": {
+      "pairs": 491298,
+      "rank<=2": 252165,
+      "rank0": 74094,
+      "address": 364709,
+      "empty": 126589
+    }
+  }
+}

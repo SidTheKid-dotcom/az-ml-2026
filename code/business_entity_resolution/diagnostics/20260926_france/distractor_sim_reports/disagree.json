@@ -1,0 +1,61 @@
+{
+ "arena_b_rest": {
+  "India": {
+   "cluster_per_s1": 0.0199,
+   "share_no_better_claimant": 0.8365,
+   "accepted_at_0.1_share": 0.2781,
+   "true_rate": 0.2738,
+   "true_rate_no_better_claimant": 0.3267,
+   "true_rate_claimed_elsewhere": 0.0029,
+   "true_free_c2[0,0.005)": [
+    2617,
+    0.1215
+   ],
+   "true_free_c2[0.005,0.02)": [
+    353,
+    0.9093
+   ],
+   "true_free_c2[0.02,0.05)": [
+    513,
+    0.9727
+   ]
+  },
+  "US": {
+   "cluster_per_s1": 0.0155,
+   "share_no_better_claimant": 0.9162,
+   "accepted_at_0.1_share": 0.4046,
+   "true_rate": 0.4267,
+   "true_rate_no_better_claimant": 0.4657,
+   "true_rate_claimed_elsewhere": 0.0,
+   "true_free_c2[0,0.005)": [
+    2985,
+    0.2536
+   ],
+   "true_free_c2[0.005,0.02)": [
+    692,
+    0.8829
+   ],
+   "true_free_c2[0.02,0.05)": [
+    753,
+    0.923
+   ]
+  }
+ },
+ "test": {
+  "France": {
+   "cluster_per_s1": 0.5449,
+   "share_no_better_claimant": 0.6114,
+   "accepted_at_0.1_share": 0.3932
+  },
+  "India": {
+   "cluster_per_s1": 0.0256,
+   "share_no_better_claimant": 0.8852,
+   "accepted_at_0.1_share": 0.2246
+  },
+  "US": {
+   "cluster_per_s1": 0.0191,
+   "share_no_better_claimant": 0.9691,
+   "accepted_at_0.1_share": 0.3532
+  }
+ }
+}

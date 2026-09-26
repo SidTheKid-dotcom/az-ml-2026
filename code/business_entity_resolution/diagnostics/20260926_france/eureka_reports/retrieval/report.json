@@ -1,0 +1,103 @@
+{
+  "arena_b_rest": {
+    "dense": {
+      "pairs": 26092300,
+      "true": 1777382,
+      "recall": 0.9836865985041436,
+      "oracle_f05": 0.9945953277213354
+    },
+    "dense_union": {
+      "pairs": 27016630,
+      "true": 1780578,
+      "recall": 0.9854554148693477,
+      "oracle_f05": 0.9952184720679662
+    },
+    "cumulative": {
+      "pairs": 31541539,
+      "true": 1788790,
+      "added_true_over_dense_union": 8212,
+      "recall": 0.9900003209992152,
+      "oracle_f05": 0.9967472986788258
+    },
+    "kept_for_scoring": {
+      "rule": {
+        "address": {
+          "min_cosine": 0.6,
+          "max_rank": 99
+        },
+        "empty": {
+          "min_cosine": 0.8,
+          "max_rank": 2
+        }
+      },
+      "new_pairs": 689474,
+      "new_true": 4897,
+      "recall": 0.9881656444502003,
+      "oracle_f05": 0.9961444986800391
+    }
+  },
+  "arena_branches": {
+    "address": {
+      "new_pairs": 2741873,
+      "new_true_vs_base": 5979,
+      "new_true_rate": 0.002180626163210331
+    },
+    "empty": {
+      "new_pairs": 1783036,
+      "new_true_vs_base": 2233,
+      "new_true_rate": 0.0012523583371283585
+    }
+  },
+  "arena_native_branch_v0": {
+    "new_pairs": 758007,
+    "new_true_vs_base": 7,
+    "new_true_rate": 9.234743214772423e-06
+  },
+  "test": {
+    "union_new_pairs": 3677525,
+    "union_new_by_country": {
+      "France": 2098656,
+      "India": 1087571,
+      "US": 491298
+    },
+    "union_new_records_outside_dense_pool": 143193,
+    "by_country_filters": {
+      "France": {
+        "pairs": 2098656,
+        "rank<=2": 647926,
+        "rank0": 206496,
+        "address": 1921237,
+        "empty": 177419
+      },
+      "India": {
+        "pairs": 1087571,
+        "rank<=2": 599047,
+        "rank0": 180987,
+        "address": 636450,
+        "empty": 451121
+      },
+      "US": {
+        "pairs": 491298,
+        "rank<=2": 252165,
+        "rank0": 74094,
+        "address": 364709,
+        "empty": 126589
+      }
+    }
+  },
+  "test_dense_pool_gap": {
+    "raw_records": 9969589,
+    "dense_pool_records": 9786416,
+    "never_in_any_dense_top50": 183173,
+    "by_country": {
+      "India": 108742,
+      "France": 59340,
+      "US": 15091
+    }
+  },
+  "paths": {
+    "b_rest_set": "b_rest/{left,right,tree}.npy (arena reference/pool indices)",
+    "test_set": "test/ (union-style set dir + score/rank/branch.npy)"
+  },
+  "verdict": "keep for scoring (oracle +0.0009 on B_REST at the kept rule); realized gain depends on the matcher; cap France by rank"
+}

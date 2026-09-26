@@ -1,0 +1,107 @@
+{
+ "arena_b_rest": {
+  "changed|suffix_added": {
+   "n": 2,
+   "true": 0.0,
+   "accepted": 0.0,
+   "c2_ge_0.5": 0.0
+  },
+  "changed|suffix_same_or_dropped": {
+   "n": 38236,
+   "true": 0.9985,
+   "accepted": 0.9985,
+   "c2_ge_0.5": 0.9975
+  },
+  "rec_added|suffix_same_or_dropped": {
+   "n": 61899,
+   "true": 0.9994,
+   "accepted": 0.9997,
+   "c2_ge_0.5": 0.9964
+  },
+  "rec_dropped_some|suffix_added": {
+   "n": 2,
+   "true": 0.0,
+   "accepted": 0.0,
+   "c2_ge_0.5": 0.0
+  },
+  "rec_dropped_some|suffix_same_or_dropped": {
+   "n": 27540,
+   "true": 0.9996,
+   "accepted": 0.9996,
+   "c2_ge_0.5": 0.9987
+  },
+  "rec_dropped|suffix_added": {
+   "n": 11,
+   "true": 0.0,
+   "accepted": 0.0909,
+   "c2_ge_0.5": 0.0
+  },
+  "rec_dropped|suffix_same_or_dropped": {
+   "n": 87935,
+   "true": 0.9999,
+   "accepted": 0.9999,
+   "c2_ge_0.5": 0.9988
+  },
+  "same|suffix_added": {
+   "n": 18,
+   "true": 0.0,
+   "accepted": 0.0,
+   "c2_ge_0.5": 0.0
+  },
+  "same|suffix_same_or_dropped": {
+   "n": 378844,
+   "true": 1.0,
+   "accepted": 0.9999,
+   "c2_ge_0.5": 0.9991
+  }
+ }
+}
+{
+ "test_france": {
+  "changed|suffix_added": {
+   "n": 1710,
+   "accepted": 0.0006,
+   "c2_ge_0.5": 0.0
+  },
+  "changed|suffix_same_or_dropped": {
+   "n": 15362,
+   "accepted": 0.0184,
+   "c2_ge_0.5": 0.0105
+  },
+  "rec_added|suffix_added": {
+   "n": 608,
+   "accepted": 0.0049,
+   "c2_ge_0.5": 0.0
+  },
+  "rec_added|suffix_same_or_dropped": {
+   "n": 47758,
+   "accepted": 0.8545,
+   "c2_ge_0.5": 0.3714
+  },
+  "rec_dropped_some|suffix_same_or_dropped": {
+   "n": 61,
+   "accepted": 1.0,
+   "c2_ge_0.5": 1.0
+  },
+  "rec_dropped|suffix_added": {
+   "n": 982,
+   "accepted": 0.0,
+   "c2_ge_0.5": 0.001
+  },
+  "rec_dropped|suffix_same_or_dropped": {
+   "n": 94712,
+   "accepted": 0.9079,
+   "c2_ge_0.5": 0.904
+  },
+  "same|suffix_added": {
+   "n": 14018,
+   "accepted": 0.5479,
+   "c2_ge_0.5": 0.2637
+  },
+  "same|suffix_same_or_dropped": {
+   "n": 445182,
+   "accepted": 0.9781,
+   "c2_ge_0.5": 0.9702
+  }
+ }
+}

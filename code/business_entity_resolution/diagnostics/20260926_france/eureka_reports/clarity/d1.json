@@ -1,0 +1,72 @@
+{
+ "counts": {
+  "unreached_france": 59340,
+  "unreached_us": 15091,
+  "unreached_india": 108742,
+  "france_records": 1434993,
+  "france_accepted": 846833,
+  "france_reached_not_accepted": 528820
+ },
+ "unreached_france": {
+  "n": 59340,
+  "share_with_house_number": 0.8814,
+  "share_ge1_plausible": 0.7911,
+  "share_exactly1": 0.1431,
+  "share_street_fuzzy_owner": 0.6008
+ },
+ "france_accepted_sample": {
+  "n": 60000,
+  "share_with_house_number": 0.9256,
+  "share_ge1_plausible": 0.9059,
+  "share_exactly1": 0.1001,
+  "share_street_fuzzy_owner": 0.8894,
+  "share_accepted_owner_among_plausible": 0.884
+ },
+ "france_reached_not_accepted_sample": {
+  "n": 60000,
+  "share_with_house_number": 0.9515,
+  "share_ge1_plausible": 0.8657,
+  "share_exactly1": 0.0815,
+  "share_street_fuzzy_owner": 0.6369
+ },
+ "unreached_us": {
+  "n": 15091,
+  "share_with_house_number": 0.9355,
+  "share_ge1_plausible": 0.0194,
+  "share_exactly1": 0.0173,
+  "share_street_fuzzy_owner": 0.0179
+ },
+ "us_accepted_sample": {
+  "n": 40000,
+  "share_with_house_number": 0.9002,
+  "share_ge1_plausible": 0.6294,
+  "share_exactly1": 0.5766,
+  "share_street_fuzzy_owner": 0.5739,
+  "share_accepted_owner_among_plausible": 0.6256
+ },
+ "us_reached_not_accepted_sample": {
+  "n": 40000,
+  "share_with_house_number": 0.9623,
+  "share_ge1_plausible": 0.0372,
+  "share_exactly1": 0.031,
+  "share_street_fuzzy_owner": 0.028
+ },
+ "unreached_india_sample": {
+  "n": 40000,
+  "share_with_house_number": 0.9447,
+  "share_ge1_plausible": 0.5924,
+  "share_exactly1": 0.1003,
+  "share_street_fuzzy_owner": 0.5736
+ },
+ "france_unreached_true_share_mixture_estimate": -1.8557,
+ "france_unreached_true_links_estimate": -110119,
+ "track_r_coverage_france_unreached": {
+  "records_in_any_track_r_pair": 19225,
+  "records_in_top3_pairs": 10699,
+  "exactly1_plausible_records": 8494,
+  "exactly1_owner_pair_present_any": 2607,
+  "exactly1_owner_pair_present_top3": 1798
+ },
+ "exactly1_owner_current_list_len_mean": 3.194,
+ "france_all_list_len_mean": 3.264
+}

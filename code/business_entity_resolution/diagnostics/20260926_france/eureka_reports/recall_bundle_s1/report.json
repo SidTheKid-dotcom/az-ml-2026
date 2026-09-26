@@ -1,0 +1,14 @@
+{
+ "base": "/opt/az-ml-new/runs/s1_pair_tree_40k/model_us_india_c2_france/matching_results.tsv",
+ "threshold": 0.5,
+ "with_f1": true,
+ "added": {
+  "f1": 5418,
+  "new": 2026
+ },
+ "rows": 1732544,
+ "contested": 0,
+ "longest": 11,
+ "french_links": 854277,
+ "sha256": "762ce2634df94822f919277696a53e606ff87a9f55cc5b510249249d10504628"
+}

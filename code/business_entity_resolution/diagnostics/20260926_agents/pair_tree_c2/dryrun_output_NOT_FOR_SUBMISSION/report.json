@@ -1,0 +1,250 @@
+{
+  "variant": "model",
+  "threshold": 0.75,
+  "model": "step005000/final_model.cbm",
+  "model_sha256": "0c9750b186f421df2652ca60f39420b1cf2155cea22556e9cfcff768e7fea88d",
+  "plain_c2_name_only": {
+    "weight": 0.9,
+    "threshold": 0.1,
+    "gate": 0.01
+  },
+  "france_fine_tune": {
+    "scores": "/opt/az-ml-new/agents/pair_tree_c2/dryrun_fake_test_scores",
+    "weight": 0.9,
+    "threshold": 0.1,
+    "complete": {
+      "state": "complete",
+      "DRYRUN": "v1 blend stand-in, not C2",
+      "checkpoint": null
+    },
+    "france_links": 927349,
+    "france_links_plain_c2": 927349,
+    "france_links_model": 906095,
+    "overlap_with_plain_c2": 927349
+  },
+  "final_fit_rows": 3000000,
+  "arena_report": "step005000/report.json",
+  "arena_crossfit": {
+    "s1": 521846,
+    "macro_f05": 0.9844460037048228,
+    "precision": 0.9975408514607492,
+    "recall": 0.9588517747382472,
+    "predicted_links": 1736780,
+    "false_links": 4271,
+    "singleton_accuracy": 0.9953301739942578,
+    "empty_predictions": 30626,
+    "false_merge": {
+      "no_match_s1": 28909,
+      "false_merges": 135,
+      "rate": 0.004669826005742156
+    },
+    "by_country": {
+      "India": {
+        "s1": 209009,
+        "macro_f05": 0.9816360074559605,
+        "precision": 0.9979142522710428,
+        "recall": 0.9510107209403907,
+        "false_links": 1438
+      },
+      "US": {
+        "s1": 312837,
+        "macro_f05": 0.9863233855553666,
+        "precision": 0.9972950496448619,
+        "recall": 0.9640875971696877,
+        "false_links": 2833
+      }
+    }
+  },
+  "arena_c2_scores": "/opt/az-ml-new/runs/c2_step005000/b_rest_scores",
+  "test_c2_scores": "/opt/az-ml-new/agents/pair_tree_c2/dryrun_fake_test_scores",
+  "test_c2_complete": null,
+  "inputs": {
+    "index/left.npy": "f0076cea985c65df7e8bb0581641ea298adef0113fc7becafa94fa5b9a7774ca",
+    "index/right.npy": "6fef66d5e5c6df2a0d11799e2ee995440a001986fca7ce841ca9280f4386b128",
+    "probabilities.npy": "1d088af1ac46511e50700386a14bd553fc879c4ab49b59dc6b42100145712c1c",
+    "base_probabilities.npy": "862126294ccaf8e122ec1149a864d30ff02387ac2e3c5c7aeec139038880fbdc",
+    "dense_test/reference.parquet": "a5ee1e0800e12b9c3e7f21d1ebf50e03b81171ffce9f85e9b842f7f501439275",
+    "dense_test/pool.parquet": "50b95f190d9758a86686463637303fc60ebdfb2ed27599249034f3b3e0459c0a"
+  },
+  "candidate_rows": 14513431,
+  "c2_rival_rates": {
+    "test": {
+      "0.1": 0.09814644676009095,
+      "0.5": 0.037565184840974805
+    },
+    "arena_b_rest": {
+      "0.1": 0.004909766298414608,
+      "0.5": 0.0010241671173041819
+    }
+  },
+  "arena_c2_rival_shift": {
+    "b_rest_gated_rows": 2576129,
+    "with_outside_gated_claimant": 613727,
+    "rival_rates": {
+      "0.1": 0.004909766298414608,
+      "0.5": 0.0010241671173041819
+    }
+  },
+  "files": {
+    "model": {
+      "path": "dryrun_output_NOT_FOR_SUBMISSION/matching_results.tsv",
+      "sha256": "2fa0db64d15b61b5d2f8cbd14d11ec84ce6bc39e37c35a7e2f36273de617b6fe",
+      "validation": {
+        "rows": 1732544,
+        "links": 5943501,
+        "longest_list": 11,
+        "contested": 0,
+        "outside_candidates": 0,
+        "passed": true,
+        "problems": []
+      },
+      "by_country": {
+        "France": {
+          "s1": 259452,
+          "links": 906095,
+          "empty_rows": 12101,
+          "mean_list": 3.4923415506529145,
+          "longest_list": 11
+        },
+        "India": {
+          "s1": 809986,
+          "links": 2775082,
+          "empty_rows": 44886,
+          "mean_list": 3.426086376801574,
+          "longest_list": 11
+        },
+        "US": {
+          "s1": 663106,
+          "links": 2262324,
+          "empty_rows": 36373,
+          "mean_list": 3.41170793206516,
+          "longest_list": 11
+        }
+      }
+    },
+    "model_us_india_c2_france": {
+      "path": "dryrun_output_NOT_FOR_SUBMISSION/model_us_india_c2_france/matching_results.tsv",
+      "sha256": "f88595d07025aa12a24163ce8ce11275a9c1ee2363c2cb14b8ec74a67a1f8e90",
+      "validation": {
+        "rows": 1732544,
+        "links": 5964755,
+        "longest_list": 11,
+        "contested": 0,
+        "outside_candidates": 0,
+        "passed": true,
+        "problems": []
+      },
+      "by_country": {
+        "France": {
+          "s1": 259452,
+          "links": 927349,
+          "empty_rows": 10710,
+          "mean_list": 3.574260364152136,
+          "longest_list": 11
+        },
+        "India": {
+          "s1": 809986,
+          "links": 2775082,
+          "empty_rows": 44886,
+          "mean_list": 3.426086376801574,
+          "longest_list": 11
+        },
+        "US": {
+          "s1": 663106,
+          "links": 2262324,
+          "empty_rows": 36373,
+          "mean_list": 3.41170793206516,
+          "longest_list": 11
+        }
+      }
+    },
+    "c2_blend_name_only": {
+      "path": "dryrun_output_NOT_FOR_SUBMISSION/c2_blend_name_only/matching_results.tsv",
+      "sha256": "4041160a957471454d0ea0d36f7906afcca79065e2f3b8eb4a24d66511340393",
+      "validation": {
+        "rows": 1732544,
+        "links": 5943380,
+        "longest_list": 11,
+        "contested": 0,
+        "outside_candidates": 0,
+        "passed": true,
+        "problems": []
+      },
+      "by_country": {
+        "France": {
+          "s1": 259452,
+          "links": 927349,
+          "empty_rows": 10710,
+          "mean_list": 3.574260364152136,
+          "longest_list": 11
+        },
+        "India": {
+          "s1": 809986,
+          "links": 2750725,
+          "empty_rows": 43630,
+          "mean_list": 3.3960154866874244,
+          "longest_list": 11
+        },
+        "US": {
+          "s1": 663106,
+          "links": 2265306,
+          "empty_rows": 35657,
+          "mean_list": 3.4162049506413754,
+          "longest_list": 11
+        }
+      }
+    },
+    "model_us_india_c2france_ft": {
+      "path": "dryrun_output_NOT_FOR_SUBMISSION/model_us_india_c2france_ft/matching_results.tsv",
+      "sha256": "f88595d07025aa12a24163ce8ce11275a9c1ee2363c2cb14b8ec74a67a1f8e90",
+      "validation": {
+        "rows": 1732544,
+        "links": 5964755,
+        "longest_list": 11,
+        "contested": 0,
+        "outside_candidates": 0,
+        "passed": true,
+        "problems": []
+      },
+      "by_country": {
+        "France": {
+          "s1": 259452,
+          "links": 927349,
+          "empty_rows": 10710,
+          "mean_list": 3.574260364152136,
+          "longest_list": 11
+        },
+        "India": {
+          "s1": 809986,
+          "links": 2775082,
+          "empty_rows": 44886,
+          "mean_list": 3.426086376801574,
+          "longest_list": 11
+        },
+        "US": {
+          "s1": 663106,
+          "links": 2262324,
+          "empty_rows": 36373,
+          "mean_list": 3.41170793206516,
+          "longest_list": 11
+        }
+      }
+    }
+  },
+  "model_vs_c2_name_only_by_country": {
+    "France": {
+      "model_only_links": 7546,
+      "c2_name_only_only_links": 28800
+    },
+    "India": {
+      "model_only_links": 46802,
+      "c2_name_only_only_links": 22445
+    },
+    "US": {
+      "model_only_links": 15985,
+      "c2_name_only_only_links": 18967
+    }
+  },
+  "labels_read": false,
+  "elapsed_seconds": 231.5
+}

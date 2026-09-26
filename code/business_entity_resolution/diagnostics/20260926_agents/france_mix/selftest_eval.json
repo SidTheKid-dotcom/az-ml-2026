@@ -1,0 +1,280 @@
+{
+  "rule": {
+    "weight": 1.0,
+    "threshold": 0.775,
+    "gate": 0.01,
+    "decode": "one owner, cap 11 (pair_tree_arena.decide); v1 uses blend >= 0.775"
+  },
+  "caveat": "SLICE is French pseudo-truth on pseudo-labelled pairs only; not French accuracy",
+  "B_REST": {
+    "v1_0.775": {
+      "s1": 20000,
+      "macro_f05": 0.9687154006157974,
+      "precision": 0.987332565610037,
+      "recall": 0.9382154324631755,
+      "predicted_links": 65996,
+      "true_links": 69451,
+      "true_positive_links": 65160,
+      "false_links": 836,
+      "singletons": 1071,
+      "singleton_accuracy": 0.9495798319327731,
+      "empty_predictions": 1124,
+      "retrieved_true_links": 68288,
+      "by_country": {
+        "India": {
+          "s1": 8036,
+          "macro_f05": 0.9650894573987491,
+          "precision": 0.9873874558371006,
+          "recall": 0.9291127475512976,
+          "predicted_links": 26323,
+          "true_links": 27974,
+          "true_positive_links": 25991,
+          "false_links": 332,
+          "singletons": 432,
+          "singleton_accuracy": 0.9537037037037037,
+          "empty_predictions": 467
+        },
+        "US": {
+          "s1": 11964,
+          "macro_f05": 0.9711508803627216,
+          "precision": 0.9872961459934968,
+          "recall": 0.9443547026062638,
+          "predicted_links": 39673,
+          "true_links": 41477,
+          "true_positive_links": 39169,
+          "false_links": 504,
+          "singletons": 639,
+          "singleton_accuracy": 0.94679186228482,
+          "empty_predictions": 657
+        }
+      },
+      "false_merge": {
+        "no_match_s1": 1071,
+        "false_merges": 54,
+        "rate": 0.05042016806722689
+      }
+    },
+    "candidate": {
+      "s1": 20000,
+      "macro_f05": 0.9687154006157974,
+      "precision": 0.987332565610037,
+      "recall": 0.9382154324631755,
+      "predicted_links": 65996,
+      "true_links": 69451,
+      "true_positive_links": 65160,
+      "false_links": 836,
+      "singletons": 1071,
+      "singleton_accuracy": 0.9495798319327731,
+      "empty_predictions": 1124,
+      "retrieved_true_links": 68288,
+      "by_country": {
+        "India": {
+          "s1": 8036,
+          "macro_f05": 0.9650894573987491,
+          "precision": 0.9873874558371006,
+          "recall": 0.9291127475512976,
+          "predicted_links": 26323,
+          "true_links": 27974,
+          "true_positive_links": 25991,
+          "false_links": 332,
+          "singletons": 432,
+          "singleton_accuracy": 0.9537037037037037,
+          "empty_predictions": 467
+        },
+        "US": {
+          "s1": 11964,
+          "macro_f05": 0.9711508803627216,
+          "precision": 0.9872961459934968,
+          "recall": 0.9443547026062638,
+          "predicted_links": 39673,
+          "true_links": 41477,
+          "true_positive_links": 39169,
+          "false_links": 504,
+          "singletons": 639,
+          "singleton_accuracy": 0.94679186228482,
+          "empty_predictions": 657
+        }
+      },
+      "false_merge": {
+        "no_match_s1": 1071,
+        "false_merges": 54,
+        "rate": 0.05042016806722689
+      }
+    },
+    "baseline": {
+      "s1": 20000,
+      "macro_f05": 0.9687154006157974,
+      "precision": 0.987332565610037,
+      "recall": 0.9382154324631755,
+      "predicted_links": 65996,
+      "true_links": 69451,
+      "true_positive_links": 65160,
+      "false_links": 836,
+      "singletons": 1071,
+      "singleton_accuracy": 0.9495798319327731,
+      "empty_predictions": 1124,
+      "retrieved_true_links": 68288,
+      "by_country": {
+        "India": {
+          "s1": 8036,
+          "macro_f05": 0.9650894573987491,
+          "precision": 0.9873874558371006,
+          "recall": 0.9291127475512976,
+          "predicted_links": 26323,
+          "true_links": 27974,
+          "true_positive_links": 25991,
+          "false_links": 332,
+          "singletons": 432,
+          "singleton_accuracy": 0.9537037037037037,
+          "empty_predictions": 467
+        },
+        "US": {
+          "s1": 11964,
+          "macro_f05": 0.9711508803627216,
+          "precision": 0.9872961459934968,
+          "recall": 0.9443547026062638,
+          "predicted_links": 39673,
+          "true_links": 41477,
+          "true_positive_links": 39169,
+          "false_links": 504,
+          "singletons": 639,
+          "singleton_accuracy": 0.94679186228482,
+          "empty_predictions": 657
+        }
+      },
+      "false_merge": {
+        "no_match_s1": 1071,
+        "false_merges": 54,
+        "rate": 0.05042016806722689
+      }
+    },
+    "candidate_minus_v1": {
+      "mean": 0.0,
+      "se": 0.0
+    },
+    "baseline_minus_v1": {
+      "mean": 0.0,
+      "se": 0.0
+    },
+    "candidate_minus_baseline": {
+      "mean": 0.0,
+      "se": 0.0
+    }
+  },
+  "SLICE_france_pseudo": {
+    "v1_0.775": {
+      "s1": 22150,
+      "macro_f05": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "predicted_links": 41026,
+      "true_links": 41026,
+      "true_positive_links": 41026,
+      "false_links": 0,
+      "singletons": 3229,
+      "singleton_accuracy": 1.0,
+      "empty_predictions": 3229,
+      "retrieved_true_links": 41026,
+      "by_country": {
+        "France": {
+          "s1": 22150,
+          "macro_f05": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "predicted_links": 41026,
+          "true_links": 41026,
+          "true_positive_links": 41026,
+          "false_links": 0,
+          "singletons": 3229,
+          "singleton_accuracy": 1.0,
+          "empty_predictions": 3229
+        }
+      },
+      "false_merge": {
+        "no_match_s1": 3229,
+        "false_merges": 0,
+        "rate": 0.0
+      }
+    },
+    "candidate": {
+      "s1": 22150,
+      "macro_f05": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "predicted_links": 41026,
+      "true_links": 41026,
+      "true_positive_links": 41026,
+      "false_links": 0,
+      "singletons": 3229,
+      "singleton_accuracy": 1.0,
+      "empty_predictions": 3229,
+      "retrieved_true_links": 41026,
+      "by_country": {
+        "France": {
+          "s1": 22150,
+          "macro_f05": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "predicted_links": 41026,
+          "true_links": 41026,
+          "true_positive_links": 41026,
+          "false_links": 0,
+          "singletons": 3229,
+          "singleton_accuracy": 1.0,
+          "empty_predictions": 3229
+        }
+      },
+      "false_merge": {
+        "no_match_s1": 3229,
+        "false_merges": 0,
+        "rate": 0.0
+      }
+    },
+    "baseline": {
+      "s1": 22150,
+      "macro_f05": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "predicted_links": 41026,
+      "true_links": 41026,
+      "true_positive_links": 41026,
+      "false_links": 0,
+      "singletons": 3229,
+      "singleton_accuracy": 1.0,
+      "empty_predictions": 3229,
+      "retrieved_true_links": 41026,
+      "by_country": {
+        "France": {
+          "s1": 22150,
+          "macro_f05": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "predicted_links": 41026,
+          "true_links": 41026,
+          "true_positive_links": 41026,
+          "false_links": 0,
+          "singletons": 3229,
+          "singleton_accuracy": 1.0,
+          "empty_predictions": 3229
+        }
+      },
+      "false_merge": {
+        "no_match_s1": 3229,
+        "false_merges": 0,
+        "rate": 0.0
+      }
+    },
+    "candidate_minus_v1": {
+      "mean": 0.0,
+      "se": 0.0
+    },
+    "baseline_minus_v1": {
+      "mean": 0.0,
+      "se": 0.0
+    },
+    "candidate_minus_baseline": {
+      "mean": 0.0,
+      "se": 0.0
+    }
+  }
+}

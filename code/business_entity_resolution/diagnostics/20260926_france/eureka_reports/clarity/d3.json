@@ -1,0 +1,78 @@
+{
+ "multiplicity_parity": true,
+ "0.0": {
+  "withheld_frac": 0.0,
+  "population_s1": 521846,
+  "base_macro_f05": 0.9855165262784406,
+  "name_only_macro_f05": 0.9852190398701787,
+  "guarded_macro_f05": 0.9854313186600862,
+  "name_only_delta": -0.0002974864082618822,
+  "guarded_delta": -8.520761835439927e-05,
+  "adds": 1368,
+  "add_precision": 0.45614035087719296,
+  "drops": 2319,
+  "drops_true": 1877,
+  "owner_removed": 12,
+  "owner_removed_true": 8,
+  "guard_fired_on_add_candidates": 5840,
+  "guarded_adds": 491,
+  "guarded_add_precision": 0.725050916496945,
+  "guard_blocked_adds": 877,
+  "guard_blocked_true": 268,
+  "false_links": {
+   "base": 3865,
+   "name_only": 4163,
+   "guarded": 3558
+  }
+ },
+ "0.2": {
+  "withheld_frac": 0.2,
+  "population_s1": 417757,
+  "base_macro_f05": 0.9855100504938039,
+  "name_only_macro_f05": 0.9849292007832738,
+  "guarded_macro_f05": 0.9854003923690164,
+  "name_only_delta": -0.0005808497105300736,
+  "guarded_delta": -0.00010965812478747061,
+  "adds": 2300,
+  "add_precision": 0.4369565217391304,
+  "drops": 1814,
+  "drops_true": 1460,
+  "owner_removed": 10,
+  "owner_removed_true": 7,
+  "guard_fired_on_add_candidates": 5762,
+  "guarded_adds": 544,
+  "guarded_add_precision": 0.6654411764705882,
+  "guard_blocked_adds": 1756,
+  "guard_blocked_true": 643,
+  "false_links": {
+   "base": 3092,
+   "name_only": 4030,
+   "guarded": 2920
+  }
+ },
+ "0.3": {
+  "withheld_frac": 0.3,
+  "population_s1": 365462,
+  "base_macro_f05": 0.9855149157872622,
+  "name_only_macro_f05": 0.984708304114273,
+  "guarded_macro_f05": 0.9854020410282874,
+  "name_only_delta": -0.0008066116729892325,
+  "guarded_delta": -0.00011287475897481247,
+  "adds": 2700,
+  "add_precision": 0.4222222222222222,
+  "drops": 1547,
+  "drops_true": 1237,
+  "owner_removed": 7,
+  "owner_removed_true": 6,
+  "guard_fired_on_add_candidates": 5668,
+  "guarded_adds": 551,
+  "guarded_add_precision": 0.6497277676950998,
+  "guard_blocked_adds": 2149,
+  "guard_blocked_true": 782,
+  "false_links": {
+   "base": 2711,
+   "name_only": 3960,
+   "guarded": 2594
+  }
+ }
+}

@@ -1,0 +1,158 @@
+{
+  "scope": "arena B_REST (SLICE, HOLDOUT-2 not queried or scored)",
+  "b_rest_s1": 521846,
+  "true_links": 1806858,
+  "branches_config": {
+    "address": [
+      5000,
+      10,
+      0.25
+    ],
+    "native": [
+      5000,
+      5,
+      0.3
+    ],
+    "empty": [
+      5000,
+      5,
+      0.3
+    ]
+  },
+  "dense": {
+    "pairs": 26092300,
+    "true": 1777382,
+    "recall": 0.9836865985041436,
+    "oracle_f05": 0.9945953277213354
+  },
+  "dense_union": {
+    "pairs": 27016630,
+    "true": 1780578,
+    "recall": 0.9854554148693477,
+    "oracle_f05": 0.9952184720679662
+  },
+  "address": {
+    "pairs": 4906186,
+    "new_pairs": 2741873,
+    "new_pairs_per_s1": 5.254180352057887,
+    "new_true_vs_base": 5979,
+    "new_true_rate": 0.002180626163210331,
+    "incremental_true_cumulative": 5979,
+    "cumulative_recall": 0.988764474020648,
+    "cumulative_oracle_f05": 0.9963637047677845,
+    "new_by_rank_[pairs,true]": {
+      "0": [
+        42680,
+        1243
+      ],
+      "1": [
+        90643,
+        1166
+      ],
+      "2": [
+        162120,
+        1013
+      ],
+      "3": [
+        238381,
+        863
+      ],
+      "4": [
+        306158,
+        590
+      ],
+      "5": [
+        351618,
+        376
+      ],
+      "6": [
+        376171,
+        279
+      ],
+      "7": [
+        387931,
+        193
+      ],
+      "8": [
+        392903,
+        146
+      ],
+      "9": [
+        393268,
+        110
+      ]
+    }
+  },
+  "native": {
+    "pairs": 760965,
+    "new_pairs": 758007,
+    "new_pairs_per_s1": 1.4525492195015388,
+    "new_true_vs_base": 7,
+    "new_true_rate": 9.234743214772423e-06,
+    "incremental_true_cumulative": 3,
+    "cumulative_recall": 0.9887661343614164,
+    "cumulative_oracle_f05": 0.9963653130693031,
+    "new_by_rank_[pairs,true]": {
+      "0": [
+        151136,
+        1
+      ],
+      "1": [
+        151276,
+        4
+      ],
+      "2": [
+        151707,
+        1
+      ],
+      "3": [
+        151878,
+        1
+      ],
+      "4": [
+        152010,
+        0
+      ]
+    }
+  },
+  "empty": {
+    "pairs": 2606703,
+    "new_pairs": 1783036,
+    "new_pairs_per_s1": 3.416785795042982,
+    "new_true_vs_base": 2233,
+    "new_true_rate": 0.0012523583371283585,
+    "incremental_true_cumulative": 2232,
+    "cumulative_recall": 0.9900014278930608,
+    "cumulative_oracle_f05": 0.9967488157291944,
+    "new_by_rank_[pairs,true]": {
+      "0": [
+        254603,
+        913
+      ],
+      "1": [
+        335664,
+        482
+      ],
+      "2": [
+        374908,
+        337
+      ],
+      "3": [
+        398892,
+        287
+      ],
+      "4": [
+        418969,
+        214
+      ]
+    }
+  },
+  "cumulative": {
+    "pairs": 32299243,
+    "true": 1788792,
+    "added_true_over_dense_union": 8214,
+    "recall": 0.9900014278930608,
+    "oracle_f05": 0.9967488157291944
+  },
+  "runtime_seconds": 228.5
+}

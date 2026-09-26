@@ -1,0 +1,137 @@
+{
+  "scope": "arena B_REST (SLICE, HOLDOUT-2 not queried or scored)",
+  "b_rest_s1": 521846,
+  "true_links": 1806858,
+  "branches_config": {
+    "address": [
+      5000,
+      10,
+      0.25
+    ],
+    "empty": [
+      5000,
+      5,
+      0.3
+    ]
+  },
+  "dense": {
+    "pairs": 26092300,
+    "true": 1777382,
+    "recall": 0.9836865985041436,
+    "oracle_f05": 0.9945953277213354
+  },
+  "dense_union": {
+    "pairs": 27016630,
+    "true": 1780578,
+    "recall": 0.9854554148693477,
+    "oracle_f05": 0.9952184720679662
+  },
+  "address": {
+    "pairs": 4906186,
+    "new_pairs": 2741873,
+    "new_pairs_per_s1": 5.254180352057887,
+    "new_true_vs_base": 5979,
+    "new_true_rate": 0.002180626163210331,
+    "incremental_true_cumulative": 5979,
+    "cumulative_recall": 0.988764474020648,
+    "cumulative_oracle_f05": 0.9963637047677845,
+    "new_by_rank_[pairs,true]": {
+      "0": [
+        42680,
+        1243
+      ],
+      "1": [
+        90643,
+        1166
+      ],
+      "2": [
+        162120,
+        1013
+      ],
+      "3": [
+        238381,
+        863
+      ],
+      "4": [
+        306158,
+        590
+      ],
+      "5": [
+        351618,
+        376
+      ],
+      "6": [
+        376171,
+        279
+      ],
+      "7": [
+        387931,
+        193
+      ],
+      "8": [
+        392903,
+        146
+      ],
+      "9": [
+        393268,
+        110
+      ]
+    }
+  },
+  "empty": {
+    "pairs": 2606703,
+    "new_pairs": 1783036,
+    "new_pairs_per_s1": 3.416785795042982,
+    "new_true_vs_base": 2233,
+    "new_true_rate": 0.0012523583371283585,
+    "incremental_true_cumulative": 2233,
+    "cumulative_recall": 0.9900003209992152,
+    "cumulative_oracle_f05": 0.9967472986788258,
+    "new_by_rank_[pairs,true]": {
+      "0": [
+        254603,
+        913
+      ],
+      "1": [
+        335664,
+        482
+      ],
+      "2": [
+        374908,
+        337
+      ],
+      "3": [
+        398892,
+        287
+      ],
+      "4": [
+        418969,
+        214
+      ]
+    }
+  },
+  "cumulative": {
+    "pairs": 31541539,
+    "true": 1788790,
+    "added_true_over_dense_union": 8212,
+    "recall": 0.9900003209992152,
+    "oracle_f05": 0.9967472986788258
+  },
+  "kept_for_scoring": {
+    "rule": {
+      "address": {
+        "min_cosine": 0.6,
+        "max_rank": 99
+      },
+      "empty": {
+        "min_cosine": 0.8,
+        "max_rank": 2
+      }
+    },
+    "new_pairs": 689474,
+    "new_true": 4897,
+    "recall": 0.9881656444502003,
+    "oracle_f05": 0.9961444986800391
+  },
+  "runtime_seconds": 282.1
+}

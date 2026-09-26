@@ -1,0 +1,86 @@
+{
+ "arena_US_share_truth": {
+  "first_number_differs": [
+   0.0846,
+   0.9911
+  ],
+  "rec_no_digits": [
+   0.102,
+   0.9857
+  ],
+  "rec_subset": [
+   0.0797,
+   0.9989
+  ],
+  "rec_superset": [
+   0.0623,
+   0.9996
+  ],
+  "same": [
+   0.6641,
+   0.9996
+  ],
+  "same_first_other_diff": [
+   0.0074,
+   0.9986
+  ]
+ },
+ "arena_India_share_truth": {
+  "first_number_differs": [
+   0.0839,
+   0.9971
+  ],
+  "rec_no_digits": [
+   0.106,
+   0.9917
+  ],
+  "rec_subset": [
+   0.0678,
+   0.999
+  ],
+  "rec_superset": [
+   0.1211,
+   0.9991
+  ],
+  "s1_no_digits": [
+   0.0151,
+   0.9954
+  ],
+  "same": [
+   0.5961,
+   0.9996
+  ],
+  "same_first_other_diff": [
+   0.01,
+   0.9923
+  ]
+ },
+ "test_share": {
+  "US": {
+   "first_number_differs": 0.0854,
+   "rec_no_digits": 0.102,
+   "rec_subset": 0.0793,
+   "rec_superset": 0.0623,
+   "same": 0.6638,
+   "same_first_other_diff": 0.0073
+  },
+  "France": {
+   "first_number_differs": 0.0237,
+   "rec_no_digits": 0.0745,
+   "rec_subset": 0.0059,
+   "rec_superset": 0.0001,
+   "s1_no_digits": 0.0001,
+   "same": 0.8954,
+   "same_first_other_diff": 0.0002
+  },
+  "India": {
+   "first_number_differs": 0.0842,
+   "rec_no_digits": 0.105,
+   "rec_subset": 0.0679,
+   "rec_superset": 0.1218,
+   "s1_no_digits": 0.0148,
+   "same": 0.5961,
+   "same_first_other_diff": 0.0102
+  }
+ }
+}

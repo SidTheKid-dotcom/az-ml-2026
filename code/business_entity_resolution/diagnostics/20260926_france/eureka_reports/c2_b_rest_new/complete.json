@@ -1,0 +1,46 @@
+{
+  "state": "complete",
+  "checkpoint": {
+    "path": "/workspace/az-ml-new/c2_plain/ckpt/step_040000",
+    "marker_sha256": "e6b576b401519e1f88643f7a99421fe9b8d658f115223a08ede66272a74ee210",
+    "step": 40000,
+    "config_sha256": "eae938f6da2d343202e0dd8ce2b2aa71a7f2ff5a81b2504305088cf83c45bb61",
+    "model_files_sha256": {
+      "config.json": "d600452d84f33611027b0ed998e435747f07c2c87040509565373a35e3dae0b7",
+      "model.safetensors": "36342ed5ba4d31bfaf9e30019efbaca01a26c3399fccc787e175804d3d966ba1",
+      "optimizer.pt": "bd152160f65979d991ca5ab854598bcd02b020a27accc144d1330e9ccea92c3d",
+      "state.json": "fe9b44907596c14e640fa846649b40101a9e21d7205e66505ed3d8e86e062721",
+      "tokenizer.json": "1ad33aff6434a00df3842a65562488e80bf3cfb273d8329216a134452eaa1a85",
+      "tokenizer_config.json": "618301b9bd7646a88691cd8455b2214f88d6c30e9e49ce65fb89b8d2d8158daa",
+      "training_config.json": "3d2ab6e920fb6140312b5545878d396b3175deada465977c6b6461611e62d435"
+    }
+  },
+  "profile": {
+    "mode": "c2",
+    "steps": 40000,
+    "batch_size": 128,
+    "positive_fraction": 0.25,
+    "canonical_text": false,
+    "field_tagged": false,
+    "schedule": "constant",
+    "init": "checkpoint"
+  },
+  "max_length": 256,
+  "gate": 0.01,
+  "pairs": 689474,
+  "scored_pairs": 689474,
+  "labels_read": false,
+  "inputs": {
+    "reference": "/workspace/az-ml-new/arena/v1/reference.parquet",
+    "pool": "/workspace/az-ml-new/arena/v1/pool.parquet",
+    "left": "retrieval/b_rest/left.npy",
+    "right": "retrieval/b_rest/right.npy",
+    "tree": "retrieval/b_rest/tree.npy",
+    "population": "None"
+  },
+  "runtime": {
+    "amp": "bf16",
+    "inference_batch": 512,
+    "seconds": 256.3819268196821
+  }
+}

@@ -1,0 +1,11 @@
+{
+ "dropped_links": 139543,
+ "french_lists_touched": 139543,
+ "lists_without_eligible_link": 84543,
+ "mean_list_len": 3.95,
+ "delta_if_all_false": 0.01993,
+ "delta_if_all_true": -0.00643,
+ "slope": 0.02636,
+ "break_even_p": 0.756,
+ "sha256": "e7f9911954ac487e2f3f954131339b881cd48862e77a9d92efa51cf6572c8541"
+}
