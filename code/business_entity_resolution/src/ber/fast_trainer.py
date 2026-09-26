@@ -712,7 +712,12 @@ def score_checkpoint(args) -> dict:
         raise ValueError("C2/G0 scoring requires the sealed ID reservation")
     data = load_score_data(args.arena, partition_file=args.partition,
                            sealed_reservation=args.sealed_reservation if needs_seal else None)
-    if any(config.get("arena", {}).get(key) != value for key, value in data.identity.items()):
+    trained = config.get("arena", {})
+    # G0b trains from precomputed historical pools without a partition file; its
+    # TUNE partition is only needed to select the rows being scored.
+    partition_free = config["profile"].get("mode") == "g0b" and trained.get("partition_sha256") is None
+    if any(trained.get(key) != value for key, value in data.identity.items()
+           if not (partition_free and key == "partition_sha256")):
         raise ValueError("Checkpoint was trained against different arena records, pair order, or partition")
     profile = config["profile"]
     args.max_length = config["max_length"]
