@@ -526,6 +526,29 @@ def _partition_values(path: Path | None, count: int) -> np.ndarray:
     return partition
 
 
+def _validate_pair_order(left: np.ndarray, right: np.ndarray, manifest: dict) -> None:
+    """Validate C2's sorted order or G0b's bounded grouped historical order."""
+    semantics = manifest.get("pair_order", "left_then_right")
+    if len(left) > 1 and np.any(left[1:] < left[:-1]):
+        raise ValueError("Candidate pairs must be nondecreasing by left_idx")
+    if semantics == "left_then_right":
+        if len(left) > 1 and np.any((left[1:] == left[:-1]) & (right[1:] <= right[:-1])):
+            raise ValueError("Real C2 arena pairs must be strictly sorted by left_idx/right_idx")
+        return
+    if semantics != "left_grouped_original_right_order":
+        raise ValueError(f"Unsupported pair-order semantics: {semantics!r}")
+    maximum = manifest.get("max_pairs_per_reference")
+    if type(maximum) is not int or not 1 <= maximum <= 10_000:
+        raise ValueError("Grouped historical pair order needs a bounded max_pairs_per_reference")
+    starts = np.r_[0, np.flatnonzero(left[1:] != left[:-1]) + 1, len(left)]
+    for start, stop in zip(starts[:-1], starts[1:]):
+        if stop - start > maximum:
+            raise ValueError("Historical candidate group exceeds its declared bound")
+        group = right[start:stop]
+        if len(np.unique(group)) != len(group):
+            raise ValueError("Duplicate candidate pair in historical left_idx group")
+
+
 def load_score_data(arena: Path, *, partition_file: Path | None = None,
                     sealed_reservation: Path | None = None, load_text: bool = True) -> ScoreData:
     """Verify label-free arena inputs and preserve their immutable pair order."""
@@ -550,10 +573,9 @@ def load_score_data(arena: Path, *, partition_file: Path | None = None,
     pool = pd.read_parquet(pool_path, columns=pool_columns)
     pairs = pd.read_parquet(pair_path, columns=["left_idx", "right_idx"])
     left, right = (pairs[name].to_numpy(dtype=np.int64) for name in ("left_idx", "right_idx"))
-    duplicate = ((left[1:] == left[:-1]) & (right[1:] == right[:-1])).any() if len(pairs) > 1 else False
-    unordered = ((left[1:] < left[:-1]) | ((left[1:] == left[:-1]) & (right[1:] < right[:-1]))).any() if len(pairs) > 1 else False
+    _validate_pair_order(left, right, manifest)
     if (len(reference) != manifest.get("references") or len(pool) != manifest.get("pool_records")
-            or len(pairs) != manifest.get("pairs") or duplicate or unordered
+            or len(pairs) != manifest.get("pairs")
             or (len(pairs) and (left.min() < 0 or left.max() >= len(reference)
                                 or right.min() < 0 or right.max() >= len(pool)))):
         raise ValueError("Arena records, pair order, or manifest counts differ")
@@ -873,6 +895,8 @@ def adapt_g0b(args) -> dict:
              "v1_blend.npy", "g0b_positive.npy", "g0b_negative.npy")
     manifest = {"schema": 1, "references": len(reference), "pool_records": len(pool),
                 "pairs": len(pairs), "labels_read": False, "holdout2_excluded": True,
+                "pair_order": "left_grouped_original_right_order",
+                "max_pairs_per_reference": int(pairs.groupby("left_idx", sort=False).size().max()),
                 "sha256": {name: file_sha256(arena / name) for name in names},
                 "g0b": {"steps": 1800, "batch_size": 32, "positive_fraction": .5,
                          "negative_ratio": 3., "conflict_fraction": .5,

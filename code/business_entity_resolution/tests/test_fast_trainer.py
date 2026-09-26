@@ -11,7 +11,8 @@ import pandas as pd
 from ber.fast_trainer import (ArenaBatchSampler, LegacyBatchSampler, NegativeType, TokenizationPrefetcher,
                               _config_digest, adapt_g0b, classify_negative_types,
                               evaluate_scores, file_sha256, g0_matrix, learning_rate,
-                              load_arena, mode_config, model_identity, stake_weights,
+                              load_arena, load_score_data, mode_config, model_identity, stake_weights,
+                              _validate_pair_order,
                               verified_checkpoint)
 from ber.models import HeuristicModel
 from ber.cross_encoder_experiment import _ShuffledCycle
@@ -290,6 +291,23 @@ class FastTrainerTests(unittest.TestCase):
             self.assertEqual(report["negative_pool"], 6)
             self.assertTrue((output / "arena/g0b_positive.npy").is_file())
             self.assertTrue((output / "arena/g0b_negative.npy").is_file())
+            loaded = load_score_data(output / "arena", partition_file=output / "partition.npy")
+            self.assertEqual(len(loaded.pairs), 9)
+            manifest_path = output / "arena/manifest.json"
+            manifest = json.loads(manifest_path.read_text())
+            manifest["pair_order"] = "left_then_right"
+            manifest_path.write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError, "strictly sorted"):
+                load_score_data(output / "arena", partition_file=output / "partition.npy")
+
+    def test_grouped_historical_order_detects_nonadjacent_duplicate_with_bounded_groups(self):
+        historical = {"pair_order": "left_grouped_original_right_order",
+                      "max_pairs_per_reference": 3}
+        _validate_pair_order(np.array([0, 0, 1, 1]), np.array([2, 0, 1, 0]), historical)
+        with self.assertRaisesRegex(ValueError, "Duplicate candidate pair"):
+            _validate_pair_order(np.array([0, 0, 0]), np.array([1, 0, 1]), historical)
+        with self.assertRaisesRegex(ValueError, "strictly sorted"):
+            _validate_pair_order(np.array([0, 0]), np.array([1, 0]), {"pair_order": "left_then_right"})
 
 
 if __name__ == "__main__":
