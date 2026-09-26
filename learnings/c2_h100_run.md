@@ -234,3 +234,7 @@ Qwen train and score → ensemble assembly on 27 Sep morning.
   - Tonight's uploads (both validator PASS, LF, French rows only):
     - `~/Downloads/probe-drop_T2r` (SHA `41993a2f…`, −43,517 links);
     - `~/Downloads/probe-drop_T3conf` (SHA `d6add04e…`, −9,033 links).
+- **Probe A result (public 0.97826):** dropping T2r (43,517 uncertain non-legal-form French links) moved the score by
+  −0.000027, which is break-even.
+  - Pricing readout: about 70% of those links are true (~30k true, ~13k wrong).
+  - Keep the band. No rule edit there recovers France's loss.
