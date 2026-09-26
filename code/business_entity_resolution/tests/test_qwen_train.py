@@ -184,7 +184,8 @@ def test_score_writes_c2_layout(tmp_path):
         "kind": "test", "state": "complete", "yes_id": YES, "no_id": NO, "pad_id": PAD, "prompt_sha256": "p",
         "total_pairs": 20, "gate": .01}))
     args = SimpleNamespace(data=str(score_data), checkpoint=str(checkpoint), output=str(tmp_path / "out"),
-                           device="cpu", amp="fp32", batch_size=3, token_budget=10_000, flush_every=1, threads=1)
+                           device="cpu", amp="fp32", batch_size=3, token_budget=10_000, flush_every=1, threads=1,
+                           c2_scores=None, min_c2=None)
     result = qt.score(args)
     scores = np.load(tmp_path / "out" / "scores.npy")
     mask = np.load(tmp_path / "out" / "scored_mask.npy")
@@ -199,3 +200,20 @@ def test_score_writes_c2_layout(tmp_path):
             value = float(scorer(torch, seq, torch.tensor([lengths[k] - 1]))[0])
             assert scores[pair_index[k]] == pytest.approx(1 / (1 + np.exp(-value)), abs=1e-5)
     assert json.loads((tmp_path / "out" / "complete.json").read_text())["state"] == "complete"
+
+    # optional C2 filter: only gated rows with C2 >= min_c2 are scored, the rest stay unscored
+    c2_dir = tmp_path / "c2"
+    c2_dir.mkdir()
+    c2 = np.zeros(20, dtype=np.float32)
+    c2[pair_index] = [.5, .001, .2, .0, .9, .05, .3]
+    np.save(c2_dir / "scores.npy", c2)
+    np.save(c2_dir / "scored_mask.npy", np.isin(np.arange(20), pair_index))
+    (c2_dir / "complete.json").write_text("{}")
+    filtered = SimpleNamespace(**{**vars(args), "output": str(tmp_path / "out_filtered"), "c2_scores": str(c2_dir),
+                                  "min_c2": .05})
+    result = qt.score(filtered)
+    mask_f = np.load(tmp_path / "out_filtered" / "scored_mask.npy")
+    scores_f = np.load(tmp_path / "out_filtered" / "scores.npy")
+    assert np.array_equal(np.flatnonzero(mask_f), pair_index[[0, 2, 4, 5, 6]])
+    assert np.allclose(scores_f[mask_f], scores[mask_f], atol=1e-6) and np.all(scores_f[~mask_f] == 0)
+    assert result["c2_filter"]["kept"] == 5 and result["scored_pairs"] == 5

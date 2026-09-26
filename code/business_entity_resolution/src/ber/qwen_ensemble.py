@@ -74,6 +74,23 @@ def blend_weights():
 # ----------------------------------------------------------------------------- arena
 
 
+def q_on_rows(q_dir, c2_dir, cand_rows, base, must_score, n_pairs):
+    """Qwen scores on candidate rows (NaN where unscored), honoring a declared ``--min-c2`` filter.
+
+    A filtered Qwen score dir must name the same C2 score dir this run uses; rows the
+    filter skipped (C2 < min_c2) are left unscored (feature value -1), identically
+    on B_REST and test.
+    """
+    complete = json.loads((Path(q_dir) / "complete.json").read_text())
+    flt = complete.get("c2_filter")
+    if flt is not None:
+        if flt["c2_scores"] != str(Path(c2_dir).resolve()):
+            raise SystemExit(f"{q_dir} was filtered with C2 scores {flt['c2_scores']}, not {c2_dir}")
+        c2_full = np.load(Path(c2_dir) / "scores.npy", mmap_mode="r")
+        must_score = must_score & (np.asarray(c2_full[cand_rows]) >= flt["min_c2"])
+    return c2_on_rows(q_dir, cand_rows, base, must_score=must_score, n_pairs=n_pairs), flt
+
+
 def load_arena_q(args) -> dict:
     """``pair_tree_c2.load_arena`` plus Qwen features on the same candidate rows."""
     from ber.pair_tree_c2 import load_arena
@@ -87,7 +104,7 @@ def load_arena_q(args) -> dict:
     partition = data["partition"]
     brest_c = partition[left_c] == 1
     c2 = c2_on_rows(args.scores, cand_rows, base_all, must_score=brest_c, n_pairs=n_pairs)
-    q = c2_on_rows(args.qwen_scores, cand_rows, base_all, must_score=brest_c, n_pairs=n_pairs)
+    q, q_filter = q_on_rows(args.qwen_scores, args.scores, cand_rows, base_all, brest_c, n_pairs)
     c2[~brest_c] = np.nan
     q[~brest_c] = np.nan
     rows = np.flatnonzero(brest_c)
@@ -97,6 +114,7 @@ def load_arena_q(args) -> dict:
     data["xq"] = xq
     data["q"] = xq[:, 0]
     data["q_shift"] = rival_rates(xq)
+    data["q_filter"] = q_filter
     log(f"Qwen scored on {int((~np.isnan(q)).sum())} of {len(q)} arena candidate rows (B_REST only)")
     return data
 
@@ -271,6 +289,7 @@ def evaluate_cmd(args) -> dict:
         **{name: {k: grids[name][k] for k in ("picks", "full_b_rest_pick")} for name in grids},
         "grids": {name: grids[name]["grid"] for name in grids}, "feature_importance": importance,
         "rival_rates": {"c2": data["shift"]["rival_rates"], "qwen": data["q_shift"]},
+        "qwen_c2_filter": data["q_filter"],
         "holdout2_rows_read": 0, "slice_read": False, "elapsed_seconds": round(time.time() - T0, 1)}
     (work / "report.json").write_text(json.dumps(report, indent=2, default=float) + "\n")
     log(json.dumps({"results": {k: v["macro_f05"] for k, v in results.items()},
@@ -330,7 +349,11 @@ def test_cmd(args) -> dict:
         raise SystemExit("test v1 cache does not match the test pair index")
     everything = np.ones(len(left), bool)
     c2 = c2_on_rows(args.test_scores, cache["cand_rows"], cache["base"], must_score=everything, n_pairs=n_pairs)
-    q = c2_on_rows(args.qwen_test_scores, cache["cand_rows"], cache["base"], must_score=everything, n_pairs=n_pairs)
+    q, q_filter = q_on_rows(args.qwen_test_scores, args.test_scores, cache["cand_rows"], cache["base"], everything,
+                            n_pairs)
+    arena_filter = report.get("qwen_c2_filter")
+    if (q_filter is None) != (arena_filter is None) or (q_filter and q_filter["min_c2"] != arena_filter["min_c2"]):
+        raise SystemExit("Qwen test and B_REST scores used different C2 filters")
     x2 = c2_features(left, right, c2, cache["base"], n_s1, n_rec, extended=args.extended)
     xq = q_features(left, right, c2, q, cache["base"], n_s1, n_rec)
     prob = proba(model, np.hstack([cache["v1x"], x2, xq]).astype(np.float32))

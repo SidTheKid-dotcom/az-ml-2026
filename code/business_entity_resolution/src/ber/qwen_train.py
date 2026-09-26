@@ -517,7 +517,7 @@ def save_checkpoint(model, optimizer, torch, *, root: Path, step: int, state: di
         for name in ("tokenizer.json", "tokenizer_config.json", "vocab.json", "merges.txt", "special_tokens_map.json",
                      "chat_template.jinja", "generation_config.json", "LICENSE"):
             if (Path(model_dir) / name).is_file() and not (stage / name).exists():
-                shutil.copy2(Path(model_dir) / name, stage / name)
+                shutil.copyfile(Path(model_dir) / name, stage / name)  # no copystat: network volumes refuse utime
         torch.save({"optimizer": optimizer_state}, stage / "optimizer.pt")
         json_dump(stage / "state.json", state)
         sizes = {path.name: path.stat().st_size for path in stage.iterdir() if path.is_file()}
@@ -726,6 +726,19 @@ def score(args) -> dict:
     pair_index = np.load(data / "pair_index.npy")
     n = len(pair_index)
     lengths = np.diff(offsets)
+    keep = np.ones(n, dtype=bool)
+    c2_filter = None
+    if args.min_c2 is not None:  # optional: skip gated rows whose C2 score is below min_c2
+        c2_dir = Path(args.c2_scores)
+        c2_scores = np.asarray(np.load(c2_dir / "scores.npy", mmap_mode="r")[pair_index])
+        c2_mask = np.asarray(np.load(c2_dir / "scored_mask.npy", mmap_mode="r")[pair_index])
+        if not c2_mask.all():
+            raise ValueError("The C2 filter scores do not cover every gated pair")
+        keep = c2_scores >= args.min_c2
+        c2_filter = {"c2_scores": str(c2_dir.resolve()), "min_c2": float(args.min_c2),
+                     "c2_complete_sha256": sha256_file(c2_dir / "complete.json"),
+                     "kept": int(keep.sum()), "skipped": int((~keep).sum())}
+        log(f"C2 filter >= {args.min_c2}: scoring {int(keep.sum())} of {n} gated pairs")
     out.mkdir(parents=True, exist_ok=True)
     progress_path = out / "progress.json"
     logit_path = out / "logits_gated.npy"
@@ -747,11 +760,12 @@ def score(args) -> dict:
     model.eval()
     scorer = YesNoScorer(model, manifest["yes_id"], manifest["no_id"])
     pad_id = int(manifest["pad_id"])
-    order = np.argsort(lengths, kind="stable")
+    order = np.flatnonzero(keep)[np.argsort(lengths[keep], kind="stable")]
+    n_keep = len(order)
     batches = []
     position = 0
-    while position < n:  # token-budget batches over length-sorted rows
-        width = bucket_width(int(lengths[order[min(n - 1, position + args.batch_size - 1)]]))
+    while position < n_keep:  # token-budget batches over length-sorted rows
+        width = bucket_width(int(lengths[order[min(n_keep - 1, position + args.batch_size - 1)]]))
         size = max(1, min(args.batch_size, args.token_budget // width))
         batches.append(order[position:position + size])
         position += size
@@ -778,26 +792,27 @@ def score(args) -> dict:
             if (i + 1) % args.flush_every == 0 or i == len(batches) - 1:
                 logits.flush()
                 rate = (done - begin) / max(1e-9, time.perf_counter() - started)
-                status = {"done": done, "total": n, "pairs_per_second": round(rate, 1),
-                          "eta_min": round((n - done) / max(rate, 1e-9) / 60, 1)}
+                status = {"done": done, "total": n_keep, "pairs_per_second": round(rate, 1),
+                          "eta_min": round((n_keep - done) / max(rate, 1e-9) / 60, 1)}
                 json_dump(progress_path, status)
                 print(json.dumps(status), flush=True)
     executor.shutdown(wait=True)
     values = np.asarray(np.load(logit_path, mmap_mode="r"))
-    if not np.isfinite(values).all():
+    if not np.isfinite(values[keep]).all():
         raise ValueError("Some gated pairs were not scored")
-    prob = (1.0 / (1.0 + np.exp(-values.astype(np.float64)))).astype(np.float32)
+    prob = (1.0 / (1.0 + np.exp(-values[keep].astype(np.float64)))).astype(np.float32)
     full = np.zeros(int(manifest["total_pairs"]), dtype=np.float32)
-    full[pair_index] = prob
+    full[pair_index[keep]] = prob
     mask = np.zeros(int(manifest["total_pairs"]), dtype=bool)
-    mask[pair_index] = True
+    mask[pair_index[keep]] = True
     save_npy(out / "scores.npy", full)
     save_npy(out / "scored_mask.npy", mask)
     result = {"state": "complete", "kind": manifest["kind"], "model_id": MODEL_ID,
               "checkpoint": {"path": str(checkpoint.resolve()), "step": ck_state.get("step"),
                              "config_sha256": ck_state.get("config_sha256")},
               "score": "sigmoid(logit(yes) - logit(no)) at the final real token",
-              "pairs": int(manifest["total_pairs"]), "scored_pairs": n, "gate": manifest["gate"],
+              "pairs": int(manifest["total_pairs"]), "scored_pairs": int(keep.sum()), "gated_pairs": n,
+              "gate": manifest["gate"], "c2_filter": c2_filter,
               "inputs": {"data": str(data.resolve()), "manifest_sha256": sha256_file(data / "manifest.json")},
               "runtime": {"amp": args.amp, "batch_size": args.batch_size, "token_budget": args.token_budget,
                           "seconds": time.perf_counter() - started},
@@ -862,6 +877,9 @@ def main(argv=None) -> None:
     p.add_argument("--batch-size", type=int, default=1024)
     p.add_argument("--token-budget", type=int, default=98_304)
     p.add_argument("--flush-every", type=int, default=200)
+    p.add_argument("--c2-scores", help="C2 score dir (same pair layout) for the optional --min-c2 filter")
+    p.add_argument("--min-c2", type=float, help="Score only gated pairs with C2 >= this; use the same C2 "
+                   "checkpoint and value for B_REST and test")
     p.add_argument("--threads", type=int, default=8)
     args = parser.parse_args(argv)
     if args.command == "prepare-train":
@@ -874,6 +892,8 @@ def main(argv=None) -> None:
             parser.error("--calibrate-steps must exceed 20")
         train(args)
     else:
+        if (args.min_c2 is None) != (args.c2_scores is None):
+            parser.error("--min-c2 and --c2-scores go together")
         score(args)
 
 
