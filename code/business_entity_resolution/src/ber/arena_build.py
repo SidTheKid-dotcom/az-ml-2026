@@ -278,24 +278,26 @@ def make_partitions(component_ids, force_a, force_b, *, a_fraction=0.70, slice_s
 
 def _forced_masks(arena_ids, quick_reference, medium_reference):
     arena_ids = pd.Index(np.asarray(arena_ids, dtype=object))
+    audit = {}
 
-    def selected(path, splits):
+    def selected(path, splits, name):
         frame = pd.read_parquet(path, columns=["entity_id", "split"])
         split = frame["split"].str.lower()
         ids = frame.loc[split.isin(splits), "entity_id"]
         if ids.duplicated().any():
             raise ValueError(f"Duplicate forced S1 IDs in {path}")
         positions = arena_ids.get_indexer(ids)
-        if np.any(positions < 0):
-            raise ValueError(f"{int((positions < 0).sum())} forced S1 IDs from {path} are absent from the arena")
-        return positions
+        present = positions >= 0
+        audit[name] = {"requested": int(len(ids)), "present": int(present.sum()),
+                       "excluded_from_arena": int((~present).sum()), "source": str(path)}
+        return positions[present]
 
     force_a = np.zeros(len(arena_ids), dtype=bool)
     force_b = np.zeros(len(arena_ids), dtype=bool)
-    force_a[selected(quick_reference, {"train"})] = True
-    force_a[selected(medium_reference, {"train"})] = True
-    force_b[selected(medium_reference, {"tune", "eval", "holdout"})] = True
-    return force_a, force_b
+    force_a[selected(quick_reference, {"train"}, "quick_train_to_A")] = True
+    force_a[selected(medium_reference, {"train"}, "medium_train_to_A")] = True
+    force_b[selected(medium_reference, {"tune", "eval", "holdout"}, "medium_development_to_B")] = True
+    return force_a, force_b, audit
 
 
 def _address_inputs(reference, pool, left, right):
@@ -590,7 +592,8 @@ def finalize(args) -> dict:
 
     reference, pool, left, right, blend, tree, label, true_count = _load_arena_arrays(
         data, args.blend, args.tree, labels_dir)
-    force_a, force_b = _forced_masks(reference.entity_id.to_numpy(), args.quick_reference, args.medium_reference)
+    force_a, force_b, forced_population = _forced_masks(
+        reference.entity_id.to_numpy(), args.quick_reference, args.medium_reference)
     component, cut, attempts = capped_claim_components(
         left, right, blend, len(reference), force_a=force_a, force_b=force_b,
         threshold=args.component_threshold, max_component_fraction=args.max_component_fraction,
@@ -646,6 +649,7 @@ def finalize(args) -> dict:
                            "attempts": attempts},
         "partition_codes": {str(code): name for code, name in PARTITION_NAMES.items()},
         "partition_counts": counts, "a_fraction_target": args.a_fraction,
+        "forced_population": forced_population,
         "slice_size_target": args.slice_size, "seed": args.seed,
         "full_true_count_sum": int(np.asarray(true_count, dtype=np.int64).sum()),
         "retrieved_positive_pairs": int(label.sum()),

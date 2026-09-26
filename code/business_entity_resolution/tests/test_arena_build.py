@@ -12,9 +12,9 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from ber.arena_build import (PARTITION_A, PARTITION_B_REST, PARTITION_SLICE, capped_claim_components,
-                             fidelity_profile, finalize, labels, make_partitions, sha256,
-                             FROZEN_V1_PIPELINE_SHA256)
+from ber.arena_build import (PARTITION_A, PARTITION_B_REST, PARTITION_SLICE, _forced_masks,
+                              capped_claim_components, fidelity_profile, finalize, labels, make_partitions, sha256,
+                              FROZEN_V1_PIPELINE_SHA256)
 
 
 def _score_artifact(directory, data, pairs, n_references, n_pool):
@@ -48,6 +48,23 @@ def _score_artifact(directory, data, pairs, n_references, n_pool):
 
 
 class ComponentPartitionTests(unittest.TestCase):
+    def test_saved_development_ids_may_be_excluded_from_the_arena(self):
+        with tempfile.TemporaryDirectory() as tmp_name:
+            root = Path(tmp_name)
+            quick = pd.DataFrame({"entity_id": ["S1-q"], "split": ["train"]})
+            medium = pd.DataFrame({"entity_id": ["S1-mt", "S1-mv"],
+                                   "split": ["train", "tune"]})
+            quick_path, medium_path = root / "quick.parquet", root / "medium.parquet"
+            quick.to_parquet(quick_path, index=False)
+            medium.to_parquet(medium_path, index=False)
+            force_a, force_b, audit = _forced_masks(
+                np.array(["S1-eligible"], dtype=object), quick_path, medium_path)
+            self.assertFalse(force_a.any())
+            self.assertFalse(force_b.any())
+            self.assertEqual(audit["quick_train_to_A"]["excluded_from_arena"], 1)
+            self.assertEqual(audit["medium_train_to_A"]["excluded_from_arena"], 1)
+            self.assertEqual(audit["medium_development_to_B"]["excluded_from_arena"], 1)
+
     def test_threshold_stays_at_point_zero_five_when_cap_passes(self):
         component, threshold, attempts = capped_claim_components(
             np.array([0, 1, 2]), np.array([10, 10, 11]), np.array([0.8, 0.01, 0.9]), 10,
