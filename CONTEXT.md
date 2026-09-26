@@ -69,17 +69,24 @@ classification logit, and Qwen scores yes/no as a language model.
   (7.65 cores, 50 GB RAM).
 - Compare models on the same S1 ids only.
 
-## Running now
+## Running now (26 Sep 11:20 IST)
 
-The detached R0 follow-ups are complete. Field-format 7,200 scored medium TUNE
-**0.973686** (422 false links); plain-text 14,400 scored **0.974288** (392 false
-links), the current reranker checkpoint leader and +0.005296 over v1. Because
-step count and format both changed, this does not isolate a format effect. The
-competitor-complete arena score is running over 2,072,821 eligible S1s; labels
-are complete with zero HOLDOUT-2 rows read, and a detached watcher will preserve
-the completed aligned arrays under `/workspace/az-ml-new/arena/v1/`. v1 test
-score arrays remain hash-verified at
-`/workspace/az-ml-new/releases/submission_v1_scores/`.
+Takeover state: `docs/briefs/HANDOFF_claude_code.md`. Arena scoring is complete
+and durable (`/workspace/az-ml-new/arena/v1/`); partitions A 1,450,975 /
+B_REST 521,846 / SLICE 100,000 (`arena/finalize_v2/`). Arena v1 + one-owner
+0.972382; + name-only 0.975361. Reranker leader on medium TUNE: plain 14,400
+steps **0.974288** (+0.005296 over v1). The HOLDOUT-2 reservation for the
+trainer is `/workspace/az-ml-new/v2/holdout2` (not `/tmp/az-ml-v2/...`).
+
+GPU (detached chains in `/tmp/az-ml-v3/chains/`): fast-trainer G0b parity
+finished training; scoring/evaluation, then the six G0 throughput variants on
+the real arena, then `c2_auto.sh` starts the arena-scale C2 run (plain-14,400
+init, 40k steps, batch 64) unless `chains/C2_MANUAL` exists.
+
+CPU subagents (Opus, own worktrees): resolver on the arena (B_REST out-of-fold,
+then v1 test), final stack assembly with byte-parity to the 0.964563 file,
+French pseudo-label transfer audit + mixed training arena, ClaimNet hardening.
+Local arena copy: `artifacts/arena/`.
 
 ## The plan
 
