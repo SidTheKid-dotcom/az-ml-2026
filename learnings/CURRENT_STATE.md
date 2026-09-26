@@ -1,3 +1,9 @@
+## Run 27 Sep (05:30 IST) — live
+
+Execution plan: `docs/briefs/PLAN_TO_099_20260927.md` sections E0–E8 (decisions in E7). Four tracks running (F, U, S, Q);
+outputs under `/workspace/az-ml-new/run27/{F,U,S,Q}`; GPU lock `/workspace/az-ml-new/run27/gpu.lock`. EC2
+`ubuntu@18.233.153.184` reachable again. Upload #1 target ~06:30 (F1 France + Qwen-tree US/India).
+
 # Handoff — resume here
 
 ## Resume here — 27 Sep
