@@ -185,7 +185,7 @@ def tune_check(tune_dir, train_dir, threshold=0.775):
                                   keep_ids=set(pairs.candidate_entity_id))
     rec_nn = pairs.candidate_entity_id.map(empties)
     rec_empty = rec_nn.notna().to_numpy()
-    exact = rec_empty & (rec_nn.to_numpy() == ref_nn[s1_idx])
+    exact = rec_empty & (ref_nn[s1_idx] != "") & (rec_nn.to_numpy() == ref_nn[s1_idx])
     mult = ref_mult[s1_idx].astype(np.int64)
     label = pairs.is_truth_for_scoring_only.to_numpy()
     blend = pairs.original_blend_probability.to_numpy()
@@ -286,7 +286,7 @@ def build_test_file(base_path, candidate_path, test_dir, out_dir, probabilities=
     rec_nn = pd.Series(pair_id).map(empties)
     rec_empty = rec_nn.notna().to_numpy()
     s1_nn_arr = np.asarray(s1_nn, dtype=object)
-    exact = rec_empty & (rec_nn.to_numpy() == s1_nn_arr[pair_s1])
+    exact = rec_empty & (s1_nn_arr[pair_s1] != "") & (rec_nn.to_numpy() == s1_nn_arr[pair_s1])
     pair_mult = mult[pair_s1]
     if len(np.unique(np.stack([pair_s1, rec_idx]), axis=1)[0]) != len(pair_s1):
         raise ValueError("duplicate (S1, record) pair in the decision table")

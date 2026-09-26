@@ -66,21 +66,26 @@ class EndToEndTests(unittest.TestCase):
             head = "entity_id\tbusiness_name\tbusiness_address\tcountry"
             _write(test_dir / "test_source1.tsv", head, [
                 "S1-1\tAlpha Traders\t1 Main St\tUS", "S1-2\tBeta Co\t2 Main St\tUS",
-                "S1-3\tBeta\t3 Main St\tUS", "S1-4\tGamma LLC\t4 Road\tIndia"])
+                "S1-3\tBeta\t3 Main St\tUS", "S1-4\tGamma LLC\t4 Road\tIndia",
+                "S1-5\tराम ट्रेडर्स\t5 Road\tIndia", "S1-6\tதமிழ் கடை\t6 Road\tIndia"])
             _write(test_dir / "test_source2.tsv", head, [
                 "S2-10\tAlpha Traders Inc\t<NULL>\tUS", "S2-11\tbeta\t\tUS", "S2-13\tGamma\t##\tIndia",
-                "S2-14\tDelta\t9 Road\tUS"])
+                "S2-14\tDelta\t9 Road\tUS", "S2-15\tराम ट्रेडर्स\t\tIndia",
+                "S2-16\tதமிழ் கடை\t\tIndia"])
             _write(test_dir / "test_source3.tsv", head, ["S3-12\tAlpha Traders\t1 Main St\tUS"])
             base = tmp / "base.tsv"
-            _write(base, "source1_entity_id\tmatched_entity_ids", ["S1-1\tS3-12", "S1-2\tS2-11", "S1-3\t", "S1-4\tS2-10"])
+            _write(base, "source1_entity_id\tmatched_entity_ids", [
+                "S1-1\tS3-12", "S1-2\tS2-11", "S1-3\t", "S1-4\tS2-10",
+                "S1-5\tS2-15", "S1-6\tS2-16"])
             cand = tmp / "cand.tsv"
             _write(cand, "source1_entity_id\tcandidate_entity_ids",
-                   ["S1-1\tS3-12,S2-10", "S1-2\tS2-11,S2-14", "S1-3\tS2-11", "S1-4\tS2-10,S2-13"], newline="\r\n")
+                    ["S1-1\tS3-12,S2-10", "S1-2\tS2-11,S2-14", "S1-3\tS2-11", "S1-4\tS2-10,S2-13",
+                     "S1-5\tS2-15", "S1-6\tS2-16"], newline="\r\n")
             out = tmp / "out"
-            report = build_test_file(base, cand, test_dir, out, run_official=False, expected_rows=4)
+            report = build_test_file(base, cand, test_dir, out, run_official=False, expected_rows=6)
             lines = (out / "matching_results.tsv").read_bytes().decode().split("\n")
             self.assertEqual(lines, ["source1_entity_id\tmatched_entity_ids", "S1-1\tS3-12,S2-10", "S1-2\t",
-                                     "S1-3\t", "S1-4\tS2-13", ""])
+                                     "S1-3\t", "S1-4\tS2-13", "S1-5\tS2-15", "S1-6\tS2-16", ""])
             us, india = report["by_group"]["US"], report["by_group"]["India"]
             self.assertEqual((us["links_added"], us["links_dropped"], us["owner_changes"]), (1, 1, 0))
             self.assertEqual((india["links_added"], india["owner_changes"], india["rows_newly_empty"]), (1, 1, 0))

@@ -307,7 +307,7 @@ def _address_inputs(reference, pool, left, right):
     empty_names = np.full(len(pool), None, dtype=object)
     empty_names[pool_empty] = [norm_name(x) for x in pool.loc[pool_empty, "business_name"]]
     pair_empty = pool_empty[right]
-    exact = pair_empty & (empty_names[right] == ref_names[left])
+    exact = pair_empty & (ref_names[left] != "") & (empty_names[right] == ref_names[left])
     return pool_empty, pair_empty, exact, multiplicity[left]
 
 
