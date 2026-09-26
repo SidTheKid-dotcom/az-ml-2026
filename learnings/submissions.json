@@ -83,6 +83,20 @@
       "public_score": 0.978287,
       "daily_quota_consumed": null,
       "note": "Upload after #4. US/India: pair_tree_c2 model (C2 step 40k features) at 0.725, arena B_REST cross-fit 0.985511. France: C2 blend 0.9/0.1 >= 0.10 plus empty-address name-only. One owner, cap 11, LF, official validator PASS. Best public score. Implied France ~0.941 if test US/India equals the arena (see c2_h100_run.md)."
+    },
+    {
+      "release_id": "probe_france_blank",
+      "date_reported": "2026-09-26",
+      "platform_status": "SCORED (user-reported)",
+      "platform_submission_performed": true,
+      "local_matching_file": "/home/sidvish/Downloads/probe-france-blank/matching_results.tsv",
+      "local_matching_sha256": "3d1256733d79217f639243f8dc4774cf59da6328e14952deb24ecda1110e4ecb",
+      "uploaded_file_sha256_confirmed_by_platform": null,
+      "platform_submission_id": null,
+      "failure_reason": null,
+      "public_score": 0.846352,
+      "daily_quota_consumed": null,
+      "note": "Diagnostic: 0.978287 file with all 259,452 French rows empty. Implies public US/India = (0.846352 - 0.1498*0.0558)/0.8502 = 0.9856 (arena 0.98551) and France = (0.978287-0.846352)/0.1498 + 0.0558 = 0.937 +/- 0.005 (singleton-rate uncertainty)."
     }
   ]
 }
