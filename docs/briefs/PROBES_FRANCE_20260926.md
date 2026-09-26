@@ -2,9 +2,11 @@
 
 ## TL;DR
 
-- **The probe decode is exact.** US/India on the test scores **0.98559**, against arena B_REST 0.985511, a difference under 0.0001. France scores **0.9368** (about ±0.006).
-- **The arena is now a free, exact stand-in for US/India.** Uploads are spent only on France.
-- **0.99 is out of reach this cycle.** A perfect France caps the public score at **0.98775**. Reaching 0.99 needs US/India ≥ **0.98824**, i.e. +0.0027 on the arena, and every US/India lever measured so far adds up to about **+0.001**.
+- **The probe decode is consistent with the arena.** US/India on the test scores **0.98559**, against arena B_REST 0.985511, a difference under 0.0001. France scores **0.9368** (about ±0.006).
+  - This agreement assumes France's no-match rate equals train's 5.58%. It supports that assumption and arena transfer *jointly*; it does not prove either on its own.
+- **The arena is now a trusted stand-in for US/India**, validated for methods like the current one. Uploads are spent only on France.
+  - Changes that are sensitive to pool density may transfer less exactly: new retrieval, or rules that react to unclaimed records. The test pool has 5.8 records per S1, against 4.67 in train.
+- **0.99 is out of reach with anything we have measured so far.** A perfect France caps the public score at **0.98775**. Reaching 0.99 needs US/India ≥ **0.98824**, i.e. +0.0027 on the arena, and every US/India lever measured so far adds up to about **+0.001**.
 - **Tonight: two France-only probes** built on the 0.978287 file. They share no links, and each score converts into a truth rate:
   - **A:** drop 43,517 uncertain French links (blend 0.1–0.7), excluding legal-form pairs.
   - **B:** drop 9,033 confident French template-word-swap links.
@@ -60,8 +62,8 @@ Empty-address records whose name is shared by several S1s are only 4.3–4.6% tr
 |---|---|
 | Qwen3-Reranker-0.6B ensemble | +0.000389 (0.985900) |
 | Collective features (name siblings, alias recurrence, "dba" bridges) | +0.00046, CI [0.000398, 0.000519] |
-| New address and fuzzy-name retrieval, scored by C2 at ≥ 0.3 | 1,180 new pairs, 1,122 true, about +0.0004 |
-| Union k=3, ranker only | +0.000275 |
+| New address and fuzzy-name retrieval, scored by C2 at ≥ 0.3 | 1,180 new pairs, 1,122 true, about +0.0004 (an estimate; no full re-decode yet) |
+| Union k=3, ranker only | +0.000275 (from an earlier agent report, not re-verified today) |
 
 Together that is about **+0.001**.
 
@@ -75,15 +77,16 @@ Together that is about **+0.001**.
 | 1 link | 8.08% | 6.16% | 7.00% | 5.40% |
 | Mean links per S1 | 3.26 | 3.36 | 3.29 | 3.46 |
 
-**The loss must be mostly wrong links.**
+**The loss is probably mostly wrong links (an inference, not a measurement).**
 - France loses about 16,400 business-points.
 - A missing link costs about 0.05–0.09; a false link about 0.17–0.29, or 1.0 on a no-match business.
-- With list sizes near India's, most of the loss must be false or swapped links, not missing ones.
+- With list sizes near India's, most of the loss is probably false or swapped links, not missing ones.
+- This assumes French truth follows the generator statistics measured on US/India (3.46 links, 5.58% no-match). France itself is unverified.
 
 **Checks that ruled things out:**
 - **Different house numbers:** 89.5% of accepted French links share every address digit with their S1, against 66.4% for US and 59.6% for India. The first number differs in only 2.4% of French links, against 8.5% in US/India, where such links are 99.7% true on the arena. So there is no excess of different-number look-alikes.
-- **Different streets:** 7.05% of French links have no street token in common with their S1 (US 1.83%). Inspection shows these are one-character street typos of true links, not an error class.
-- **Never-retrieved records:** 59,340 French test records never reach any candidate list, and they look like decoys. Only 60.1% share a fuzzy street with a plausible owner, against 88.9% for accepted links and 63.7% for rejected candidates. Recovering them is worth at most +0.0005.
+- **Different streets:** 7.05% of French links have no street token in common with their S1 (US 1.83%). Inspection of about 30 examples shows these are one-character street typos of true links, not an error class.
+- **Never-retrieved records:** 59,340 French test records never reach any candidate list, and a proxy test suggests they are mostly decoys (the reference groups used for comparison contain errors of their own). Only 60.1% share a fuzzy street with a plausible owner, against 88.9% for accepted links and 63.7% for rejected candidates. Recovering them is worth at most +0.0005.
 
 **Tree-yes / C2-no pairs** (tree ≥ 0.9, C2 < 0.05):
 - France has 0.545 per S1; US/India have 0.016–0.026, a 28× difference.
@@ -98,7 +101,8 @@ Together that is about **+0.001**.
 - **Definition:** same address digits, and a core word replaced by a word that appears in ≥ 20 S1 names of the country (not a typo).
 - **B_REST truth rate of accepted links:** US 98.5% (2,332 links), India 99.9% (1,734).
 - **Accepted on test:** US 2,923 (0.13%), India 8,100 (0.30%), France **15,871 (1.9%, about 15× the US rate)**.
-- **French examples, all at the same address:**
+- **Caution:** on labelled US/India, accepted swaps are 98.5–99.9% *true*. Reading the French ones as decoys is a hypothesis, which Upload B tests. The 15× excess could also partly reflect France's small template vocabulary (see Q5).
+- **French examples, all at the same address** (a random sample; judging them as decoys is subjective):
   - Team Ecole SARL → Team Fetes SARL
   - WG Club → WG College
   - Humanisme Maison → Humanisme Ecole
@@ -136,7 +140,7 @@ A probe is a rule edit that drops a set of links. For one dropped link in a list
 | False | +4 / (5*n* − 1) | +0.5 |
 | True | −1 / (5*n* − 4) | −1 |
 
-This assumes the other links in the list are correct and complete. That holds well enough for rule edits and breaks for model re-scoring.
+This assumes the other links in the list are correct and complete, which holds well enough for rule edits and breaks for model re-scoring. The *n* = 1 values are heuristics, and several dropped links in the same list are treated independently. **Use the readouts for direction and rough size, not as exact truth rates.**
 
 Δpublic(*p*) = [G·(1 − *p*) − L·*p*] / 1,732,544, where G and L are the summed gains and losses and *p* is the truth rate of the dropped set.
 
@@ -203,7 +207,7 @@ This assumes the other links in the list are correct and complete. That holds we
   - 89.5% of French links already share their S1's digits, so a digit tie-break cannot separate same-address claimants.
   - House-number, city and name-overlap tests do not separate French copies from decoys.
   - Volume is not the problem: there are 32,022 contested French records.
-- **U3** (add the 0.05–0.10 band): everyone predicts it will lose, so the result would tell us little.
+- **U3** (add the 0.05–0.10 band): Colleague 1 predicts the similar Upload-4 set is about 30% true, and so do I. Confirming that would have little decision value. This is a judgment about information value, not a measured fact.
 - **U4** (name-only in France): 12,074 links, worth about ±0.001. Secondary.
 - **U5** (exact French no-match rate): it would tighten France's level (±0.005) but would not change any decision.
 - **S2** (the French fine-tune, +12,056 / −30,743 links) and **pair_tree_c2 applied to France** (+8,649 / −16,619):
@@ -211,7 +215,7 @@ This assumes the other links in the list are correct and complete. That holds we
   - Both files are validated and kept as candidates for tomorrow.
 - **Corrections to figures in circulation:**
   - **Probe decode:** 0.846352 (not 0.846) gives US/India 0.98559 and France 0.9368.
-  - **Pair tree vs blend:** the pair tree beats the C2 blend + name-only on B_REST by +0.0029. The +0.006 figure is against the blend without name-only.
+  - **Pair tree vs blend:** both figures are correct for their own baselines. The pair tree beats the C2 blend without name-only by +0.006, and the blend *with* name-only by +0.0029. The second is the relevant comparison for France, which already uses name-only.
   - **C2 < 0.005 truth rate:** accepted links with C2 < 0.005 are 73–84% true on B_REST. The 12–25% figure describes the whole tree-yes/C2-no cluster with no better claimant, which is mostly rejected pairs.
 
 ## 7. Tomorrow (27 Sep: 5 uploads, and only the last counts)
@@ -233,9 +237,37 @@ This assumes the other links in the list are correct and complete. That holds we
     - **Gate:** B_REST may drop by at most 0.0005.
 - **Realistic target: 0.982–0.985.** 0.99 would need a US/India breakthrough (+0.0027 on the arena) that nobody has shown yet.
 
+## Caveats: assumptions and judgment calls in this brief
+
+**Measured:**
+- public scores and test country counts;
+- all test-side link counts, bands, overlaps and histograms;
+- B_REST truth rates, from arena labels;
+- file SHAs and validator results.
+
+**Assumed:**
+- **France's no-match rate is 5.58%.** The whole decode depends on this.
+- **The public subset has the full test's French share.**
+- **France follows the generator statistics measured on US/India.** They were measured on US and India only.
+- **US/India truth rates transfer to France.** In particular, legal-form pairs are ~99.9% true, which is why they are excluded from both probes.
+- **The readout pricing is right.** It is an approximation: the other links are assumed correct, *n* = 1 values are heuristics, and dropped links are treated independently.
+
+**Judgment (mine):**
+- choosing A and B over the other proposals, using expected information value;
+- the decision thresholds;
+- the template-swap definition (≥ 20 S1 names, typo cutoff);
+- reading the French swap examples as decoys;
+- estimating the new-retrieval gain.
+
+**Not re-verified today:**
+- union +0.000275;
+- the collective-features CI, which an agent reported.
+
+The author also designed probes A and B, so treat the arguments for them with that in mind.
+
 ## 8. Feedback we want
 
-1. **Pricing model.** Is "the other links are correct and complete" acceptable for converting Δ into *p*? France probably has about 6% false and about 5% missing links. Should the per-list gains and losses be corrected for imperfect lists?
+1. **Pricing model.** Is "the other links are correct and complete" acceptable for converting Δ into *p*? As a rough guess (not measured), France has about 6% false and about 5% missing links. Should the per-list gains and losses be corrected for imperfect lists?
 2. **Excluding legal-form pairs.** This relies on the US/India truth rate (99.85–99.99%). Is there any reason French legal-form variants (SARL, SAS, EURL, SASU, SCI) would behave differently?
 3. **T2r mixes mechanisms:** 16.6k tree-override links, 2.6k other swaps and about 24k moderate-C2 links. Would you rather spend Upload A on the cleaner, smaller T1r (±0.001–0.002) and test the rest of T2r tomorrow?
 4. **Second probe.** Is T3conf the right one, or would S2 or pair-tree-on-France tell us more for tomorrow's training?
