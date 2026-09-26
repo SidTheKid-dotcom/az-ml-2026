@@ -211,3 +211,13 @@ Qwen train and score → ensemble assembly on 27 Sep morning.
   - At test-like density (~15–20% withheld) the guard gains ≤ +0.0002 on France.
     Not worth building.
   - Outputs: `eureka/clarity/d3.json` and `d3_plain_c2.json`.
+- **French same-address word-swap class** (`diagnostics/20260926_france/template_swap.py`).
+  - Definition: an accepted link whose address digits equal the S1's, where one core name word is replaced by a
+    different common template word (in ≥ 20 S1 names of the country, not a typo).
+  - Sizes: US 2,923 links (0.13%), India 8,100 (0.30%), France 15,871 (1.9%, ≈15× the US rate).
+  - B_REST truth rate of the class: US 0.9846 (2,332), India 0.9988 (1,734).
+  - French examples look like decoys with semantically related words swapped (Ecole→Fetes, Club→College, Sport→Loisirs).
+  - Upload-2 probe drops them: `~/Downloads/drop-fr-template-swap/matching_results.tsv`, SHA `6bcc86be…`, validator PASS.
+    It changes 15,375 French rows and empties 915; US/India are byte-identical.
+- **Recall bundle is too small to upload alone**: +5,418 legal-form adds and +2,026 unclaimed new-pair adds.
+  Files: pod `/workspace/az-ml-new/eureka/recall_bundle_{s1,s2}/`.
