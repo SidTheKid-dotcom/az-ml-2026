@@ -125,6 +125,16 @@
       "public_score": 0.97297,
       "daily_quota_consumed": null,
       "note": "France-only probe: dropped one random confident (blend>=0.7) non-legal-form French link from each of 139,543 French lists with >=2 links (seed 20260926). Delta -0.005317; readout p=(0.01993-delta)/0.02636 = 0.958 true (+/-~0.03). France's confident non-legal band is ~96% true."
+    },
+    {
+      "release_id": "u1_k_routes_frvote08acr",
+      "date_reported": "2026-09-27",
+      "platform_status": "SCORED (user-reported)",
+      "platform_submission_performed": true,
+      "local_matching_file": "/home/sidvish/Downloads/u1-k-routes-frvote/matching_results.tsv",
+      "local_matching_sha256": "38cbd04abbd2bc7dfa34996fc0b937a14fd2e9f10323f0009a1966182791aeac",
+      "public_score": 0.981022,
+      "note": "US/India: K-robust + U ed + U8f routes (B_REST 0.987476, +0.001965 vs pair tree; route rows thr 0.955). France: vote_t0.8_acr (G v1 + C2-FR + K3; >=2 of 3 at calibrated p>=0.8; else S1-file #5 rule; G override, twin guard, acronyms). Delta vs 0.978287 = +0.002735; US/India predicted +0.00167 (0.850248 x 0.001965) -> France delta ~ +0.0071 (France ~0.944), +-0.001 from the US/India transfer assumption. Source run27/K/final/full_k_usin_routes955_fr_vote08acr.tsv."
     }
   ]
 }
