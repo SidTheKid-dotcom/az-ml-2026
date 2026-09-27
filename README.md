@@ -4,6 +4,13 @@ Objective: maximize the official mean per-business **F0.5**, emphasizing correct
 matches and correct abstention. Compete for first place; no local score establishes
 a rank or guarantees the hidden-test result.
 
+**Latest public best: 0.985207 (FINAL_C3, user-reported 27 Sep).** The matching
+file's LF endings, exact row coverage and official `--check-ids` validation were
+rechecked before upload. [Current state](learnings/CURRENT_STATE.md) records the
+file/hash and subsequent GPU work; [submissions](learnings/submissions.json)
+records the actual score. New takeover results below 0.99 or retrieval ceilings
+near 0.999 are separately scoped development measurements, not public scores.
+
 ## Start here
 
 1. [Operating context](CONTEXT.md). Scores, what worked, what failed, what runs next.

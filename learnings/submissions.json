@@ -135,6 +135,28 @@
       "local_matching_sha256": "38cbd04abbd2bc7dfa34996fc0b937a14fd2e9f10323f0009a1966182791aeac",
       "public_score": 0.981022,
       "note": "US/India: K-robust + U ed + U8f routes (B_REST 0.987476, +0.001965 vs pair tree; route rows thr 0.955). France: vote_t0.8_acr (G v1 + C2-FR + K3; >=2 of 3 at calibrated p>=0.8; else S1-file #5 rule; G override, twin guard, acronyms). Delta vs 0.978287 = +0.002735; US/India predicted +0.00167 (0.850248 x 0.001965) -> France delta ~ +0.0071 (France ~0.944), +-0.001 from the US/India transfer assumption. Source run27/K/final/full_k_usin_routes955_fr_vote08acr.tsv."
+    },
+    {
+      "release_id": "final_c3_usmix_fc_native_france_exact",
+      "date_reported": "2026-09-27",
+      "platform_status": "SCORED (user-reported)",
+      "platform_submission_performed": true,
+      "local_matching_file": "/home/sidvish/Downloads/u4-final/FINAL_C3_usmixFC_nat_frCexact.tsv",
+      "local_matching_sha256": "47aad8ebfe1e52f1b6abbde29762e8aee6b84aa54b4ca77a7be0df4024328698",
+      "uploaded_file_sha256_confirmed_by_platform": null,
+      "platform_submission_id": null,
+      "public_score": 0.985207,
+      "public_delta_from_previous_best": 0.004185,
+      "daily_quota_consumed": null,
+      "validation": {
+        "matching_rows": 1732544,
+        "bytes": 97105804,
+        "line_endings": "LF",
+        "carriage_return_bytes": 0,
+        "official_matching_check_ids": "PASS",
+        "candidate_file_checked_in_this_validation": false
+      },
+      "note": "User reports 0.985207 for the recommended FINAL_C3 file. Its local hash, LF endings, all-S1 coverage and official matching-file validation with --check-ids were rechecked before upload. C3 combines the earlier K F/C US/India rows, U8t native-script additions, and French vote/swap/empty-address/exact-name-number corrections. This gain belongs to that pre-existing candidate, not to the later takeover training experiments. Previous best was 0.981022. French and US/India effects are not separately identified by this combined upload."
     }
   ]
 }

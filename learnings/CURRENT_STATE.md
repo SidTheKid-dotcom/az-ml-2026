@@ -1,6 +1,75 @@
-## 27 Sep 15:20 — France findings and candidate files
+## 27 Sep — new public best: FINAL_C3 = 0.985207
 
-**Candidate files** (none uploaded yet; SHA256 verified; build scripts in `code/business_entity_resolution/diagnostics/20260927_run/lead/`):
+The user reports **public F0.5 0.985207**, **+0.004185** over 0.981022, for
+`~/Downloads/u4-final/FINAL_C3_usmixFC_nat_frCexact.tsv`. SHA256
+`47aad8ebfe1e52f1b6abbde29762e8aee6b84aa54b4ca77a7be0df4024328698`;
+97,105,804 bytes; 1,732,544 rows; **LF, zero CR bytes**. The unchanged official
+validator passed with `--check-ids` for the matching file. Candidate-file checking
+was not part of this particular validation. See `submissions.json`.
+
+**Attribution:** C3 was the already-built candidate below. It does not contain the
+new takeover models. The combined upload does not isolate the French gain.
+Its former estimate (~0.9838) is superseded by this measured public result.
+
+### Takeover experiments — separate from C3
+
+Source: `src/ber/takeover_*.py`. Artifacts are under
+`s3://az-ml-new-20260926-533267274451/takeover_20260927_1000/` and the machine work
+directories with that name. Compact measured evidence is in
+[`takeover_20260927.json`](takeover_20260927.json).
+
+- **A pack complete:** 200,000 fixed A S1s; 1,844,743 pairs; 678,887 positives.
+  Raw truth contains another **11,387 positive links** for those businesses.
+- **Raw audit complete:** on all 521,846 B_REST S1s, legacy dense oracle
+  **0.994595**, current *pruned* U8t union oracle **0.996251**. The extra routes
+  add 14,822 true links, while the retained candidate filter drops **8,334** true
+  links that full dense top-50 had. Full-union retrieval ceilings and the actual
+  retained matcher candidate ceiling must not be conflated.
+- **Augmented A pack complete, training not yet launched:** existing reverse and
+  native rank-0 routes add **4,444 positives + 182,278 negatives** to the same
+  A businesses (2,031,465 total pairs). A labels were independently re-read from
+  raw truth: the native candidate file's cached `true` column labels B_REST only.
+- **H100 training complete:** matched 3,000-step control and refreshed-error BGE
+  runs from C2-v2 step 40k, batch 128, LR 5e-6; 400k training pairs mined. Both
+  50,036-pair development score files exist. Control continuation is essentially
+  tied with the initial checkpoint; no new training gain is established.
+- **Byte screen complete:** ByT5 1,000 steps, 64k pair presentations from a sealed
+  500k balanced A sample. Its best screen fusion is **0.989246** vs **0.989079**
+  baseline on 30k B_REST businesses; below the +0.0005 screen target. This is
+  reused development, not a public or French score.
+- **E5 control/multi training complete:** 2,000 steps each. Control retrieval on
+  the fixed 30k screen raises link recall **0.983901 → 0.991091** vs legacy dense.
+  Adding it to current candidates gives oracle **0.998672**, with **742** extra
+  true links; **308** are new even beyond unpruned legacy dense plus old routes.
+  These are retrieval ceilings, not matching scores or submission gains.
+- **Next deliverable:** score/gate new unowned retrieval candidates, then build a
+  measured additive rescue on top of C3. `takeover_rescue.py` currently implements
+  label-blind preparation only; gating and final replay are unfinished.
+
+**Machines / access (last reads around 17:57 IST):**
+- H100: `root@216.81.245.34`, port **14436**, key `~/.ssh/az-ml-new-ec2`.
+  The user's `~/.ssh/id_ed25519` was rejected. Use SSH; the user explicitly said
+  **not to use Runpod MCP**. Work `/dev/shm/takeover_20260927_1000`; inference
+  checkpoint `/dev/shm/c2v2/ckpt/step_040000`. Disk space is tight; preserve new
+  checkpoints to S3 and never clear unrelated `/dev/shm` or `/workspace` files.
+- CPU: `ubuntu@18.233.153.184`, `/home/ubuntu/takeover_20260927_1000`, Python
+  `/home/ubuntu/run27/U/venv/bin/python`. SSH works again. Local AWS login expired;
+  the CPU's **instance role** still works through `sudo aws`.
+- L40S: `ubuntu@98.88.250.95`, same work directory, Python
+  `/home/ubuntu/s-venv/bin/python`. Multi retriever full-pool search was running.
+- A10G: `ubuntu@16.147.231.201`, same work directory, Python
+  `/opt/pytorch/bin/python`. Control-retriever official-test encoding was running.
+  Both AWS GPUs use the project SSH key. Check live logs before any launch.
+
+**Unchanged evaluation boundary:** HOLDOUT-2 labels have not been opened by these
+runs. The old C2/Qwen and some K artifacts remain missing; do not claim an exact
+C3 holdout replay from a substitute model. No new experiment TSV has yet earned
+promotion. The requested follow-up file target is 20:00 IST, conditional on its
+measured gate and full inference/validation.
+
+## 27 Sep 15:20 — France findings and candidate files (historical)
+
+**Candidate files** (C3 subsequently scored **0.985207**; SHA256 verified; build scripts in `code/business_entity_resolution/diagnostics/20260927_run/lead/`):
 - **FINAL_C** `~/Downloads/u3-final-candidates/FINAL_C_usmixFC_frB_swapEA.tsv`,
   `2e31842f8236c609b8dd15738b58e1f93f6fdba42dd10a66a256da27546a0839` = K-final F US/India (B_REST 0.989372) + French
   vote minus 12,601 same-number one-word swaps and 1,399 empty-address shared-name links.
@@ -22,8 +91,8 @@
 mis-assignment (98.7% correct); the 4B judge and Laya as French scorers (under-confident, probe C′ mean 0.62);
 FINAL_A2 (K-France recipe + swap removal) loses ~5.5k exact and ~6k acronym copies vs C.
 
-**Expected public for C3:** ~0.9838 (range 0.9825–0.985). Unmeasured estimate, not a leaderboard score; US/India
-rates above are not French accuracy.
+**Original public estimate for C3:** ~0.9838 (range 0.9825–0.985); subsequently measured at **0.985207**.
+US/India rates above are not French accuracy.
 
 ## Run 27 Sep — learnings so far (12:40 IST)
 

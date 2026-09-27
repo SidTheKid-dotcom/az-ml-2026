@@ -188,6 +188,44 @@ or `.git`, and pass its full revision with `--source-commit` when building there
 
 ## Source map
 
+## 27 Sep takeover experiments
+
+FINAL_C3's **0.985207 public score** belongs to the earlier K/native/French-rule
+pipeline. The following experimental modules are separate; none has yet produced
+a promoted submission. See `../../learnings/takeover_20260927.json` for measured
+scopes and `../../learnings/CURRENT_STATE.md` for current jobs and artifact paths.
+
+- `ber.takeover_data`: fixed A training pack and B_REST world/screen packs.
+- `ber.takeover_raw_audit`: raw-file identity, full-truth candidate ceilings,
+  missing training support and ID-aligned retrieval evaluation truth.
+- `ber.takeover_augment`: add existing reverse/native candidate edges to the
+  same A pack, with independently verified raw labels.
+- `ber.takeover_residual`: current-error mining, matched control/refreshed-error
+  BGE continuation, checkpoint/resume and keyed scoring.
+- `ber.takeover_byte`: ByT5 copy/nonmatch likelihood training and keyed scoring.
+- `ber.takeover_retriever`: matched E5 control/multi-positive training, resumable
+  encoding and full-pool search. `ber.takeover_recall` scores complete raw truth.
+- `ber.takeover_eval`: exact baseline parity and component-cross-fitted feature
+  screens, with complete S1 accounting and paired intervals.
+- `ber.takeover_rescue`: label-blind new-candidate preparation only; subsequent
+  rescue gating and TSV replay remain unfinished.
+
+Every module exposes `--help`. Keep its output directory separate from released
+models. The training modules consume the sealed A-only `train.parquet` and
+`train_complete.json`; inference ignores label columns. Completed output markers,
+input/model hashes and sampled IDs bind each run. A retrieval oracle is not a
+matcher result. The 30k B_REST screen remains development data; HOLDOUT-2 stays
+sealed until a complete finalist is frozen.
+
+The new neural tests use pytest in addition to the existing runtime:
+
+```bash
+pip install -r requirements-takeover-tests.txt
+PYTHONPATH=src python -m pytest tests/test_takeover_*.py -q -p no:cacheprovider
+```
+
+## Historical source map
+
 | Modules | Purpose |
 | --- | --- |
 | `prepare`, `normalization`, `features`, `numeric_features`, `residual_features` | Data splits and candidate-group features |

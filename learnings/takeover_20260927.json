@@ -1,0 +1,92 @@
+{
+  "date": "2026-09-27",
+  "scope": "Takeover experiments after FINAL_C3 was built; all model screens are reused B_REST development, not public scores",
+  "public_reference": {
+    "release": "FINAL_C3",
+    "score": 0.985207,
+    "status": "user-reported",
+    "sha256": "47aad8ebfe1e52f1b6abbde29762e8aee6b84aa54b4ca77a7be0df4024328698",
+    "contains_takeover_models": false
+  },
+  "storage_prefix": "s3://az-ml-new-20260926-533267274451/takeover_20260927_1000/",
+  "training_pack": {
+    "partition": "A",
+    "s1": 200000,
+    "pairs": 1844743,
+    "positives": 678887,
+    "raw_true_links": 690274,
+    "missing_raw_true_links": 11387,
+    "sha256": "33faf90ca003b4a5258da18cf0c277ce6456da3571f4a55e9eae20cddc89117d"
+  },
+  "augmented_training_pack": {
+    "state": "prepared; training not launched at this snapshot",
+    "partition": "A",
+    "same_s1": 200000,
+    "pairs": 2031465,
+    "positives": 683331,
+    "added_positives": 4444,
+    "added_negatives": 182278,
+    "sources": ["existing reverse candidates", "existing native rank-0 candidates"],
+    "sha256": "5795c3ff877825c9ee2f99f180011657f55b776231a58f5e55dee4e55f5c2915",
+    "labels": "Only selected A raw truth; cached native true column was not used"
+  },
+  "raw_audit_brest": {
+    "s1": 521846,
+    "full_target_pool": 10320219,
+    "true_links": 1806858,
+    "dense_oracle_f05": 0.9945953277213354,
+    "retained_union_oracle_f05": 0.9962514807107936,
+    "retained_union_link_recall": 0.9872773621391387,
+    "union_only_true_links": 14822,
+    "true_dense_links_dropped_by_retained_filter": 8334,
+    "baseline_fixed_f05": 0.9889270323911976,
+    "baseline_cross_threshold_f05": 0.988918311526446,
+    "excluded_truth_payloads_parsed": 0
+  },
+  "matcher_screen": {
+    "s1": 30000,
+    "scored_band_pairs": 50036,
+    "full_target_pool": 10320219,
+    "baseline_f05": 0.9890794081707903,
+    "baseline_false_links": 149,
+    "initial_c2v2": {"convex_blend_f05": 0.9897209695080339, "false_links": 119},
+    "control_3000": {"convex_blend_f05": 0.9897231687464354, "false_links": 121},
+    "refreshed_error_3000": {"convex_blend_f05": 0.9897585427940333, "false_links": 161},
+    "byte_1000": {"logistic_fusion_f05": 0.9892459203793562, "false_links": 138},
+    "training": {
+      "bge_initial": "C2-v2 dense step_040000",
+      "bge_steps_per_arm": 3000,
+      "bge_batch_size": 128,
+      "bge_learning_rate": 0.000005,
+      "bge_mining_pairs": 400000,
+      "byte_steps": 1000,
+      "byte_batch_size": 64,
+      "byte_selected_training_pairs": 500000
+    },
+    "decision": "No matcher promoted. Compare continuation against initial C2-v2, which already supplies most of the improvement over U8t.",
+    "limitations": [
+      "Component-cross-fitted calibration/selection on reused development data",
+      "Cached baseline OOF and repeated model selection are not fully nested fresh validation",
+      "Only declared score-band rows change; fixed competing predictions remain in the world",
+      "No French labels or public effect measured"
+    ]
+  },
+  "retrieval_control_2000_screen": {
+    "s1": 30000,
+    "full_target_pool": 10320219,
+    "true_links": 104169,
+    "legacy_dense_link_recall": 0.9839011606140022,
+    "new_dense_link_recall": 0.99109139955265,
+    "current_union_oracle_f05": 0.9964592936477782,
+    "current_plus_new_link_recall": 0.9950177116032601,
+    "current_plus_new_oracle_f05": 0.9986716365146968,
+    "unpruned_existing_oracle_f05": 0.997799042685365,
+    "unpruned_existing_plus_new_oracle_f05": 0.99868402967709,
+    "new_true_beyond_current": 742,
+    "new_true_beyond_unpruned_existing": 308,
+    "candidate_pairs": 1500000,
+    "labels_used_in_retrieval": false,
+    "matcher_gain_measured": false
+  },
+  "holdout2_labels_read": false
+}

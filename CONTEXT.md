@@ -1,5 +1,29 @@
 # Operating context
 
+## Current — 27 Sep: public best 0.985207
+
+**FINAL_C3 scored 0.985207 on the public platform (user-reported)**, +0.004185
+over 0.981022. File `~/Downloads/u4-final/FINAL_C3_usmixFC_nat_frCexact.tsv`,
+SHA256 `47aad8ebfe1e52f1b6abbde29762e8aee6b84aa54b4ca77a7be0df4024328698`.
+LF and official matching-file `--check-ids` validation passed. Its earlier score
+estimate is obsolete. This is the earlier K/native/French-rule candidate, not a
+result of the subsequent takeover training.
+
+**Read next:** [CURRENT_STATE](learnings/CURRENT_STATE.md) for the running GPU
+jobs, working SSH access, raw-data audit and next file; [submission ledger](learnings/submissions.json)
+for scored files; [takeover evidence](learnings/takeover_20260927.json) for the new
+development results. Use SSH for Runpod, as the user requested; do not use its MCP.
+
+The raw audit verifies a broader current candidate union, but also **8,334 true
+dense candidates lost by its retained-pair filter** on B_REST. New E5 control
+retrieval adds 742 true links on the fixed 30k screen (308 beyond unpruned old
+routes), raising the current-union oracle to 0.998672. This is not matcher F0.5.
+The extra BGE training is near-tied with its initial checkpoint, and the byte
+screen is below its +0.0005 target. The next useful work is scoring new candidates
+and validating an actual TSV, not claiming those ceilings as submission scores.
+
+## Historical context — 26 Sep (superseded by the live sources above)
+
 **Full factual handoff (26 Sep 14:30 IST):**
 [docs/briefs/HANDOFF_20260926_1430.md](docs/briefs/HANDOFF_20260926_1430.md).
 
