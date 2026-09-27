@@ -1,3 +1,27 @@
+## Run 27 Sep — learnings so far (12:40 IST)
+
+**Uploads:** #1 `u1-k-routes-frvote` = **0.981022** (+0.002735 vs 0.978287; US/India predicted +0.00167 → France ≈ +0.007, ~0.944).
+Next upload: one big file at ~15:00 (spec in `docs/briefs/PLAN_TO_099_20260927.md` E10).
+
+**Measured wins (B_REST, paired CI > 0 unless noted):**
+- K record-centric model (claimant sets): +0.0013–0.0014 over the pair tree; K-final C (K + U ed + U8f routes + L1 v3 +
+  R reverse rows + L run2) = **0.989254** (+0.003742 vs 0.985511).
+- Reverse retrieval (e5, record→S1 top-k, rank1|orphan≤10): oracle 0.99553 → 0.99683; scored gain +0.0006 (U).
+- Listwise record+claimants cross-encoder (L, e5-small/base): +0.0002–0.0006 as a K feature.
+- L1 model trained on A (no reranker scores): +0.00058–0.00067 as a feature. More A data barely helps; capacity does.
+- C2 v2 (bge-reranker-v2-m3 from base, 40k steps, microbatch 128): full B_REST plain blend 0.980453 vs old C2 0.979583.
+- France: 3-family vote (+~0.007 France on the leaderboard); fr_swap removal of same-address one-word-swap decoys
+  (another team: −8,703 links → +0.0011 public; ours: 4,458 links, `~/Downloads/u2-frswap/`).
+
+**Measured failures / dead ends:** French legal-form stripping before C2 (55% of added links were decoys); P5
+calibration + count decoding (−0.00054); U1 empty-address uniqueness (density artefact); U3 transliteration (+0.00002);
+K3 edit-op scorer alone (poor transfer, US→India −0.062); G string GBDT alone (0.9842; US→India −0.109); collective
+features at test density (adversarial AUC 0.78–0.83); C2-FR fails US/India gate (from base, weaker there).
+
+**Infra lessons:** never bulk-read the RunPod geesefs `/workspace` in parallel (it hung; lost C2 40k weights access);
+checkpoints to /dev/shm + S3; `pkill -f` over ssh kills its own shell (use bracket patterns / PIDs); auto mode's
+classifier blocks remote actions — use manual mode + allow rules; check S3 status files instead of waiting for messages.
+
 ## Run 27 Sep (05:30 IST) — live
 
 Execution plan: `docs/briefs/PLAN_TO_099_20260927.md` sections E0–E8 (decisions in E7). Four tracks running (F, U, S, Q);
