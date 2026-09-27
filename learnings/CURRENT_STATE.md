@@ -1,3 +1,30 @@
+## 27 Sep 15:20 — France findings and candidate files
+
+**Candidate files** (none uploaded yet; SHA256 verified; build scripts in `code/business_entity_resolution/diagnostics/20260927_run/lead/`):
+- **FINAL_C** `~/Downloads/u3-final-candidates/FINAL_C_usmixFC_frB_swapEA.tsv`,
+  `2e31842f8236c609b8dd15738b58e1f93f6fdba42dd10a66a256da27546a0839` = K-final F US/India (B_REST 0.989372) + French
+  vote minus 12,601 same-number one-word swaps and 1,399 empty-address shared-name links.
+- **FINAL_C2** `~/Downloads/u4-final/FINAL_C2_usmixFC_nat_frC.tsv`,
+  `9c2c67d0808577e980dbdc80d0778182fa5e657a26fc32ce26003509d184bb27` = C + 11,765 India native-script dictionary
+  links from U's u8t (B_REST +0.000735, CI [+0.000669, +0.000808]).
+- **FINAL_C3** `~/Downloads/u4-final/FINAL_C3_usmixFC_nat_frCexact.tsv`,
+  `47aad8ebfe1e52f1b6abbde29762e8aee6b84aa54b4ca77a7be0df4024328698` = C2 + 6,235 French exact-name +
+  same-house-number copies.
+
+**Train-label measurements (US/India, rules transposed from France):**
+- The French swap-removal rule catches pairs that are 0.1% true (US) / 0.0% (India).
+- Exact core name + first house number with one candidate S1: 98.1% (US) / 94.4% (India) true without a street
+  match; 99.4–99.9% with a street match.
+- Same name + house number shifted by the decoy offsets (1, 3, 5, 7, 9, 11, 13, 21): 2.3–2.8% true.
+- Near-name variants at the same address (same number + street tokens): similarity ≥ 85 is 0.90–0.99 true.
+
+**Ruled out:** French admin-component hypothesis (96% of French records carry the S1's région); French sibling
+mis-assignment (98.7% correct); the 4B judge and Laya as French scorers (under-confident, probe C′ mean 0.62);
+FINAL_A2 (K-France recipe + swap removal) loses ~5.5k exact and ~6k acronym copies vs C.
+
+**Expected public for C3:** ~0.9838 (range 0.9825–0.985). Unmeasured estimate, not a leaderboard score; US/India
+rates above are not French accuracy.
+
 ## Run 27 Sep — learnings so far (12:40 IST)
 
 **Uploads:** #1 `u1-k-routes-frvote` = **0.981022** (+0.002735 vs 0.978287; US/India predicted +0.00167 → France ≈ +0.007, ~0.944).

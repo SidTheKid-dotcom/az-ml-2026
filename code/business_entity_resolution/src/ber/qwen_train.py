@@ -493,19 +493,24 @@ def _to_cpu(value):
 
 
 def save_checkpoint(model, optimizer, torch, *, root: Path, step: int, state: dict, model_dir,
-                    keep_optimizers: int = 1, background=None):
+                    keep_optimizers: int = 1, background=None, write_model=None):
     """Snapshot weights + optimizer to CPU now; write them (optionally on ``background``) atomically.
 
     Returns the final path, or a future of it when ``background`` is an executor.
-    Tied ``lm_head.weight`` is dropped (``from_pretrained`` re-ties it).
+    Tied ``lm_head.weight`` is dropped (``from_pretrained`` re-ties it). ``write_model(stage)``
+    replaces the full-weight write (callers snapshot their own tensors first, e.g. LoRA adapters).
     """
     root.mkdir(parents=True, exist_ok=True)
     final, stage = root / f"step_{step:06d}", root / f".step_{step:06d}.incomplete"
     if final.exists():
         raise FileExistsError(final)
-    model_state = {key: value.detach().to("cpu", copy=True) for key, value in model.state_dict().items()}
-    if getattr(model.config, "tie_word_embeddings", False):
-        model_state.pop("lm_head.weight", None)
+    if write_model is None:
+        model_state = {key: value.detach().to("cpu", copy=True) for key, value in model.state_dict().items()}
+        if getattr(model.config, "tie_word_embeddings", False):
+            model_state.pop("lm_head.weight", None)
+
+        def write_model(stage):
+            model.save_pretrained(stage, state_dict=model_state, safe_serialization=True)
     optimizer_state = _to_cpu(optimizer.state_dict())
     state = {**state, "step": step}
 
@@ -513,7 +518,7 @@ def save_checkpoint(model, optimizer, torch, *, root: Path, step: int, state: di
         if stage.exists():
             shutil.rmtree(stage)
         stage.mkdir()
-        model.save_pretrained(stage, state_dict=model_state, safe_serialization=True)
+        write_model(stage)
         for name in ("tokenizer.json", "tokenizer_config.json", "vocab.json", "merges.txt", "special_tokens_map.json",
                      "chat_template.jinja", "generation_config.json", "LICENSE"):
             if (Path(model_dir) / name).is_file() and not (stage / name).exists():
@@ -533,10 +538,40 @@ def save_checkpoint(model, optimizer, torch, *, root: Path, step: int, state: di
     return write() if background is None else background.submit(write)
 
 
-def train(args) -> dict:
+class FullBackend:
+    """Full fine-tune of a Qwen3 causal LM with FP32 master weights (the 0.6B path)."""
+
+    model_id = MODEL_ID
+
+    def config(self, args) -> dict:
+        extra = {}
+        if getattr(args, "init_optimizer", False):
+            extra["init_optimizer"] = str((Path(args.model) / "optimizer.pt").resolve())
+        return extra
+
+    def load(self, args, device, torch, resume):
+        model = load_model(resume or args.model, device, torch)
+        return model, [p for p in model.parameters() if p.requires_grad]
+
+    def init_optimizer_state(self, args, optimizer, torch) -> None:
+        if getattr(args, "init_optimizer", False):
+            path = Path(args.model) / "optimizer.pt"
+            optimizer.load_state_dict(torch.load(path, map_location="cpu", weights_only=True)["optimizer"])
+            log(f"initialized optimizer moments from {path}")
+
+    def scorer(self, model, manifest, args, torch):
+        backbone = torch.compile(model.model, dynamic=True) if args.compile else None
+        return YesNoScorer(model, manifest["yes_id"], manifest["no_id"], backbone)
+
+    def save(self, model, optimizer, torch, **kwargs):
+        return save_checkpoint(model, optimizer, torch, **kwargs)
+
+
+def train(args, backend=None) -> dict:
     import torch
     from torch.nn import functional as F
 
+    backend = backend or FullBackend()
     torch.set_num_threads(args.threads)
     data = Path(args.data)
     manifest = json.loads((data / "manifest.json").read_text())
@@ -547,15 +582,23 @@ def train(args) -> dict:
     labels = np.load(data / "labels.npy").astype(np.float32)
     weights = np.load(data / "weights.npy").astype(np.float32)
     batch = int(manifest["batch_size"])
-    available = len(labels) // batch
+    data_offset = int(getattr(args, "data_offset_steps", 0) or 0)  # train step s reads data step s-1+offset
+    available = len(labels) // batch - data_offset
+    if available <= 0:
+        raise ValueError("--data-offset-steps leaves no materialized steps")
     max_steps = min(args.steps or available, available)
-    config = {"schema": 1, "model_id": MODEL_ID, "data_files": manifest["files"],
+    config = {"schema": 1, "model_id": backend.model_id, "data_files": manifest["files"],
               "prompt_sha256": manifest["prompt_sha256"], "batch_size": batch, "microbatches": args.microbatches,
               "learning_rate": args.learning_rate, "weight_decay": args.weight_decay, "warmup": args.warmup,
               "schedule": args.schedule, "lr_floor": args.lr_floor, "max_steps": max_steps,
               "time_budget_min": args.time_budget_min, "amp": args.amp, "compile": bool(args.compile),
               "model_dir": str(Path(args.model).resolve()), "seed": args.seed}
+    if data_offset:  # keys only when used, so earlier run configs hash unchanged
+        config["data_offset_steps"] = data_offset
+    config.update(backend.config(args))
     config_sha = sha256_bytes(json.dumps(config, sort_keys=True).encode())
+    log(f"{backend.model_id}: train steps 1..{max_steps} read materialized data steps "
+        f"{data_offset}..{data_offset + max_steps - 1} (pair rows {data_offset * batch}..{(data_offset + max_steps) * batch - 1})")
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
     root = output / "checkpoints"
@@ -572,11 +615,14 @@ def train(args) -> dict:
     start, elapsed_before = 0, 0.0
     total_steps = None if args.time_budget_min else max_steps
     resume = _checkpoints(root)[-1] if (args.resume and _checkpoints(root)) else None
-    model = load_model(resume or args.model, device, torch)
-    params = [p for p in model.parameters() if p.requires_grad]
+    if resume is None and _checkpoints(root):
+        raise ValueError("Output already has checkpoints; pass --resume or use a new --output")
+    model, params = backend.load(args, device, torch, resume)
     optimizer = torch.optim.AdamW(params, lr=args.learning_rate, weight_decay=args.weight_decay,
                                   betas=(.9, .999), eps=1e-8, fused=cuda)
-    if resume is not None:
+    if resume is None:
+        backend.init_optimizer_state(args, optimizer, torch)
+    else:
         state = json.loads((resume / "state.json").read_text())
         if state["config_sha256"] != config_sha:
             raise ValueError("Checkpoint belongs to a different configuration")
@@ -584,11 +630,9 @@ def train(args) -> dict:
         start, total_steps = int(state["step"]), state.get("total_steps")
         elapsed_before = float(state.get("train_seconds", 0.0))
         log(f"resumed {resume} at step {start}, total_steps {total_steps}")
-    backbone = torch.compile(model.model, dynamic=True) if args.compile else None
-    forward = YesNoScorer(model, manifest["yes_id"], manifest["no_id"], backbone)
+    forward = backend.scorer(model, manifest, args, torch)
     pad_id = int(manifest["pad_id"])
-    amp = torch.autocast("cuda", dtype=torch.bfloat16) if (cuda and args.amp == "bf16") else torch.autocast(
-        "cpu", enabled=False)
+    amp = torch.autocast("cuda" if cuda else "cpu", dtype=torch.bfloat16, enabled=args.amp == "bf16")
 
     def prepared(step):
         parts = []
@@ -622,9 +666,9 @@ def train(args) -> dict:
             step += 1
             for ahead in range(step, min(step + 4, target + 1)):
                 if ahead not in pending:
-                    pending[ahead] = executor.submit(prepared, ahead - 1)
+                    pending[ahead] = executor.submit(prepared, ahead - 1 + data_offset)
             parts = pending.pop(step).result()
-            normalizer = float(weights[(step - 1) * batch: step * batch].sum())
+            normalizer = float(weights[(step - 1 + data_offset) * batch: (step + data_offset) * batch].sum())
             loss_total = 0.0
             for (ids, last, target_y, weight), size, real in parts:
                 ids, last = ids.to(device, non_blocking=True), last.to(device, non_blocking=True)
@@ -671,16 +715,23 @@ def train(args) -> dict:
                 json_dump(status_path, status)
                 window.update(loss=0.0, steps=0, pairs=0, tokens=0, padded=0, t=now)
             over_budget = budget_s is not None and elapsed > budget_s * 1.1
-            if step % args.checkpoint_every == 0 or step == (total_steps or max_steps) or over_budget:
+            stop_file = getattr(args, "stop_file", None)
+            chunk_done = step < (total_steps or max_steps) and (
+                (bool(getattr(args, "stop_after_min", None)) and time.time() - T0 > args.stop_after_min * 60)
+                or (bool(stop_file) and step % 10 == 0 and os.path.exists(stop_file)))
+            if step % args.checkpoint_every == 0 or step == (total_steps or max_steps) or over_budget or chunk_done:
                 state = {"config_sha256": config_sha, "total_steps": total_steps, "train_seconds": elapsed,
                          "last_loss": loss_total}
                 if saving is not None:
                     saving.result()  # surface a failed write before starting the next
-                saving = save_checkpoint(model, optimizer, torch, root=root, step=step, state=state,
-                                         model_dir=args.model, background=writer)
+                saving = backend.save(model, optimizer, torch, root=root, step=step, state=state,
+                                      model_dir=args.model, background=writer)
                 last_saved = step
             if over_budget:
                 stop_reason = "time_budget_exceeded"
+                break
+            if chunk_done:
+                stop_reason = "chunk_limit"
                 break
     finally:
         executor.shutdown(wait=False, cancel_futures=True)
@@ -690,9 +741,11 @@ def train(args) -> dict:
     if last_saved != step:
         state = {"config_sha256": config_sha, "total_steps": total_steps,
                  "train_seconds": elapsed_before + time.perf_counter() - started, "last_loss": None}
-        save_checkpoint(model, optimizer, torch, root=root, step=step, state=state, model_dir=args.model)
-    result = {"state": "complete", "completed_steps": step, "total_steps": total_steps, "stop_reason": stop_reason,
-              "pairs_seen": step * batch, "train_seconds": elapsed_before + time.perf_counter() - started,
+        backend.save(model, optimizer, torch, root=root, step=step, state=state, model_dir=args.model)
+    finished = step >= (total_steps or max_steps) or stop_reason == "time_budget_exceeded"
+    result = {"state": "complete" if finished else "partial", "completed_steps": step, "total_steps": total_steps, "stop_reason": stop_reason,
+              "pairs_seen": step * batch, "data_offset_steps": data_offset, "model_id": backend.model_id,
+              "train_seconds": elapsed_before + time.perf_counter() - started,
               "final_checkpoint": str(_checkpoints(root)[-1]), "config_sha256": config_sha,
               "scope": "arena partition A only; HOLDOUT-2 excluded"}
     if cuda:
@@ -704,7 +757,8 @@ def train(args) -> dict:
 
 # ----------------------------------------------------------------------------- scoring
 
-def score(args) -> dict:
+def score(args, loader=None, model_id=MODEL_ID) -> dict:
+    """``loader(checkpoint, device, torch)`` overrides how the scoring model is built (e.g. LoRA merge)."""
     import torch
 
     torch.set_num_threads(args.threads)
@@ -739,6 +793,14 @@ def score(args) -> dict:
                      "c2_complete_sha256": sha256_file(c2_dir / "complete.json"),
                      "kept": int(keep.sum()), "skipped": int((~keep).sum())}
         log(f"C2 filter >= {args.min_c2}: scoring {int(keep.sum())} of {n} gated pairs")
+    keep_mask = getattr(args, "keep_mask", None)
+    if keep_mask:  # optional: score only the rows of a boolean mask (e.g. a probability band), others stay 0/unscored
+        mask = np.load(keep_mask).astype(bool)
+        if len(mask) != n:
+            raise ValueError("--keep-mask length does not match the score rows")
+        keep &= mask
+        c2_filter = dict(c2_filter or {}, keep_mask=str(Path(keep_mask).resolve()), keep_mask_rows=int(keep.sum()))
+        log(f"keep mask: scoring {int(keep.sum())} of {n} rows")
     out.mkdir(parents=True, exist_ok=True)
     progress_path = out / "progress.json"
     logit_path = out / "logits_gated.npy"
@@ -752,11 +814,11 @@ def score(args) -> dict:
         logits.flush()
     device = args.device
     cuda = device.startswith("cuda")
-    model = load_model(checkpoint, device, torch)
+    model = (loader or load_model)(checkpoint, device, torch)
     if cuda and args.amp == "bf16":
         amp = torch.autocast("cuda", dtype=torch.bfloat16)
     else:
-        amp = torch.autocast("cpu", enabled=False)
+        amp = torch.autocast("cpu", dtype=torch.bfloat16, enabled=args.amp == "bf16")
     model.eval()
     scorer = YesNoScorer(model, manifest["yes_id"], manifest["no_id"])
     pad_id = int(manifest["pad_id"])
@@ -807,14 +869,15 @@ def score(args) -> dict:
     mask[pair_index[keep]] = True
     save_npy(out / "scores.npy", full)
     save_npy(out / "scored_mask.npy", mask)
-    result = {"state": "complete", "kind": manifest["kind"], "model_id": MODEL_ID,
+    result = {"state": "complete", "kind": manifest["kind"], "model_id": model_id,
               "checkpoint": {"path": str(checkpoint.resolve()), "step": ck_state.get("step"),
                              "config_sha256": ck_state.get("config_sha256")},
               "score": "sigmoid(logit(yes) - logit(no)) at the final real token",
               "pairs": int(manifest["total_pairs"]), "scored_pairs": int(keep.sum()), "gated_pairs": n,
               "gate": manifest["gate"], "c2_filter": c2_filter,
               "inputs": {"data": str(data.resolve()), "manifest_sha256": sha256_file(data / "manifest.json")},
-              "runtime": {"amp": args.amp, "batch_size": args.batch_size, "token_budget": args.token_budget,
+              "runtime": {"amp": args.amp, "weights_bf16": bool(getattr(args, "weights_bf16", False) or loader),
+                          "batch_size": args.batch_size, "token_budget": args.token_budget,
                           "seconds": time.perf_counter() - started},
               "files": {name: sha256_file(out / name) for name in ("scores.npy", "scored_mask.npy")},
               "labels_read": False}
@@ -868,6 +931,13 @@ def main(argv=None) -> None:
     p.add_argument("--compile", action="store_true")
     p.add_argument("--threads", type=int, default=8)
     p.add_argument("--seed", type=int, default=DEFAULT_SEED)
+    p.add_argument("--data-offset-steps", type=int, default=0,
+                   help="Continue on later materialized steps: train step s reads data step s-1+offset")
+    p.add_argument("--init-optimizer", action="store_true",
+                   help="Fresh run only: load AdamW moments from MODEL/optimizer.pt (continuation of a checkpoint)")
+    p.add_argument("--stop-after-min", type=float,
+                   help="Chunked training: checkpoint and exit after this many wall minutes; rerun with --resume")
+    p.add_argument("--stop-file", help="Checkpoint and exit early once this path exists (GPU hand-over)")
     p = sub.add_parser("score")
     p.add_argument("--data", required=True)
     p.add_argument("--checkpoint", required=True)
@@ -881,6 +951,7 @@ def main(argv=None) -> None:
     p.add_argument("--min-c2", type=float, help="Score only gated pairs with C2 >= this; use the same C2 "
                    "checkpoint and value for B_REST and test")
     p.add_argument("--threads", type=int, default=8)
+    p.add_argument("--weights-bf16", action="store_true", help="Load scoring weights in BF16 (faster; default FP32+autocast)")
     args = parser.parse_args(argv)
     if args.command == "prepare-train":
         args.flags = args.flags or str(Path(args.out) / "flags")
@@ -894,7 +965,10 @@ def main(argv=None) -> None:
     else:
         if (args.min_c2 is None) != (args.c2_scores is None):
             parser.error("--min-c2 and --c2-scores go together")
-        score(args)
+        loader = None
+        if args.weights_bf16:
+            loader = lambda path, device, torch: load_model(path, device, torch, dtype=torch.bfloat16)  # noqa: E731
+        score(args, loader=loader)
 
 
 if __name__ == "__main__":

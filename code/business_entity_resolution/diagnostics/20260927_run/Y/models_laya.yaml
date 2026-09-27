@@ -1,0 +1,82 @@
+# Pretrained models allowed in the 2026 pipeline. Nothing else may be loaded.
+#
+# Rule (kb/2026/statement.md, Constraints): "Final model should be a MIT/Apache 2.0 License model and up to 8 Billion
+# parameters." Working interpretation (kb/2026.md): every pretrained model used must be MIT or Apache-2.0, and all
+# models used together in the final pipeline must total at most 8.0B parameters.
+#
+# Each entry was verified against its Hugging Face model card through the Hub API on 2026-09-25 (licence tag and
+# safetensors parameter count), and every entry is cached on the pod and was load-tested offline on the A40.
+# Enforcement: jobs run with HF_HUB_OFFLINE=1, so only cached models can load, and the job lint blocks model ids that
+# are not listed here. `ctl models --id <id>` caches a newly added entry.
+# To add a model: verify licence and parameter count the same way, then append an entry (operator only).
+
+budget_total_params_b: 8.0
+
+models:
+  # --- embedding / retrieval (bi-encoders) ---
+  - {id: BAAI/bge-m3, licence: mit, params_b: 0.568, role: embedding, cache: true,
+     notes: "multilingual (100+ languages incl. Indic scripts), dense + sparse + multi-vector outputs"}
+  - {id: Qwen/Qwen3-Embedding-0.6B, licence: apache-2.0, params_b: 0.596, role: embedding, cache: true,
+     notes: "multilingual, instruction-aware"}
+  - {id: microsoft/harrier-oss-v1-0.6b, licence: mit, params_b: 0.596, role: embedding, cache: true,
+     notes: "multilingual (94 languages), 2026, Qwen3 architecture"}
+  - {id: intfloat/multilingual-e5-small, licence: mit, params_b: 0.118, role: embedding, cache: true,
+     notes: "prefix inputs with 'query: '"}
+  - {id: intfloat/multilingual-e5-base, licence: mit, params_b: 0.278, role: embedding, cache: true}
+  - {id: intfloat/multilingual-e5-large, licence: mit, params_b: 0.560, role: embedding, cache: true}
+  - {id: intfloat/multilingual-e5-large-instruct, licence: mit, params_b: 0.560, role: embedding, cache: true}
+  - {id: ibm-granite/granite-embedding-278m-multilingual, licence: apache-2.0, params_b: 0.278, role: embedding, cache: true}
+  - {id: ibm-granite/granite-embedding-97m-multilingual-r2, licence: apache-2.0, params_b: 0.097, role: embedding, cache: true,
+     notes: "ModernBERT architecture"}
+  - {id: sentence-transformers/LaBSE, licence: apache-2.0, params_b: 0.471, role: embedding, cache: true,
+     notes: "language-agnostic sentence embeddings"}
+  - {id: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2, licence: apache-2.0, params_b: 0.118, role: embedding, cache: true}
+  - {id: sentence-transformers/paraphrase-multilingual-mpnet-base-v2, licence: apache-2.0, params_b: 0.278, role: embedding, cache: true}
+  - {id: Qwen/Qwen3-Embedding-4B, licence: apache-2.0, params_b: 4.022, role: embedding, cache: true}
+  - {id: Qwen/Qwen3-Embedding-8B, licence: apache-2.0, params_b: 7.567, role: embedding, cache: true,
+     notes: "uses almost the whole 8B budget on its own"}
+
+  # --- rerankers / cross-encoders (score a pair directly) ---
+  - {id: BAAI/bge-reranker-v2-m3, licence: apache-2.0, params_b: 0.568, role: reranker, cache: true, notes: multilingual}
+  - {id: Qwen/Qwen3-Reranker-0.6B, licence: apache-2.0, params_b: 0.596, role: reranker, cache: true, notes: multilingual}
+  - {id: convaiinnovations/laya-multilingual, licence: apache-2.0, params_b: 0.322, role: reranker, cache: true,
+     notes: "Agent Y copy 27 Sep: HF card + Hub API (licence apache-2.0; safetensors 321,908,998 params; rev e4e9ddf2). mmBERT-base (ModernBERT, MIT) encoder kept, Laya decision head dropped, fresh 1-logit head"}
+  - {id: cross-encoder/mmarco-mMiniLMv2-L12-H384-v1, licence: apache-2.0, params_b: 0.118, role: reranker, cache: true,
+     notes: "small multilingual cross-encoder"}
+  - {id: Qwen/Qwen3-Reranker-4B, licence: apache-2.0, params_b: 4.022, role: reranker, cache: true}
+  - {id: zeroentropy/zerank-2-reranker, licence: apache-2.0, params_b: 4.022, role: reranker, cache: true,
+     notes: "English-centric (Qwen3-4B base)"}
+
+  # --- encoders to fine-tune as pair classifiers ---
+  - {id: microsoft/mdeberta-v3-base, licence: mit, params_b: 0.279, role: encoder, cache: true, notes: multilingual}
+  - {id: FacebookAI/xlm-roberta-base, licence: mit, params_b: 0.279, role: encoder, cache: true, notes: multilingual}
+  - {id: FacebookAI/xlm-roberta-large, licence: mit, params_b: 0.561, role: encoder, cache: true, notes: multilingual}
+  - {id: google/muril-base-cased, licence: apache-2.0, params_b: 0.237, role: encoder, cache: true,
+     notes: "Indian languages, trained with transliterated text"}
+  - {id: ai4bharat/IndicBERTv2-MLM-only, licence: mit, params_b: 0.278, role: encoder, cache: true, notes: "23 Indian languages + English"}
+  - {id: google/canine-s, licence: apache-2.0, params_b: 0.132, role: encoder, cache: true,
+     notes: "character-level, tokenizer-free"}
+  - {id: google/byt5-small, licence: apache-2.0, params_b: 0.300, role: encoder, cache: true, notes: "byte-level T5"}
+
+  # --- small LLMs (adjudicate hard pairs; fine-tune with LoRA) ---
+  - {id: Qwen/Qwen3-0.6B, licence: apache-2.0, params_b: 0.752, role: llm, cache: true}
+  - {id: Qwen/Qwen3-1.7B, licence: apache-2.0, params_b: 2.032, role: llm, cache: true}
+  - {id: Qwen/Qwen3-4B, licence: apache-2.0, params_b: 4.022, role: llm, cache: true}
+  - {id: microsoft/Phi-4-mini-instruct, licence: mit, params_b: 3.836, role: llm, cache: true}
+  - {id: microsoft/Phi-3.5-mini-instruct, licence: mit, params_b: 3.821, role: llm, cache: true}
+  - {id: Qwen/Qwen2.5-7B-Instruct, licence: apache-2.0, params_b: 7.616, role: llm, cache: true}
+  - {id: mistralai/Mistral-7B-Instruct-v0.3, licence: apache-2.0, params_b: 7.248, role: llm, cache: true}
+
+# Checked and NOT allowed.
+excluded:
+  - {id: Qwen/Qwen3-8B, why: "8.19B parameters, over the 8B limit"}
+  - {id: Qwen/Qwen3-Reranker-8B, why: "8.19B parameters, over the 8B limit"}
+  - {id: Qwen/Qwen2.5-3B-Instruct, why: "Qwen research licence, not MIT/Apache"}
+  - {id: google/muril-large-cased, why: "no licence declared on the card"}
+  - {id: Octen/Octen-Embedding-8B, why: "licence fine, but its sentence-transformers config fails to load on the pod (use Qwen/Qwen3-Embedding-8B, its base)"}
+  - {id: "Alibaba-NLP/gte-multilingual-base and -reranker-base", why: "licence fine, but their remote code fails on the pod's transformers 5 (removed API)"}
+  - {id: microsoft/harrier-oss-v1-270m, why: "Gemma-3 architecture; licence provenance unclear"}
+  - {id: jinaai/jina-embeddings-v3, why: "CC-BY-NC-4.0"}
+  - {id: nvidia/NV-Embed-v2, why: "CC-BY-NC-4.0"}
+  - {id: google/embeddinggemma-300m, why: "Gemma licence"}
+  - {id: "meta-llama/* and google/gemma-*", why: "Llama / Gemma licences"}
