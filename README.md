@@ -1,5 +1,7 @@
 # Amazon ML Challenge 2026 — entity resolution
 
+> Experiments run by coding agents under my direction.
+
 Objective: maximize the official mean per-business **F0.5**, emphasizing correct
 matches and correct abstention. Compete for first place; no local score establishes
 a rank or guarantees the hidden-test result.
